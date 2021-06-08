@@ -1,0 +1,8 @@
+.github/
+package.json
+package-lock.json
+truffle-config.js
+tsconfig.json
+README.md
+contracts/**
+migrations/**

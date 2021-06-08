@@ -1,0 +1,12 @@
+node_modules/
+build/
+coverage/
+coverage.json
+.coverage_artifacts
+.coverage_contracts
+.env
+project.secret.js
+#Hardhat files
+cache
+artifacts
+deployments
