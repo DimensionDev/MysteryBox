@@ -1,0 +1,30 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  test:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 15
+      - run: git submodule init
+      - run: git submodule update
+      - run: npm ci
+      - run: npm run compile
+      - run: npm run test
+      - run: npm run test:coverage
+      - run: npx prettier --list-different ./test/*.js
+      - run: npx hardhat check
+      # `npx hardhat check` does not return error code, even if there are `lint errors` reported.
+      # Using `grep` to expose error code to `github workflows`
+      - run: (! npx hardhat check | grep problem)
+
