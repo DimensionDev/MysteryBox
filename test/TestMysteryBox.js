@@ -9,17 +9,12 @@ chai.use(require('chai-as-promised'));
 const jsonABI = require('../artifacts/contracts/MysteryBox.sol/MysteryBox.json');
 const interface = new ethers.utils.Interface(jsonABI.abi);
 
-const nftJsonABI = require('../artifacts/contracts/MysteryBoxNFT.sol/MysteryBoxNFT.json');
-const nftInterface = new ethers.utils.Interface(nftJsonABI.abi);
-
 const qlfWhiltelistJsonABI = require('../artifacts/contracts/WhitelistQlf.sol/WhitelistQlf.json');
 const qlfSigVerifyJsonABI = require('../artifacts/contracts/SigVerifyQlf.sol/SigVerifyQlf.json');
 
 let snapshotId;
 let mbContract;
 let nftContract;
-let linkTokenContract;
-let accessorContract;
 
 let testTokenAContract;
 let testTokenBContract;
@@ -27,30 +22,28 @@ let testTokenCContract;
 let contractCreator;
 let user_0;
 let user_1;
-let fake_vrf_coordinator;
+
 let whitelistQlfContract;
 let sigVerifyQlfContract;
-let verifier;
-let collection_id;
-const invalid_collection_id = 1000;
 
 const {
     NftCtorParameters,
-    LinkAccessorCtorParameters,
+    openBoxParameters,
     MysteryboxCtorParameters,
     CreateCollectionParameters,
-    DrawNftParameters,
     ZeroAddress,
-    LinkAccessorFulfillRandomnessGasLimit,
     ProbabilityDistributionTestRound,
     MaxNumberOfNFT,
-    DrawTxParameters,
     qualification_project_name,
     seconds_in_a_day,
 } = require('./constants');
 
-const rawFulfillRandomnessTxParameter = {
-    gasLimit: LinkAccessorFulfillRandomnessGasLimit,
+const network = 'mainnet';
+const ctorParameter = NftCtorParameters[network];
+
+const txParameters = {
+    gasLimit: 6000000,
+    value: ctorParameter.payment[0][1],
 };
 
 describe('MysteryBox', () => {
@@ -79,11 +72,6 @@ describe('MysteryBox', () => {
         testTokenCContract = await testTokenC.deployed();
 
         {
-            const factory = await ethers.getContractFactory('MockLinkToken');
-            const deploy = await factory.deploy();
-            linkTokenContract = await deploy.deployed();
-        }
-        {
             const factory = await ethers.getContractFactory('WhitelistQlf');
             const proxy = await upgrades.deployProxy(factory, []);
             whitelistQlfContract = new ethers.Contract(proxy.address, qlfWhiltelistJsonABI.abi, contractCreator);
@@ -94,48 +82,20 @@ describe('MysteryBox', () => {
             const proxy = await upgrades.deployProxy(factory, [qualification_project_name, verifier.address]);
             sigVerifyQlfContract = new ethers.Contract(proxy.address, qlfSigVerifyJsonABI.abi, contractCreator);
         }
+        // first is ETH: address(0)
+        ctorParameter.payment.push([testTokenAContract.address, ctorParameter.payment[0][1]]);
+        ctorParameter.payment.push([testTokenBContract.address, ctorParameter.payment[0][1]]);
+        ctorParameter.payment.push([testTokenCContract.address, ctorParameter.payment[0][1]]);
         {
-            LinkAccessorCtorParameters.link = linkTokenContract.address;
-            LinkAccessorCtorParameters.vrfCoordinator = fake_vrf_coordinator.address;
-            const factory = await ethers.getContractFactory('MockLinkAccessor');
-            const deploy = await factory.deploy(...Object.values(LinkAccessorCtorParameters));
-            accessorContract = await deploy.deployed();
-        }
-        {
-            const factory = await ethers.getContractFactory('MysteryBoxNFT');
-            const proxy = await upgrades.deployProxy(factory, [...Object.values(NftCtorParameters)]);
-            nftContract = new ethers.Contract(proxy.address, nftJsonABI.abi, contractCreator);
-        }
-        {
-            MysteryboxCtorParameters._linkAccessor = accessorContract.address;
-            MysteryboxCtorParameters._nftHandle = nftContract.address;
             const factory = await ethers.getContractFactory('MysteryBox');
-            const proxy = await upgrades.deployProxy(factory, [...Object.values(MysteryboxCtorParameters)]);
+            const proxy = await upgrades.deployProxy(factory, [...Object.values(ctorParameter)]);
             mbContract = new ethers.Contract(proxy.address, jsonABI.abi, contractCreator);
         }
-        await linkTokenContract.transfer(accessorContract.address, LinkAccessorCtorParameters.fee.mul(10));
-        await nftContract.addAdmin(mbContract.address);
         await testTokenAContract.transfer(user_0.address, transferAmount);
         await testTokenAContract.connect(user_0).approve(mbContract.address, transferAmount);
-        {
-            await accessorContract.connect(contractCreator).setMysteryBox(mbContract.address);
-            const mysteryBox = await accessorContract.mysteryBox();
-            expect(mysteryBox).to.be.eq(mbContract.address);
+        for (let i = 0; i < 256; i++) {
+            await helper.advanceBlock();
         }
-        // first is ETH: address(0)
-        CreateCollectionParameters.payment[1][0] = testTokenAContract.address;
-        CreateCollectionParameters.payment[2][0] = testTokenBContract.address;
-        CreateCollectionParameters.payment[3][0] = testTokenCContract.address;
-        {
-            await mbContract.connect(contractCreator).createCollection(...Object.values(CreateCollectionParameters));
-            const logs = await ethers.provider.getLogs(mbContract.filters.CollectionCreated());
-            const parsedLog = interface.parseLog(logs[0]);
-            const result = parsedLog.args;
-            expect(result).to.have.property('owner').that.to.be.eq(contractCreator.address);
-            expect(result).to.have.property('collection_id');
-            collection_id = result.collection_id;
-        }
-        DrawNftParameters._collection_id = collection_id;
     });
 
     beforeEach(async () => {
@@ -153,272 +113,76 @@ describe('MysteryBox', () => {
         const owner = await mbContract.owner();
         expect(owner).to.be.eq(contractCreator.address);
 
-        const linkAccessor = await mbContract.linkAccessor();
-        expect(linkAccessor).to.be.eq(accessorContract.address);
+        const name = await mbContract.name();
+        expect(name).to.be.eq(ctorParameter.name);
 
-        const mysteryBoxNFT = await mbContract.mysteryBoxNFT();
-        expect(mysteryBoxNFT).to.be.eq(nftContract.address);
-
-        const fee = await mbContract.fee();
-        expect(fee.eq(DrawTxParameters.value)).to.be.true;
+        const symbol = await mbContract.symbol();
+        expect(symbol).to.be.eq(ctorParameter.symbol);
     });
 
-    it('Should setLinkAccessor work properly', async () => {
-        await expect(mbContract.connect(user_0).setLinkAccessor(nftContract.address)).to.be.rejectedWith(
-            'Ownable: caller is not the owner',
-        );
-        await mbContract.connect(contractCreator).setLinkAccessor(nftContract.address);
-        const link_accessor = await mbContract.linkAccessor();
-        expect(link_accessor).to.be.eq(nftContract.address);
-    });
-
-    it('Should setNftHandle work properly', async () => {
-        await expect(mbContract.connect(user_0).setNftHandle(accessorContract.address)).to.be.rejectedWith(
-            'Ownable: caller is not the owner',
-        );
-        await mbContract.connect(contractCreator).setNftHandle(accessorContract.address);
-        const nft_handle = await mbContract.mysteryBoxNFT();
-        expect(nft_handle).to.be.eq(accessorContract.address);
-    });
-
-    it('Should setFee work properly', async () => {
-        {
-            const fee = await mbContract.fee();
-            expect(fee.eq(DrawTxParameters.value)).to.be.true;
-        }
-        const newFee = ethers.BigNumber.from(DrawTxParameters.value).mul(2);
-        await expect(mbContract.connect(user_0).setFee(newFee)).to.be.rejectedWith('Ownable: caller is not the owner');
-        await mbContract.connect(contractCreator).setFee(newFee);
-        const fee = await mbContract.fee();
-        expect(fee.eq(newFee)).to.be.true;
-    });
-
-    it('Should not draw not-started', async () => {
-        const create_parameters = JSON.parse(JSON.stringify(CreateCollectionParameters));
+    it('Should not be able to buy if not-started', async () => {
         const now = Math.floor(new Date().getTime() / 1000);
-        create_parameters.start_time = now + seconds_in_a_day * 90;
-        create_parameters.end_time = CreateCollectionParameters.start_time + seconds_in_a_day;
-        await mbContract.connect(contractCreator).createCollection(...Object.values(create_parameters));
-        const draw_parameters = JSON.parse(JSON.stringify(DrawNftParameters));
-        const logs = await ethers.provider.getLogs(mbContract.filters.CollectionCreated());
-        const parsedLog = interface.parseLog(logs[0]);
-        const result = parsedLog.args;
-        expect(result).to.have.property('collection_id');
-        const collection_id = result.collection_id;
-        draw_parameters._collection_id = collection_id;
+        const start_time = now + seconds_in_a_day;
+        await mbContract.connect(contractCreator).setStartTime(start_time);
         await expect(
-            mbContract.connect(user_0).drawNFT(...Object.values(draw_parameters), DrawTxParameters),
+            mbContract.connect(user_0).openBox(...Object.values(openBoxParameters), txParameters),
         ).to.be.rejectedWith('not started');
     });
 
-    it('Should not draw expired', async () => {
-        const create_parameters = JSON.parse(JSON.stringify(CreateCollectionParameters));
+    it('Should not mint expired', async () => {
         const now = Math.floor(new Date().getTime() / 1000);
-        create_parameters.start_time = now - seconds_in_a_day;
-        create_parameters.end_time = CreateCollectionParameters.start_time + seconds_in_a_day;
-        await mbContract.connect(contractCreator).createCollection(...Object.values(create_parameters));
-        const draw_parameters = JSON.parse(JSON.stringify(DrawNftParameters));
-        const logs = await ethers.provider.getLogs(mbContract.filters.CollectionCreated());
-        const parsedLog = interface.parseLog(logs[0]);
-        const result = parsedLog.args;
-        expect(result).to.have.property('collection_id');
-        const collection_id = result.collection_id;
-        draw_parameters._collection_id = collection_id;
+        const end_time = now - seconds_in_a_day;
+        await mbContract.connect(contractCreator).setEndTime(end_time);
         await expect(
-            mbContract.connect(user_0).drawNFT(...Object.values(draw_parameters), DrawTxParameters),
+            mbContract.connect(user_0).openBox(...Object.values(openBoxParameters), txParameters),
         ).to.be.rejectedWith('expired');
     });
 
-    it('Should createCollection reject invalid parameters', async () => {
+    it('Should mint reject invalid parameters', async () => {
         {
-            const invalid_parameters = JSON.parse(JSON.stringify(CreateCollectionParameters));
-            invalid_parameters.nft_option = [];
-            await expect(
-                mbContract.connect(user_0).createCollection(...Object.values(invalid_parameters)),
-            ).to.be.rejectedWith('invalid NFT options');
-        }
-        {
-            const invalid_parameters = JSON.parse(JSON.stringify(CreateCollectionParameters));
-            invalid_parameters.nft_option = [
-                [90, 0],
-                [10, 100],
-            ];
-            await expect(
-                mbContract.connect(user_0).createCollection(...Object.values(invalid_parameters)),
-            ).to.be.rejectedWith('invalid total amount');
-        }
-        {
-            const invalid_parameters = JSON.parse(JSON.stringify(CreateCollectionParameters));
-            invalid_parameters.nft_option = [
-                [100, 100],
-                [1, 100],
-            ];
-            await expect(
-                mbContract.connect(user_0).createCollection(...Object.values(invalid_parameters)),
-            ).to.be.rejectedWith('invalid percentage');
-
-            invalid_parameters.nft_option = [
-                [80, 100],
-                [1, 100],
-            ];
-            await expect(
-                mbContract.connect(user_0).createCollection(...Object.values(invalid_parameters)),
-            ).to.be.rejectedWith('invalid percentage');
-        }
-        {
-            const invalid_parameters = JSON.parse(JSON.stringify(CreateCollectionParameters));
-            invalid_parameters.nft_option = [
-                [100, 100],
-                [0, 100],
-            ];
-            await expect(
-                mbContract.connect(user_0).createCollection(...Object.values(invalid_parameters)),
-            ).to.be.rejectedWith('invalid percentage');
-        }
-        {
-            const invalid_parameters = JSON.parse(JSON.stringify(CreateCollectionParameters));
-            invalid_parameters.payment = [];
-            await expect(
-                mbContract.connect(user_0).createCollection(...Object.values(invalid_parameters)),
-            ).to.be.rejectedWith('invalid payment options');
-        }
-
-        {
-            const invalid_parameters = JSON.parse(JSON.stringify(CreateCollectionParameters));
-            invalid_parameters.payment[0][0] = nftContract.address;
-            await expect(
-                mbContract.connect(user_0).createCollection(...Object.values(invalid_parameters)),
-            ).to.be.rejectedWith(Error);
-        }
-    });
-
-    it('Should createCollection work properly', async () => {
-        {
-            const collection_info = await mbContract.getCollectionInfo(collection_id);
-            expect(collection_info).to.have.property('_owner').that.to.be.eq(contractCreator.address);
-            expect(collection_info).to.have.property('_name').that.to.be.eq(CreateCollectionParameters.name);
-            expect(collection_info)
-                .to.have.property('_purchase_limit')
-                .that.to.be.eq(CreateCollectionParameters.purchase_limit);
-            expect(collection_info)
-                .to.have.property('_start_time')
-                .that.to.be.eq(CreateCollectionParameters.start_time);
-            expect(collection_info).to.have.property('_end_time').that.to.be.eq(CreateCollectionParameters.end_time);
-            expect(collection_info).to.have.property('_total_quantity').that.to.be.eq(40000);
-            expect(collection_info).to.have.property('_drawn_quantity').that.to.be.eq(0);
-            expect(collection_info).to.have.property('_claimed_quantity').that.to.be.eq(0);
-            expect(collection_info).to.have.property('_qualification').that.to.be.eq(ZeroAddress);
-
-            expect(collection_info).to.have.property('_nft_list');
-            const nft_list = collection_info._nft_list;
-            expect(nft_list.length).to.be.eq(CreateCollectionParameters.nft_option.length);
-            expect(nft_list.map((info) => info.sold.toString())).to.eql(['0', '0', '0', '0']);
-            expect(nft_list.map((info) => info.percentage)).to.eql(
-                CreateCollectionParameters.nft_option.map((info) => info[0]),
+            const parameters = JSON.parse(JSON.stringify(openBoxParameters));
+            parameters._payment_token_index = 1;
+            await expect(mbContract.connect(user_1).openBox(...Object.values(parameters))).to.be.rejectedWith(
+                'ERC20: transfer amount exceeds balance',
             );
-
-            expect(collection_info).to.have.property('_payment_list');
-            const payment_list = collection_info._payment_list;
-            expect(payment_list.map((info) => info.token_addr)).to.eql(
-                CreateCollectionParameters.payment.map((info) => info[0]),
-            );
-            expect(payment_list.map((info) => info.price)).to.eql(
-                CreateCollectionParameters.payment.map((info) => info[1]),
-            );
-            expect(payment_list.map((info) => info.receivable_amount.toString())).to.eql(['0', '0', '0', '0']);
-        }
-        // using `local random number`
-        await mbContract.connect(contractCreator).setLinkAccessor(ZeroAddress);
-        const MultiDrawNFT_parameters = JSON.parse(JSON.stringify(DrawNftParameters));
-        MultiDrawNFT_parameters._number_of_nft = MaxNumberOfNFT;
-        await mbContract.connect(user_0).drawNFT(...Object.values(MultiDrawNFT_parameters), DrawTxParameters);
-        {
-            const distribution = [0, 0, 0, 0];
-            const collection_info = await mbContract.getCollectionInfo(collection_id);
-            const nft_list = collection_info._nft_list;
-            expect(collection_info).to.have.property('_total_quantity').that.to.be.eq(40000);
-            expect(collection_info).to.have.property('_drawn_quantity').that.to.be.eq(MaxNumberOfNFT);
-            expect(collection_info).to.have.property('_claimed_quantity').that.to.be.eq(MaxNumberOfNFT);
-            expect(distribution.length).to.be.eq(nft_list.length);
-            const logs = await ethers.provider.getLogs(nftContract.filters.Transfer());
-            expect(logs.length).to.be.eq(ProbabilityDistributionTestRound);
-            for (let i = 0; i < logs.length; i++) {
-                const parsedLog = nftInterface.parseLog(logs[i]);
-                const result = parsedLog.args;
-                expect(result).to.have.property('from').that.to.be.eq(ZeroAddress);
-                expect(result).to.have.property('to').that.to.be.eq(user_0.address);
-                expect(result).to.have.property('tokenId');
-                const owner = await nftContract.ownerOf(result.tokenId);
-                expect(owner).to.be.eq(user_0.address);
-                const index = getNftTypeIndex(nft_list, result.tokenId);
-                expect(index).to.be.lessThan(nft_list.length);
-                distribution[index]++;
-            }
-            expect(nft_list.map((info) => info.sold)).to.eql(distribution);
-        }
-    });
-
-    it('Should createCollection [different parameters] work properly', async () => {
-        {
-            const parameters = JSON.parse(JSON.stringify(CreateCollectionParameters));
-            parameters.nft_option = [[100, 100]];
-            await mbContract.connect(contractCreator).createCollection(...Object.values(parameters));
-        }
-        {
-            const parameters = JSON.parse(JSON.stringify(CreateCollectionParameters));
-            parameters.nft_option = [
-                [9, 100],
-                [91, 100],
-            ];
-            await mbContract.connect(contractCreator).createCollection(...Object.values(parameters));
-        }
-    });
-
-    it('Should drawNFT reject invalid parameters', async () => {
-        {
-            const parameters = JSON.parse(JSON.stringify(DrawNftParameters));
-            parameters._collection_id = invalid_collection_id;
-            await expect(mbContract.connect(user_1).drawNFT(...Object.values(parameters))).to.be.rejectedWith(
-                'invalid collection',
+            await testTokenAContract.transfer(user_1.address, transferAmount);
+            await expect(mbContract.connect(user_1).openBox(...Object.values(parameters))).to.be.rejectedWith(
+                'ERC20: transfer amount exceeds allowance',
             );
         }
-        await expect(
-            mbContract.connect(user_1).drawNFT(...Object.values(DrawNftParameters), DrawTxParameters),
-        ).to.be.rejectedWith('ERC20: transfer amount exceeds balance');
-        await testTokenAContract.transfer(user_1.address, transferAmount);
-        await expect(
-            mbContract.connect(user_1).drawNFT(...Object.values(DrawNftParameters), DrawTxParameters),
-        ).to.be.rejectedWith('ERC20: transfer amount exceeds allowance');
         {
-            const parameters = JSON.parse(JSON.stringify(DrawNftParameters));
+            const parameters = JSON.parse(JSON.stringify(openBoxParameters));
             parameters._number_of_nft = MaxNumberOfNFT + 1;
-            await expect(mbContract.connect(user_0).drawNFT(...Object.values(parameters))).to.be.rejectedWith(
+            await expect(mbContract.connect(user_0).openBox(...Object.values(parameters))).to.be.rejectedWith(
                 'exceeds personal limit',
             );
         }
         {
-            const parameters = JSON.parse(JSON.stringify(DrawNftParameters));
-            parameters._payment_token_index = CreateCollectionParameters.payment.length;
-            await expect(mbContract.connect(user_0).drawNFT(...Object.values(parameters))).to.be.rejectedWith(
+            const parameters = JSON.parse(JSON.stringify(openBoxParameters));
+            parameters._payment_token_index = ctorParameter.payment.length;
+            await expect(mbContract.connect(user_0).openBox(...Object.values(parameters))).to.be.rejectedWith(
                 'invalid payment token',
             );
         }
         {
-            const tx_parameters = JSON.parse(JSON.stringify(DrawTxParameters));
-            tx_parameters.value = 0;
+            const tx_parameters = {
+                value: 0,
+            };
             await expect(
-                mbContract.connect(user_1).drawNFT(...Object.values(DrawNftParameters), tx_parameters),
-            ).to.be.rejectedWith('not enough Fee');
+                mbContract.connect(user_1).openBox(...Object.values(openBoxParameters), tx_parameters),
+            ).to.be.rejectedWith('not enough ETH');
         }
     });
 
-    it('Should draw-limit work', async () => {
-        const parameters = JSON.parse(JSON.stringify(DrawNftParameters));
+    it('Should personal limit work', async () => {
+        const parameters = JSON.parse(JSON.stringify(openBoxParameters));
+        const tx_parameters = JSON.parse(JSON.stringify(txParameters));
         parameters._number_of_nft = MaxNumberOfNFT / 2;
-        await mbContract.connect(user_0).drawNFT(...Object.values(parameters), DrawTxParameters);
-        await mbContract.connect(user_0).drawNFT(...Object.values(parameters), DrawTxParameters);
+        tx_parameters.value = txParameters.value.mul(parameters._number_of_nft);
+        await mbContract.connect(user_0).openBox(...Object.values(parameters), tx_parameters);
+        await mbContract.connect(user_0).openBox(...Object.values(parameters), tx_parameters);
         await expect(
-            mbContract.connect(user_0).drawNFT(...Object.values(parameters), DrawTxParameters),
+            mbContract.connect(user_0).openBox(...Object.values(parameters), tx_parameters),
         ).to.be.rejectedWith('exceeds personal limit');
     });
 
@@ -433,7 +197,7 @@ describe('MysteryBox', () => {
         expect((await nftContract.balanceOf(user_0.address)).eq(0)).to.be.true;
         {
             await mbContract.connect(contractCreator).createCollection(...Object.values(create_parameters));
-            const draw_parameters = JSON.parse(JSON.stringify(DrawNftParameters));
+            const draw_parameters = JSON.parse(JSON.stringify(openBoxParameters));
             const logs = await ethers.provider.getLogs(mbContract.filters.CollectionCreated());
             const parsedLog = interface.parseLog(logs[0]);
             const result = parsedLog.args;
@@ -443,7 +207,7 @@ describe('MysteryBox', () => {
             draw_parameters._collection_id = collection_id;
             // draw 2 NFT(s), should work
             draw_parameters._number_of_nft = total_NFT_number;
-            await mbContract.connect(user_0).drawNFT(...Object.values(draw_parameters), DrawTxParameters);
+            await mbContract.connect(user_0).openBox(...Object.values(draw_parameters), txParameters);
             {
                 // NFT can be claimed after `random number` is generated
                 const fakeRequestId = await accessorContract.requestId();
@@ -460,7 +224,7 @@ describe('MysteryBox', () => {
             const userTokenABalanceBeforeDraw = await testTokenAContract.balanceOf(user_0.address);
             const contractTokenABalanceBeforeDraw = await testTokenAContract.balanceOf(mbContract.address);
             await mbContract.connect(contractCreator).createCollection(...Object.values(create_parameters));
-            const draw_parameters = JSON.parse(JSON.stringify(DrawNftParameters));
+            const draw_parameters = JSON.parse(JSON.stringify(openBoxParameters));
             const logs = await ethers.provider.getLogs(mbContract.filters.CollectionCreated());
             const parsedLog = interface.parseLog(logs[0]);
             const result = parsedLog.args;
@@ -470,7 +234,7 @@ describe('MysteryBox', () => {
             draw_parameters._collection_id = collection_id;
             draw_parameters._number_of_nft = total_NFT_number + 10;
             // draw 3 NFT,
-            await mbContract.connect(user_0).drawNFT(...Object.values(draw_parameters), DrawTxParameters);
+            await mbContract.connect(user_0).openBox(...Object.values(draw_parameters), txParameters);
             {
                 // NFT can be claimed after `random number` is generated
                 const fakeRequestId = await accessorContract.requestId();
@@ -491,7 +255,7 @@ describe('MysteryBox', () => {
         }
         {
             await mbContract.connect(contractCreator).createCollection(...Object.values(create_parameters));
-            const draw_parameters = JSON.parse(JSON.stringify(DrawNftParameters));
+            const draw_parameters = JSON.parse(JSON.stringify(openBoxParameters));
             const logs = await ethers.provider.getLogs(mbContract.filters.CollectionCreated());
             const parsedLog = interface.parseLog(logs[0]);
             const result = parsedLog.args;
@@ -499,10 +263,10 @@ describe('MysteryBox', () => {
             expect(result).to.have.property('collection_id');
             const collection_id = result.collection_id;
             draw_parameters._collection_id = collection_id;
-            await mbContract.connect(user_0).drawNFT(...Object.values(draw_parameters), DrawTxParameters);
-            await mbContract.connect(user_0).drawNFT(...Object.values(draw_parameters), DrawTxParameters);
+            await mbContract.connect(user_0).openBox(...Object.values(draw_parameters), txParameters);
+            await mbContract.connect(user_0).openBox(...Object.values(draw_parameters), txParameters);
             await expect(
-                mbContract.connect(user_0).drawNFT(...Object.values(draw_parameters), DrawTxParameters),
+                mbContract.connect(user_0).openBox(...Object.values(draw_parameters), txParameters),
             ).to.be.rejectedWith('no NFT left');
             {
                 // NFT can be claimed after `random number` is generated
@@ -523,7 +287,7 @@ describe('MysteryBox', () => {
             let contractEthBalanceBeforeDraw = await ethers.provider.getBalance(mbContract.address);
             contractEthBalanceBeforeDraw = contractEthBalanceBeforeDraw.sub(unused_fee);
             await mbContract.connect(contractCreator).createCollection(...Object.values(create_parameters));
-            const draw_parameters = JSON.parse(JSON.stringify(DrawNftParameters));
+            const draw_parameters = JSON.parse(JSON.stringify(openBoxParameters));
             const logs = await ethers.provider.getLogs(mbContract.filters.CollectionCreated());
             const parsedLog = interface.parseLog(logs[0]);
             const result = parsedLog.args;
@@ -534,15 +298,15 @@ describe('MysteryBox', () => {
             draw_parameters._payment_token_index = 0;
             draw_parameters._collection_id = collection_id;
             draw_parameters._number_of_nft = total_NFT_number + 1;
-            const txParameter = JSON.parse(JSON.stringify(DrawTxParameters));
+            const txParameter = JSON.parse(JSON.stringify(txParameters));
             await expect(
-                mbContract.connect(user_0).drawNFT(...Object.values(draw_parameters), txParameter),
+                mbContract.connect(user_0).openBox(...Object.values(draw_parameters), txParameter),
             ).to.be.rejectedWith('not enough ETH');
             // draw 3 NFT
             txParameter.value = CreateCollectionParameters.payment[0][1]
                 .mul(draw_parameters._number_of_nft)
                 .add(txParameter.value);
-            await mbContract.connect(user_0).drawNFT(...Object.values(draw_parameters), txParameter);
+            await mbContract.connect(user_0).openBox(...Object.values(draw_parameters), txParameter);
             // should only pay & draw & claim 2 NFT(s)
             const userEthBalanceAfterDraw = await ethers.provider.getBalance(user_0.address);
             const contractEthBalanceAfterDraw = await ethers.provider.getBalance(mbContract.address);
@@ -587,8 +351,8 @@ describe('MysteryBox', () => {
         }
     });
 
-    it('Should drawNFT + claimNFT + ERC-20 + LocalRandomNumberGenerator work properly', async () => {
-        await expect(mbContract.connect(user_0).claimNFT(DrawNftParameters._collection_id)).to.be.rejectedWith(
+    it('Should openBox + claimNFT + ERC-20 + LocalRandomNumberGenerator work properly', async () => {
+        await expect(mbContract.connect(user_0).claimNFT(openBoxParameters._collection_id)).to.be.rejectedWith(
             'nothing to claim',
         );
 
@@ -599,7 +363,7 @@ describe('MysteryBox', () => {
         // token A balance before
         const userTokenABalanceBeforeDraw = await testTokenAContract.balanceOf(user_0.address);
         const contractTokenABalanceBeforeDraw = await testTokenAContract.balanceOf(mbContract.address);
-        await mbContract.connect(user_0).drawNFT(...Object.values(DrawNftParameters), DrawTxParameters);
+        await mbContract.connect(user_0).openBox(...Object.values(openBoxParameters), txParameters);
         const userTokenABalanceAfterDraw = await testTokenAContract.balanceOf(user_0.address);
         const contractTokenABalanceAfterDraw = await testTokenAContract.balanceOf(mbContract.address);
         expect(userTokenABalanceBeforeDraw.eq(userTokenABalanceAfterDraw.add(paymentTokenAAmount))).to.be.true;
@@ -617,30 +381,30 @@ describe('MysteryBox', () => {
         }
         {
             // `claimNFT()` again should revert
-            await expect(mbContract.connect(user_0).claimNFT(DrawNftParameters._collection_id)).to.be.rejectedWith(
+            await expect(mbContract.connect(user_0).claimNFT(openBoxParameters._collection_id)).to.be.rejectedWith(
                 'nothing to claim',
             );
             expect((await nftContract.balanceOf(user_0.address)).eq(1)).to.be.true;
         }
     });
 
-    it('Should drawNFT + claimNFT + ERC-20 + ChainLinkVRF work properly', async () => {
-        expect(await mbContract.isReadyToClaim(DrawNftParameters._collection_id, user_0.address)).to.be.true;
+    it('Should openBox + claimNFT + ERC-20 + ChainLinkVRF work properly', async () => {
+        expect(await mbContract.isReadyToClaim(openBoxParameters._collection_id, user_0.address)).to.be.true;
         const paymentTokenAAmount = CreateCollectionParameters.payment[1][1];
         // token A balance before
         const userTokenABalanceBeforeDraw = await testTokenAContract.balanceOf(user_0.address);
         const contractTokenABalanceBeforeDraw = await testTokenAContract.balanceOf(mbContract.address);
-        await drawNFT();
+        await openBox();
         const userTokenABalanceAfterDraw = await testTokenAContract.balanceOf(user_0.address);
         const contractTokenABalanceAfterDraw = await testTokenAContract.balanceOf(mbContract.address);
         expect(userTokenABalanceBeforeDraw.eq(userTokenABalanceAfterDraw.add(paymentTokenAAmount))).to.be.true;
         expect(contractTokenABalanceAfterDraw.eq(contractTokenABalanceBeforeDraw.add(paymentTokenAAmount))).to.be.true;
         expect((await nftContract.balanceOf(user_0.address)).eq(0)).to.be.true;
         // should revert if `random number` is not generated
-        await expect(mbContract.connect(user_0).claimNFT(DrawNftParameters._collection_id)).to.be.rejectedWith(
+        await expect(mbContract.connect(user_0).claimNFT(openBoxParameters._collection_id)).to.be.rejectedWith(
             'random number not ready',
         );
-        expect(await mbContract.isReadyToClaim(DrawNftParameters._collection_id, user_0.address)).to.be.false;
+        expect(await mbContract.isReadyToClaim(openBoxParameters._collection_id, user_0.address)).to.be.false;
         {
             // others can NOT call `rawFulfillRandomness`
             const fakeRequestId = LinkAccessorCtorParameters.linkKeyHash;
@@ -659,8 +423,8 @@ describe('MysteryBox', () => {
                 .connect(fake_vrf_coordinator)
                 .rawFulfillRandomness(fakeRequestId, fakeRand, rawFulfillRandomnessTxParameter);
         }
-        expect(await mbContract.isReadyToClaim(DrawNftParameters._collection_id, user_0.address)).to.be.true;
-        await mbContract.connect(user_0).claimNFT(DrawNftParameters._collection_id);
+        expect(await mbContract.isReadyToClaim(openBoxParameters._collection_id, user_0.address)).to.be.true;
+        await mbContract.connect(user_0).claimNFT(openBoxParameters._collection_id);
         expect((await nftContract.balanceOf(user_0.address)).eq(1)).to.be.true;
         {
             const logs = await ethers.provider.getLogs(nftContract.filters.Transfer());
@@ -677,7 +441,7 @@ describe('MysteryBox', () => {
         }
         {
             // `claimNFT()` again should revert
-            await expect(mbContract.connect(user_0).claimNFT(DrawNftParameters._collection_id)).to.be.rejectedWith(
+            await expect(mbContract.connect(user_0).claimNFT(openBoxParameters._collection_id)).to.be.rejectedWith(
                 'nothing to claim',
             );
             expect((await nftContract.balanceOf(user_0.address)).eq(1)).to.be.true;
@@ -688,9 +452,9 @@ describe('MysteryBox', () => {
         expect(contractTokenABalanceAfterDraw.eq(contractTokenABalanceAfterClaim)).to.be.true;
     });
 
-    it('Should drawNFT multiple NFT work properly', async () => {
+    it('Should openBox multiple NFT work properly', async () => {
         {
-            const purchaseHistory = await mbContract.getPurchaseInfo(DrawNftParameters._collection_id, user_0.address);
+            const purchaseHistory = await mbContract.getPurchaseInfo(openBoxParameters._collection_id, user_0.address);
             expect(purchaseHistory._claim_history.length).to.be.eq(0);
         }
         // token A balance before
@@ -698,9 +462,9 @@ describe('MysteryBox', () => {
         const userTokenABalanceBeforeDraw = await testTokenAContract.balanceOf(user_0.address);
         const contractTokenABalanceBeforeDraw = await testTokenAContract.balanceOf(mbContract.address);
         {
-            const MultiDrawNFT_parameters = JSON.parse(JSON.stringify(DrawNftParameters));
+            const MultiDrawNFT_parameters = JSON.parse(JSON.stringify(openBoxParameters));
             MultiDrawNFT_parameters._number_of_nft = MaxNumberOfNFT;
-            await mbContract.connect(user_0).drawNFT(...Object.values(MultiDrawNFT_parameters), DrawTxParameters);
+            await mbContract.connect(user_0).openBox(...Object.values(MultiDrawNFT_parameters), txParameters);
         }
         const userTokenABalanceAfterDraw = await testTokenAContract.balanceOf(user_0.address);
         const contractTokenABalanceAfterDraw = await testTokenAContract.balanceOf(mbContract.address);
@@ -723,32 +487,32 @@ describe('MysteryBox', () => {
                 .connect(fake_vrf_coordinator)
                 .rawFulfillRandomness(fakeRequestId, fakeRand, rawFulfillRandomnessTxParameter);
         }
-        expect(await mbContract.isReadyToClaim(DrawNftParameters._collection_id, user_0.address)).to.be.true;
-        await mbContract.connect(user_0).claimNFT(DrawNftParameters._collection_id);
+        expect(await mbContract.isReadyToClaim(openBoxParameters._collection_id, user_0.address)).to.be.true;
+        await mbContract.connect(user_0).claimNFT(openBoxParameters._collection_id);
         expect((await nftContract.balanceOf(user_0.address)).eq(MaxNumberOfNFT)).to.be.true;
         const userTokenABalanceAfterClaim = await testTokenAContract.balanceOf(user_0.address);
         const contractTokenABalanceAfterClaim = await testTokenAContract.balanceOf(mbContract.address);
         expect(userTokenABalanceAfterDraw.eq(userTokenABalanceAfterClaim)).to.be.true;
         expect(contractTokenABalanceAfterDraw.eq(contractTokenABalanceAfterClaim)).to.be.true;
         {
-            const purchaseHistory = await mbContract.getPurchaseInfo(DrawNftParameters._collection_id, user_0.address);
+            const purchaseHistory = await mbContract.getPurchaseInfo(openBoxParameters._collection_id, user_0.address);
             expect(purchaseHistory._claim_history.length).to.be.eq(MaxNumberOfNFT);
         }
     });
 
-    it('Should drawNFT + claimNFT + ETH + ChainLinkVRF work properly', async () => {
-        const parameters = JSON.parse(JSON.stringify(DrawNftParameters));
+    it('Should openBox + claimNFT + ETH + ChainLinkVRF work properly', async () => {
+        const parameters = JSON.parse(JSON.stringify(openBoxParameters));
         parameters._payment_token_index = 0;
 
         const nft_price = CreateCollectionParameters.payment[parameters._payment_token_index][1];
         // payment + 'fee'
-        const paymentEthAmount = nft_price.add(DrawTxParameters.value);
-        const txParameters = JSON.parse(JSON.stringify(DrawTxParameters));
+        const paymentEthAmount = nft_price.add(txParameters.value);
+        const txParameters = JSON.parse(JSON.stringify(txParameters));
         txParameters.value = paymentEthAmount;
         // ETH balance
         const userEthBalanceBeforeDraw = await ethers.provider.getBalance(user_0.address);
         const contractEthBalanceBeforeDraw = await ethers.provider.getBalance(mbContract.address);
-        await mbContract.connect(user_0).drawNFT(...Object.values(parameters), txParameters);
+        await mbContract.connect(user_0).openBox(...Object.values(parameters), txParameters);
         const userEthBalanceAfterDraw = await ethers.provider.getBalance(user_0.address);
         const contractEthBalanceAfterDraw = await ethers.provider.getBalance(mbContract.address);
         // gas consumption
@@ -798,22 +562,18 @@ describe('MysteryBox', () => {
     });
 
     it('probability distribution test', async () => {
-        await linkTokenContract.transfer(
-            accessorContract.address,
-            LinkAccessorCtorParameters.fee.mul(ProbabilityDistributionTestRound),
-        );
         // `probability distribution` of 4 different classes of NFT should roughly match:
         // 10% 10% 30% 50%
         for (let i = 0; i < ProbabilityDistributionTestRound; i++) {
-            await mbContract.connect(user_0).drawNFT(...Object.values(DrawNftParameters), DrawTxParameters);
+            await mbContract.connect(user_0).openBox(...Object.values(openBoxParameters), txParameters);
             const fakeRequestId = await accessorContract.requestId();
             const fakeRand = soliditySha3(user_0.address, i, Date.now());
             await accessorContract
                 .connect(fake_vrf_coordinator)
                 .rawFulfillRandomness(fakeRequestId, fakeRand, rawFulfillRandomnessTxParameter);
         }
-        expect(await mbContract.isReadyToClaim(DrawNftParameters._collection_id, user_0.address)).to.be.true;
-        await mbContract.connect(user_0).claimNFT(DrawNftParameters._collection_id);
+        expect(await mbContract.isReadyToClaim(openBoxParameters._collection_id, user_0.address)).to.be.true;
+        await mbContract.connect(user_0).claimNFT(openBoxParameters._collection_id);
         const distribution = [0, 0, 0, 0];
         const collection_info = await mbContract.getCollectionInfo(collection_id);
         expect(distribution.length).to.be.eq(collection_info._nft_list.length);
@@ -845,17 +605,13 @@ describe('MysteryBox', () => {
             console.log('exception: unexpected distribution: ' + distribution + ' please check!');
         }
 
-        const purchaseHistory = await mbContract.getPurchaseInfo(DrawNftParameters._collection_id, user_0.address);
+        const purchaseHistory = await mbContract.getPurchaseInfo(openBoxParameters._collection_id, user_0.address);
         expect(purchaseHistory).to.have.property('_claim_history');
         expect(purchaseHistory._claim_history.length).to.be.eq(ProbabilityDistributionTestRound);
     });
 
     it('Should claimPayment reject invalid parameters', async () => {
-        await expect(mbContract.connect(user_1).claimPayment([collection_id])).to.be.rejectedWith('not owner');
-        await expect(
-            mbContract.connect(contractCreator).claimPayment([collection_id, invalid_collection_id]),
-        ).to.be.rejectedWith('not owner');
-        await expect(mbContract.connect(user_1).claimPayment([invalid_collection_id])).to.be.rejectedWith('not owner');
+        await expect(mbContract.connect(user_1).claimPayment()).to.be.rejectedWith('not owner');
     });
 
     it('Should claimPayment work', async () => {
@@ -867,13 +623,13 @@ describe('MysteryBox', () => {
         }
         let paymentEthAmount = CreateCollectionParameters.payment[0][1];
         {
-            const parameters = JSON.parse(JSON.stringify(DrawNftParameters));
-            const txParameters = JSON.parse(JSON.stringify(DrawTxParameters));
+            const parameters = JSON.parse(JSON.stringify(openBoxParameters));
+            const txParameters = JSON.parse(JSON.stringify(txParameters));
             parameters._payment_token_index = 0;
-            txParameters.value = paymentEthAmount.add(DrawTxParameters.value);
-            await mbContract.connect(user_0).drawNFT(...Object.values(parameters), txParameters);
+            txParameters.value = paymentEthAmount.add(txParameters.value);
+            await mbContract.connect(user_0).openBox(...Object.values(parameters), txParameters);
         }
-        await drawNFT();
+        await openBox();
         const paymentTokenAAmount = CreateCollectionParameters.payment[1][1];
         {
             const collection_info = await mbContract.getCollectionInfo(collection_id);
@@ -926,64 +682,26 @@ describe('MysteryBox', () => {
     });
 
     it('Should whitelist qualification work', async () => {
-        const create_parameters = JSON.parse(JSON.stringify(CreateCollectionParameters));
-        create_parameters._qualification = whitelistQlfContract.address;
+        await mbContract.connect(contractCreator).setQualification(whitelistQlfContract.address);
         await whitelistQlfContract.add_white_list([user_0.address]);
-        {
-            await mbContract.connect(contractCreator).createCollection(...Object.values(create_parameters));
-            const draw_parameters = JSON.parse(JSON.stringify(DrawNftParameters));
-            const logs = await ethers.provider.getLogs(mbContract.filters.CollectionCreated());
-            const parsedLog = interface.parseLog(logs[0]);
-            const result = parsedLog.args;
-            expect(result).to.have.property('collection_id');
-            const collection_id = result.collection_id;
-            draw_parameters._collection_id = collection_id;
-            await mbContract.connect(user_0).drawNFT(...Object.values(draw_parameters), DrawTxParameters);
-            await expect(
-                mbContract.connect(user_1).drawNFT(...Object.values(draw_parameters), DrawTxParameters),
-            ).to.be.rejectedWith('not whitelisted');
-        }
+        await mbContract.connect(user_0).openBox(...Object.values(draw_parameters), txParameters);
+        await expect(
+            mbContract.connect(user_1).openBox(...Object.values(draw_parameters), txParameters),
+        ).to.be.rejectedWith('not whitelisted');
     });
 
     it('Should signature verification qualification work', async () => {
-        const create_parameters = JSON.parse(JSON.stringify(CreateCollectionParameters));
-        create_parameters._qualification = sigVerifyQlfContract.address;
+        await mbContract.connect(contractCreator).setQualification(sigVerifyQlfContract.address);
         {
-            await mbContract.connect(contractCreator).createCollection(...Object.values(create_parameters));
-            const draw_parameters = JSON.parse(JSON.stringify(DrawNftParameters));
-            const logs = await ethers.provider.getLogs(mbContract.filters.CollectionCreated());
-            const parsedLog = interface.parseLog(logs[0]);
-            const result = parsedLog.args;
-            expect(result).to.have.property('collection_id');
-            const collection_id = result.collection_id;
-            draw_parameters._collection_id = collection_id;
-            {
-                const msg_hash = soliditySha3(qualification_project_name, user_0.address);
-                const signature = await verifier.signMessage(ethers.utils.arrayify(msg_hash));
-                draw_parameters._proof = signature;
-            }
-            await mbContract.connect(user_0).drawNFT(...Object.values(draw_parameters), DrawTxParameters);
+            const draw_parameters = JSON.parse(JSON.stringify(openBoxParameters));
+            const msg_hash = soliditySha3(qualification_project_name, user_0.address);
+            const signature = await verifier.signMessage(ethers.utils.arrayify(msg_hash));
+            draw_parameters._proof = signature;
+            await mbContract.connect(user_0).openBox(...Object.values(draw_parameters), txParameters);
             await expect(
-                mbContract.connect(user_1).drawNFT(...Object.values(draw_parameters), DrawTxParameters),
+                mbContract.connect(user_1).openBox(...Object.values(draw_parameters), txParameters),
             ).to.be.rejectedWith('not qualified');
         }
-    });
-
-    it('Should claimNFT revert if no NFT is there', async () => {
-        // `claimNFT()` again should revert
-        await expect(mbContract.connect(user_0).claimNFT(DrawNftParameters._collection_id)).to.be.rejectedWith(
-            'nothing to claim',
-        );
-        expect((await nftContract.balanceOf(user_0.address)).eq(0)).to.be.true;
-    });
-
-    it('Should fulfillRandomness reject non-accessor', async () => {
-        // only `accessor` can call `fulfillRandomness`
-        const fakeRequestId = await accessorContract.requestId();
-        const fakeRand = LinkAccessorCtorParameters.link;
-        await expect(mbContract.connect(user_0).fulfillRandomness(fakeRequestId, fakeRand)).to.be.rejectedWith(
-            'Only linkAccessor can call',
-        );
     });
 
     it('Should initialize not work', async () => {
@@ -1010,17 +728,63 @@ describe('MysteryBox', () => {
         await mbContract.connect(user_0).setLinkAccessor(nftContract.address);
     });
 
-    async function drawNFT() {
-        await mbContract.connect(user_0).drawNFT(...Object.values(DrawNftParameters), DrawTxParameters);
-        const logs = await ethers.provider.getLogs(mbContract.filters.NFTDrawn());
-        expect(logs.length).to.be.eq(1);
-        const parsedLog = interface.parseLog(logs[0]);
-        const result = parsedLog.args;
-        expect(result).to.have.property('owner').that.to.be.eq(user_0.address);
-        expect(result).to.have.property('collection_id');
-        expect(result.collection_id.toString()).to.be.eq(DrawNftParameters._collection_id.toString());
-        expect(result).to.have.property('number_of_nft').that.to.be.eq(DrawNftParameters._number_of_nft);
-    }
+    it('Should setStartTime/setEndTime work', async () => {
+        {
+            const nftInfo = await mbContract.getNFTInfo();
+            expect(nftInfo._start_time).to.be.eq(ctorParameter.start_time);
+            expect(nftInfo._end_time).to.be.eq(ctorParameter.end_time);
+        }
+        const now = Math.floor(new Date().getTime() / 1000);
+        // set start time
+        const start_time = now + seconds_in_a_day;
+        await expect(mbContract.connect(user_0).setStartTime(start_time)).to.be.rejectedWith(
+            'Ownable: caller is not the owner',
+        );
+        await mbContract.connect(contractCreator).setStartTime(start_time);
+        // set end time
+        const end_time = now + seconds_in_a_day;
+        await expect(mbContract.connect(user_0).setEndTime(end_time)).to.be.rejectedWith(
+            'Ownable: caller is not the owner',
+        );
+        await mbContract.connect(contractCreator).setEndTime(end_time);
+        {
+            const nftInfo = await mbContract.getNFTInfo();
+            expect(nftInfo._end_time).to.be.eq(end_time);
+        }
+    });
+
+    it('Should setQualification work', async () => {
+        {
+            const nftInfo = await mbContract.getNFTInfo();
+            expect(nftInfo._qualification).to.be.eq(ctorParameter.qualification);
+        }
+        await expect(mbContract.connect(user_0).setQualification(whitelistQlfContract.address)).to.be.rejectedWith(
+            'Ownable: caller is not the owner',
+        );
+        await mbContract.connect(contractCreator).setQualification(whitelistQlfContract.address);
+        {
+            const nftInfo = await mbContract.getNFTInfo();
+            expect(nftInfo._qualification).to.be.eq(whitelistQlfContract.address);
+        }
+    });
+
+    it('Should setBaseURI work', async () => {
+        /*
+        {
+            const name = await mbContract.name();
+            expect(name).to.be.eq(NftCtorParameters.name);
+        }
+
+        const newName = 'MASK NFT';
+        await expect(mbContract.connect(user_0).setName(newName)).to.be.rejectedWith('Ownable: caller is not the owner');
+        await mbContract.connect(contractCreator).setName(newName);
+
+        {
+            const name = await mbContract.name();
+            expect(name).to.be.eq(newName);
+        }
+        */
+    });
 
     function getNftTypeIndex(TypeList, NftId) {
         // `NFT type ID` is the upper 128 bits of the NFT id.
