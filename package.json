@@ -16,7 +16,7 @@
     "deploy:bsc_test": "hardhat --network bsc_test deploy",
     "deploy:bsc_mainnet": "hardhat --network bsc_mainnet deploy",
     "deploy:matic_mainnet": "hardhat --network matic_mainnet deploy",
-    "format": "prettier --write './test/*.js' './deploy/*.ts'"
+    "format": "prettier --write './test/*.js' './deploy/*.ts' './*.js'"
   },
   "repository": {
     "type": "git",

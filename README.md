@@ -41,11 +41,7 @@ To deploy the smart contract on Ethereum `rinkeby` testnet
 npm run deploy:rinkeby
 ```
 
-Using the [`project_setup.js`](project_setup.js) script to set up the deployed smart contracts.
-
-```bash
-node project_setup.js setup
-```
+Using the [`helper.js`](helper.js) script to set up the deployed smart contracts.
 
 ### Troubleshoot & Tips
 
@@ -55,51 +51,35 @@ node project_setup.js setup
 
 ## Deployed Contract Address
 
-### MysteryBoxNFT
-
-| Chain   | Address                                                                                  |
-| ------- | ---------------------------------------------------------------------------------------- |
-| Mainnet | [0xxxxxxxxx][0xxxxxxxxx]                                                                 |
-| Ropsten | [0xxxxxxxxx][0xxxxxxxxx]                                                                 |
-| Rinkeby | [0x9217Cc4F65054fe138807ecF6E25DdC75480396D][0x9217Cc4F65054fe138807ecF6E25DdC75480396D] |
-| BSC     | [0xxxxxxxxx][0xxxxxxxxx]                                                                 |
-| Matic   | [0xxxxxxxxx][0xxxxxxxxx]                                                                 |
-
-[0xxxxxxxxx]: https://etherscan.io/address/0xxxxxxxxx
-[0xxxxxxxxx]: https://ropsten.etherscan.io/address/0xxxxxxxxx
-[0x9217Cc4F65054fe138807ecF6E25DdC75480396D]: https://rinkeby.etherscan.io/address/0x9217Cc4F65054fe138807ecF6E25DdC75480396D
-[0xxxxxxxxx]: https://bscscan.com/address/0xxxxxxxxx
-[0xxxxxxxxx]: https://polygonscan.com/address/0xxxxxxxxx
-
-### LinkAccessor
-
-| Chain   | Address                                                                                  |
-| ------- | ---------------------------------------------------------------------------------------- |
-| Mainnet | [0xxxxxxxxx][0xxxxxxxxx]                                                                 |
-| Ropsten | [0xxxxxxxxx][0xxxxxxxxx]                                                                 |
-| Rinkeby | [0x2326a8632Fb60965f931b0E6A6A6612F3dB2A87E][0x2326a8632Fb60965f931b0E6A6A6612F3dB2A87E] |
-| BSC     | [0xxxxxxxxx][0xxxxxxxxx]                                                                 |
-| Matic   | [0xxxxxxxxx][0xxxxxxxxx]                                                                 |
-
-[0xxxxxxxxx]: https://etherscan.io/address/0xxxxxxxxx
-[0xxxxxxxxx]: https://ropsten.etherscan.io/address/0xxxxxxxxx
-[0x2326a8632Fb60965f931b0E6A6A6612F3dB2A87E]: https://rinkeby.etherscan.io/address/0x2326a8632Fb60965f931b0E6A6A6612F3dB2A87E
-[0xxxxxxxxx]: https://bscscan.com/address/0xxxxxxxxx
-[0xxxxxxxxx]: https://polygonscan.com/address/0xxxxxxxxx
-
 ### MysteryBox
 
 | Chain   | Address                                                                                  |
 | ------- | ---------------------------------------------------------------------------------------- |
 | Mainnet | [0xxxxxxxxx][0xxxxxxxxx]                                                                 |
 | Ropsten | [0xxxxxxxxx][0xxxxxxxxx]                                                                 |
-| Rinkeby | [0xe7D150B42CAAf8042e5956944a7fe2B4716c5fA5][0xe7D150B42CAAf8042e5956944a7fe2B4716c5fA5] |
+| Rinkeby | [0xbFcf8210F5B6764D86a9C5252218ad627A6a949d][0xbFcf8210F5B6764D86a9C5252218ad627A6a949d] |
 | BSC     | [0xxxxxxxxx][0xxxxxxxxx]                                                                 |
 | Matic   | [0xxxxxxxxx][0xxxxxxxxx]                                                                 |
 
 [0xxxxxxxxx]: https://etherscan.io/address/0xxxxxxxxx
 [0xxxxxxxxx]: https://ropsten.etherscan.io/address/0xxxxxxxxx
-[0xe7D150B42CAAf8042e5956944a7fe2B4716c5fA5]: https://rinkeby.etherscan.io/address/0xe7D150B42CAAf8042e5956944a7fe2B4716c5fA5
+[0xbFcf8210F5B6764D86a9C5252218ad627A6a949d]: https://rinkeby.etherscan.io/address/0xbFcf8210F5B6764D86a9C5252218ad627A6a949d
+[0xxxxxxxxx]: https://bscscan.com/address/0xxxxxxxxx
+[0xxxxxxxxx]: https://polygonscan.com/address/0xxxxxxxxx
+
+### MaskTestNFT
+
+| Chain   | Address                                                                                  |
+| ------- | ---------------------------------------------------------------------------------------- |
+| Mainnet | [0xxxxxxxxx][0xxxxxxxxx]                                                                 |
+| Ropsten | [0xxxxxxxxx][0xxxxxxxxx]                                                                 |
+| Rinkeby | [0x0c8FB5C985E00fb1D002b6B9700084492Fb4B9A8][0x0c8FB5C985E00fb1D002b6B9700084492Fb4B9A8] |
+| BSC     | [0xxxxxxxxx][0xxxxxxxxx]                                                                 |
+| Matic   | [0xxxxxxxxx][0xxxxxxxxx]                                                                 |
+
+[0xxxxxxxxx]: https://etherscan.io/address/0xxxxxxxxx
+[0xxxxxxxxx]: https://ropsten.etherscan.io/address/0xxxxxxxxx
+[0x0c8FB5C985E00fb1D002b6B9700084492Fb4B9A8]: https://rinkeby.etherscan.io/address/0x0c8FB5C985E00fb1D002b6B9700084492Fb4B9A8
 [0xxxxxxxxx]: https://bscscan.com/address/0xxxxxxxxx
 [0xxxxxxxxx]: https://polygonscan.com/address/0xxxxxxxxx
 

@@ -1,99 +1,129 @@
-const ethers = require("ethers");
+const ethers = require('ethers');
 const utils = require('./utils.js');
 
 const project_secret = require('./project.secret');
 
 // TODO: organize these into a config file
-const MysteryBoxArtifact = require("./artifacts/contracts/MysteryBox.sol/MysteryBox.json");
+const MysteryBoxArtifact = require('./artifacts/contracts/MysteryBox.sol/MysteryBox.json');
 let MysteryBoxAddress;
 let MysteryBoxApp;
 
-const {
-    ChainlinkVRFConfig,
-    ContractAddressConfig,
-} = require('./SmartContractProjectConfig/config.js');
+const NFTArtifact = require('./artifacts/contracts/test/MaskTestNFT.sol/MaskTestNFT.json');
+let NFTAddress;
+let NFTApp;
 
-const ERC20Artifact = require("./node_modules/@openzeppelin/contracts/build/contracts/ERC20.json");
 let NetworkProvider;
 let adminWallet;
 let testWallet_0;
 let testWallet_1;
 
-const {
-    NftCtorParameters,
-    openBoxParameters,
-    seconds_in_a_day,
-} = require('./test/constants.js');
+const { CreateBoxParameters, openBoxParameters, seconds_in_a_day } = require('./test/constants.js');
 //----------------------------------------
 const transactionParameters = {
     gasLimit: 10000000,
-    gasPrice: ethers.utils.parseUnits('5', 'gwei'),
 };
 
 //------------------------------------------------------------------------------------------------
-const network = "rinkeby";
+const network = 'rinkeby';
 
 const txParameters = {
     gasLimit: 6000000,
 };
+const creatBoxParameter = CreateBoxParameters[network];
 
 async function main() {
-    if (network === "mainnet") {
+    if (network === 'mainnet') {
         // set gas price carefully, it is expensive.
         // transactionParameters.nonce = 3440;
         // console.log("Force Nonce: " + transactionParameters.nonce);
         // transactionParameters.gasPrice = ethers.utils.parseUnits('25', 'gwei');
         const gasPriceList = await utils.getGasPrice(false);
-        console.log("Ethereum standard gas price: " + ethers.utils.formatUnits(gasPriceList.standard, 'gwei') + " Gwei");
+        console.log(
+            'Ethereum standard gas price: ' + ethers.utils.formatUnits(gasPriceList.standard, 'gwei') + ' Gwei',
+        );
         transactionParameters.gasPrice = gasPriceList.standard;
-        NetworkProvider = new ethers.providers.JsonRpcProvider("https://mainnet.infura.io/v3/" + project_secret.infura_project_id);
-    }
-    else if(network === "rinkeby")
-    {
+        NetworkProvider = new ethers.providers.JsonRpcProvider(
+            'https://mainnet.infura.io/v3/' + project_secret.infura_project_id,
+        );
+    } else if (network === 'rinkeby') {
         {
-            const deploymentInfo = require("./.openzeppelin/rinkeby.json");
+            const deploymentInfo = require('./.openzeppelin/rinkeby.json');
             if (deploymentInfo.proxies.length < 4) {
-                throw "project not deployed properly";
+                throw 'project not deployed properly';
             }
             const lastOne = deploymentInfo.proxies.length - 1;
+            NFTAddress = deploymentInfo.proxies[lastOne - 1].address;
             MysteryBoxAddress = deploymentInfo.proxies[lastOne].address;
         }
-        NetworkProvider = new ethers.providers.JsonRpcProvider("https://rinkeby.infura.io/v3/" + project_secret.infura_project_id);
-    }
-    else {
-        // 
-        NetworkProvider = new ethers.providers.JsonRpcProvider("https://xxxx.infura.io/v3/" + project_secret.infura_project_id);
+        NetworkProvider = new ethers.providers.JsonRpcProvider(
+            'https://rinkeby.infura.io/v3/' + project_secret.infura_project_id,
+        );
+    } else {
+        //
+        NetworkProvider = new ethers.providers.JsonRpcProvider(
+            'https://xxxx.infura.io/v3/' + project_secret.infura_project_id,
+        );
     }
     adminWallet = new ethers.Wallet(project_secret.test_private_key[0], NetworkProvider);
     testWallet_0 = new ethers.Wallet(project_secret.test_private_key[1], NetworkProvider);
     testWallet_1 = new ethers.Wallet(project_secret.test_private_key[2], NetworkProvider);
 
-    MysteryBoxApp = new ethers.Contract(
-        MysteryBoxAddress,
-        MysteryBoxArtifact.abi,
-        testWallet_0
-    );
+    MysteryBoxApp = new ethers.Contract(MysteryBoxAddress, MysteryBoxArtifact.abi, adminWallet);
 
-    console.log("network: " + network + " adminWallet address: " + adminWallet.address);
-    console.log("network: " + network + " testWallet_0 address: " + testWallet_0.address);
-    console.log("network: " + network + " testWallet_1 address: " + testWallet_1.address);
+    NFTApp = new ethers.Contract(NFTAddress, NFTArtifact.abi, adminWallet);
+
+    console.log('MysteryBoxAddress: ' + MysteryBoxAddress);
+    console.log('network: ' + network + ' adminWallet address: ' + adminWallet.address);
+    console.log('network: ' + network + ' testWallet_0 address: ' + testWallet_0.address);
+    console.log('network: ' + network + ' testWallet_1 address: ' + testWallet_1.address);
 
     const action = process.argv[2];
-    if (action === "buy") {
-        txParameters.value = ethers.utils.parseUnits('0.1', "ether");
-        {
-            const tx = await MysteryBoxApp.openBox(...Object.values(openBoxParameters), txParameters);
+    if (action === 'create') {
+        const isApproved = await NFTApp.isApprovedForAll(testWallet_0.address, MysteryBoxApp.address);
+        if (!isApproved) {
+            const tx = await NFTApp.connect(testWallet_0).setApprovalForAll(MysteryBoxApp.address, true);
             await tx.wait();
         }
+        const tx = await MysteryBoxApp.connect(testWallet_0).create_box(...Object.values(creatBoxParameter));
+        await tx.wait();
+    } else if (action === 'open') {
+        txParameters.value = creatBoxParameter.payment[0][1];
+        const tx = await MysteryBoxApp.connect(testWallet_1).open_box(
+            ...Object.values(openBoxParameters),
+            txParameters,
+        );
+        await tx.wait();
+    } else if (action === 'test') {
         {
-            const tx = await MysteryBoxApp.connect(testWallet_1).openBox(...Object.values(openBoxParameters), txParameters);
-            await tx.wait();
+            const info = await MysteryBoxApp.get_box_info(1);
+            console.log(JSON.stringify(info, null, 2));
         }
-    }
-    else {
-        throw "unknown command option";
+    } else if (action === 'create_invalid') {
+        const now = Math.floor(new Date().getTime() / 1000);
+        if (true) {
+            creatBoxParameter.start_time = now + 120 * seconds_in_a_day;
+            const tx = await MysteryBoxApp.connect(testWallet_0).create_box(...Object.values(creatBoxParameter));
+            const receipt = await tx.wait();
+            console.log(receipt);
+        }
+        if (true) {
+            creatBoxParameter.start_time = 0;
+            creatBoxParameter.end_time = now + 60;
+            const tx = await MysteryBoxApp.connect(testWallet_0).create_box(...Object.values(creatBoxParameter));
+            const receipt = await tx.wait();
+            console.log(receipt);
+        }
+    } else if (action === 'open_invalid') {
+        txParameters.value = creatBoxParameter.payment[0][1];
+        openBoxParameters.box_id = 3;
+        const tx = await MysteryBoxApp.connect(testWallet_1).open_box(
+            ...Object.values(openBoxParameters),
+            txParameters,
+        );
+        await tx.wait();
+    } else {
+        throw 'unknown command option';
     }
 }
 
-main().then(function() {
-});
+main().then(function () {});

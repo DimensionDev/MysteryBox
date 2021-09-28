@@ -2,117 +2,235 @@
 
 ## Function Briefing
 
-### NFT MysteryBox representation
+### NFT MysteryBox
 
-Briefly, a MysteryBox contains different types of NFT(s) for sale. When plyers call`MysteryBox`, The smart contract will pick an NFT randomly, mint it, and transfer it to players.
-To keep it simple, we keep the number of different types of NFT(s) in a list.
-Example, suppose there will be 5 different types of NFT(s), initially, the stock will look like:
+Briefly, NFT designers/owners(such as: artists, etc) put a collection of NFT(s) into a `MysteryBox` and NFT fans(players) can buy NFT(s) from the collection. When players buy NFT(s), the smart contract will pick an NFT randomly, and transfer it to players. After the sale, the NFT collection owner can claim the payments.
 
-```javascript
-// total = 10,000 NFT(s) for sale
-stock = [
-    50,    // type 0, 50
-    100,   // type 1, 100
-    1000,  // type 2, 1000
-    2000,  // type 3, 2000
-    6850,  // type 4, 6850
-];
-```
+### createBox
 
-The smart contract will pick NFT(s) randomly, and the chance of each NFT being picked is the same. Hence, the possibility of getting type 0 NFT is 0.5%. So, compared to others, type 0 is relatively `rare`.
-
-### getNFTInfo
-
-The query of MysteryBox status.
+Create a `MysteryBox`.
 
 ```solidity
-    function getNFTInfo()
+    function createBox (
+        address nft_address,
+        string calldata name,
+        PaymentOption[] calldata payment,
+        uint32 personal_limit,
+        uint32 start_time,
+        uint32 end_time,
+        bool sell_all,
+        uint256[] calldata nft_id_list,
+        address qualification
+    )
+        external
+    {}
+```
+
+- Parameters:
+  - `nft_address`: NFT smart contract address.
+  - `name`: Name of this box.
+  - `payment`: Payment information.
+  - `personal_limit`: Maximum of NFT(s) each player can buy.
+  - `start_time`: Sale start time(timestamp as seconds since unix epoch).
+  - `end_time`: Sale end time(timestamp as seconds since unix epoch).
+  - `sell_all`: If owner wants to sell all NFT(s) owned.
+  - `nft_id_list`: If `sell_all` is false, the list of NFT ids for sale.
+  - `qualification`: qualifaction smart contract address.
+- Returns:
+  - N/A
+- Events:
+
+```solidity
+event CreationSuccess (
+    address indexed creator,
+    address indexed nft_address,
+    uint256 box_id,
+    string name,
+    uint32 start_time,
+    uint32 end_time,
+    bool sell_all
+);
+```
+
+If `sell_all` is true, it means the box creator wants to sell all NFT(s) of `nft_address` he owned. In this case, `nft_id_list` will be ignored.
+If `sell_all` is false, owner need to provide he NFT id(s) he/she wants to sell into `nft_id_list`.
+
+`payment` includes payment token addresses and price.
+`payment token address` can be `ETH` or `ERC-20 token address`.
+
+- If `payment token` is `ETH`: `address` is `0x0000000000000000000000000000000000000000`.
+- If `payment token` is `ERC20 token`: `address` is `ERC-20 token address`.
+
+`qualification` is the smart contract address. And this smart contract is used to check if a player's wallet address is qualified for an NFT sale. If `qualification` is `0x0000000000000000000000000000000000000000`, it means everyone is qualified.
+
+### openBox
+
+MysteryBox players `open_box` to buy and open boxes. The smart contract will mint NFT(s) randomly after the transaction is successful. Players are allowed to call `openBox` multiple times.
+
+```solidity
+    function openBox(
+        uint256 box_id,
+        uint8 amount,
+        uint8 payment_token_index,
+        bytes memory proof
+    )
+        external
+        payable
+    {}
+```
+
+- Parameters:
+  - `box_id`: box id.
+  - `amount`: how many NFT(s) a player wants to buy.
+  - `payment_token_index`: token to pay for the NFT.
+  - `proof`: proof to prove a player is qualified for the sale.
+- Events:
+  - `Transfer(address from, address to, uint256 tokenId)`
+
+`payment_token_index` is the payment token index in `payment` when the box is created by `create_box`.
+
+- If `payment token` is `ETH`: players must send enough `ETH` through `transaction value`.
+- If `payment token` is `ERC20 token`: players must approve enough `allowance` for the purchase.
+
+### claimPayment
+
+`MysteryBox` owners can `claim_payment` after NFT(s) are sold.
+
+```solidity
+    function claimPayment(uint256[] calldata box_ids) external {}
+```
+
+- Parameters:
+  - `box_ids`: list of box id.
+- Events:
+
+```solidity
+    event ClaimPayment (
+        address indexed creator,
+        uint256 indexed box_id,
+        address token_address,
+        uint256 amount,
+        uint256 timestamp
+    );
+```
+
+### getBoxInfo
+
+Get basic information about a `MysteryBox`.
+
+```solidity
+    function getBoxInfo(uint256 box_id)
         external
         view
         returns (
-            uint32 _purchase_limit,
-            uint32 _start_time,
-            uint32 _end_time,
-            address _qualification,
-            uint32[] memory _stock,
-            PaymentInfo[] memory _payment
+            address creator,
+            address nft_address,
+            string memory name,
+            PaymentInfo[] memory payment,
+            uint32 personal_limit,
+            bool started,
+            bool expired,
+            uint256 remaining
         )
     {}
 ```
 
 - Parameters:
-  - N/A
+  - `box_id`: box id.
 - Returns:
-  - `_purchase_limit`: Maximum of NFT(s) each player can buy.
-  - `_start_time`: Sale start time(timestamp as seconds since unix epoch)
-  - `_end_time`: Sale end time(timestamp as seconds since unix epoch)
-  - `_qualification`: qualifaction smart contract address.
-  - `_stock`: the list of the number of NFT(s) in stock.
-  - `_payment`: Payment information.
+  - `creator`: `MysteryBox` owner.
+  - `nft_address`: NFT smart contract address.
+  - `name`: Name of this box.
+  - `payment`: Payment information.
+  - `personal_limit`: Maximum of NFT(s) each player can buy.
+  - `started`: If sale is started.
+  - `expired`: If sale ended.
+  - `remaining`: How many NFT(s) left in the NFT box.
 - Events:
-  - N/A
+  - N/A
 
-### openBox
+### getPurchasedNft
 
-MysteryBox players `openBox` to buy and open boxes. The smart contract will mint NFT(s) randomly after the transaction is successful. Players are allowed to call `openBox` multiple times.
+Get the list of NFT(s) a player has purchased.
 
 ```solidity
-    function openBox(
-        uint8 _number_of_nft,
-        uint8 _payment_token_index,
-        bytes memory _proof
-    )
-        external
-        payable
-    {}
+    function getPurchasedNft(uint256 box_id, address customer)
+        external
+        view
+        returns(uint256[] memory nft_id_list)
+    {}
 ```
 
 - Parameters:
-  - `_number_of_nft`: collection id.
-  - `_payment_token_index`: how to pay.
-  - `_proof`: proof to be a qualified player.
-- Events:
-  - `Transfer(address from, address to, uint256 tokenId)`
-
-### claimPayment
-
-NFT owners can `claimPayment` after NFT(s) are sold.
-
-```solidity
-    function claimPayment(uint256[] calldata _collection_ids) external {}
-```
-
-- Parameters:
-  - N/A
-- Events:
-
-```solidity
-    event ClaimPayment (
-        address indexed owner,
-        uint256 indexed collection_id,
-        address token_address,
-        uint256 amount,
-        uint256 timestamp
-    );
-```
-
-### purchased_by_addr
-
-Get how many NFT(s) a player has purchased.
-
-```solidity
-    function purchased_by_addr(address _addr)
-        external
-        view
-        returns (
-            uint32 _number_of_nft,
-        )
-    {}
-```
-
-- Parameters:
-  - `_addr`: wallet address.
+  - `box_id`: box id.
+  - `customer`: user address.
 - Returns:
-  - `_number_of_nft`: Total number of NFT(s) bought by this player.
+  - `nft_id_list`: The list of NFT(s) bought by this player.
 - Events:
-  - N/A
+  - N/A
+
+### addNftIntoBox
+
+Add more NFT for sale.
+
+```solidity
+    function addNftIntoBox (
+        uint256 box_id,
+        uint256[] calldata nft_id_list
+    )
+        external
+    {}
+```
+
+- Parameters:
+  - `box_id`: box id.
+  - `nft_id_list`: The list of NFT(s) for sale.
+- Returns:
+  - N/A
+- Events:
+  - N/A
+
+### getNftListForSale
+
+Get the list of NFT(s) for sale.
+
+```solidity
+    function getNftListForSale(uint256 box_id, uint256 cursor, uint256 amount)
+        external
+        view
+        returns(uint256[] memory nft_id_list)
+    {}
+```
+
+- Parameters:
+  - `box_id`: box id.
+  - `cursor`: cursor.
+  - `amount`: how many NFT id(s) users want to get.
+- Returns:
+  - `nft_id_list`: The list of NFT(s) for sale.
+- Events:
+  - N/A
+
+Suppose the owner added a lot of NFT(s) into a `MysteryBox`, the list of NFT on sale will be very long. Hence smart contract might not be able to return all NFT id(s), because of the block gas limit. That's where the `cursor` and `amount` come from. These two parameters enable users to get part of the list.
+This figure shows how it works:
+
+```javascript
+    // Suppose the list is going on and on. Following line can get NFT id from 4 ~ 10.
+    const nft_id_list_on_sale = await get_nft_for_sale(1, 4, 7);
+    /*
+        0
+        1
+        2
+        3
+        4\--------------->`cursor`
+        5 \
+        6  \
+        7   |==> amount
+        8  /
+        9 /
+       10/
+       11
+       12
+       13
+    */
+```
