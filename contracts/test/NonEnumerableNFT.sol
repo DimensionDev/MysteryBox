@@ -5,9 +5,9 @@ pragma solidity >0.4.22;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
 contract NonEnumerableNFT is ERC721 {
-    constructor(uint initialSupply) ERC721("TestToken_721", "TEST") public{
+    constructor(uint initialSupply) ERC721("TestToken_721", "TEST") {
         for (uint i=0; i<initialSupply; i++) {
-          _mint(msg.sender, i);
+            _mint(msg.sender, i);
         }
     }
 

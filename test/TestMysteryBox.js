@@ -186,7 +186,7 @@ describe('MysteryBox', () => {
 
         const nft_id_list = [];
         // half of the NFT ids owned
-        for (let i = 0; i < mintNftAmount/2; i++) {
+        for (let i = 0; i < mintNftAmount / 2; i++) {
             const nftId = await nftContract.tokenOfOwnerByIndex(user_1.address, i);
             nft_id_list.push(nftId);
         }
@@ -212,19 +212,17 @@ describe('MysteryBox', () => {
         }
 
         const append_nft_id_list = [];
-        for (let i = mintNftAmount/2; i < mintNftAmount; i++) {
+        for (let i = mintNftAmount / 2; i < mintNftAmount; i++) {
             const nftId = await nftContract.tokenOfOwnerByIndex(user_1.address, i);
             append_nft_id_list.push(nftId);
         }
-        await expect(
-            mbContract.connect(user_1).addNftIntoBox(sell_all_box_id, []),
-        ).to.be.rejectedWith('not box owner');
-        await expect(
-            mbContract.connect(user_0).addNftIntoBox(sell_all_box_id, []),
-        ).to.be.rejectedWith('can not add for sell_all');
-        await expect(
-            mbContract.connect(user_0).addNftIntoBox(box_id, append_nft_id_list),
-        ).to.be.rejectedWith('not box owner');
+        await expect(mbContract.connect(user_1).addNftIntoBox(sell_all_box_id, [])).to.be.rejectedWith('not box owner');
+        await expect(mbContract.connect(user_0).addNftIntoBox(sell_all_box_id, [])).to.be.rejectedWith(
+            'can not add for sell_all',
+        );
+        await expect(mbContract.connect(user_0).addNftIntoBox(box_id, append_nft_id_list)).to.be.rejectedWith(
+            'not box owner',
+        );
 
         {
             // try adding 'NFT id' he/she does not own
@@ -233,9 +231,9 @@ describe('MysteryBox', () => {
             expect(nftBalance.gt(0)).to.be.true;
             const nftId = await nftContract.tokenOfOwnerByIndex(user_0.address, 0);
             invalid_nft_id.push(nftId);
-            await expect(
-                mbContract.connect(user_1).addNftIntoBox(box_id, invalid_nft_id),
-            ).to.be.rejectedWith('not nft owner');
+            await expect(mbContract.connect(user_1).addNftIntoBox(box_id, invalid_nft_id)).to.be.rejectedWith(
+                'not nft owner',
+            );
         }
         await mbContract.connect(user_1).addNftIntoBox(box_id, append_nft_id_list);
         {
@@ -245,6 +243,43 @@ describe('MysteryBox', () => {
             const boxInfo = await mbContract.getBoxInfo(box_id);
             expect(boxInfo).to.have.property('remaining');
             expect(boxInfo.remaining.eq(final_nft_id_list.length)).to.be.true;
+        }
+    });
+
+    it('Should getNftListForSale work', async () => {
+        const nft_id_list = [];
+        const nftBalance = await nftContract.balanceOf(user_0.address);
+        // half of the NFT ids owned
+        for (let i = 0; i < nftBalance; i++) {
+            const nftId = await nftContract.tokenOfOwnerByIndex(user_0.address, i);
+            nft_id_list.push(nftId);
+        }
+        const nftList = await mbContract.getNftListForSale(sell_all_box_id, 0, nftBalance);
+        expect(nftList.map((id) => id.toString())).to.eql(nft_id_list.map((id) => id.toString()));
+        {
+            // buy some NFT(s)
+            const parameters = JSON.parse(JSON.stringify(openBoxParameters));
+            parameters.amount = MaxNumberOfNFT;
+            const tx_parameters = {
+                value: txParameters.value.mul(parameters.amount),
+            };
+            await mbContract.connect(user_1).openBox(...Object.values(parameters), tx_parameters);
+        }
+        const newNftList = await mbContract.getNftListForSale(sell_all_box_id, 0, nftBalance);
+        expect(newNftList.length).to.be.eq(nftList.length - MaxNumberOfNFT);
+
+        const purchaseList = await mbContract.getPurchasedNft(sell_all_box_id, user_1.address);
+        expect(purchaseList.length).to.be.eq(MaxNumberOfNFT);
+        {
+            const nftListStr = nftList.map((id) => id.toString());
+            const newNftListStr = newNftList.map((id) => id.toString());
+            const purchaseListStr = purchaseList.map((id) => id.toString());
+            const mergedList = newNftListStr.concat(purchaseListStr);
+            expect(nftListStr.sort()).to.eql(mergedList.sort());
+        }
+        {
+            const emptyNftList = await mbContract.getNftListForSale(sell_all_box_id, nftBalance, nftBalance);
+            expect(emptyNftList.length).to.be.eq(0);
         }
     });
 
@@ -296,6 +331,7 @@ describe('MysteryBox', () => {
             expect(boxInfo).to.have.property('expired').that.to.be.eq(false);
             expect(boxInfo).to.have.property('remaining');
             expect(boxInfo.remaining.eq(expectedRemaining)).to.be.true;
+            expect(boxInfo).to.have.property('qualification').that.to.be.eq(createBoxPara.qualification);
         }
         const tx_parameters = {
             value: txParameters.value,
@@ -387,15 +423,36 @@ describe('MysteryBox', () => {
             parameter.payment.push([user_1.address, createBoxPara.payment[0][1]]);
             await expect(mbContract.connect(user_0).createBox(...Object.values(parameter))).to.be.rejectedWith(Error);
         }
-        // TODO: validate if creators do not own NFT: "no nft owned"
         // TODO: "empty nft list" if `NonEnumerableNFT`
-        // TODO: "no nft owned"
         {
             await nftContract.connect(user_1).mint(50);
             const parameter = JSON.parse(JSON.stringify(createBoxPara));
             parameter.sell_all = true;
             await expect(mbContract.connect(user_1).createBox(...Object.values(parameter))).to.be.rejectedWith(
                 'not ApprovedForAll',
+            );
+        }
+        {
+            const parameter = JSON.parse(JSON.stringify(createBoxPara));
+            await nftContract.connect(signers[6]).setApprovalForAll(mbContract.address, true);
+            parameter.sell_all = true;
+            await expect(mbContract.connect(signers[6]).createBox(...Object.values(parameter))).to.be.rejectedWith(
+                'no nft owned',
+            );
+        }
+        {
+            const user_0_NftBalance = await nftContract.balanceOf(user_0.address);
+            expect(user_0_NftBalance.gt(0)).to.be.true;
+            const user_1_NftBalance = await nftContract.balanceOf(user_1.address);
+            expect(user_1_NftBalance.gt(0)).to.be.true;
+            const nft_id_list = [];
+            nft_id_list.push(await nftContract.tokenOfOwnerByIndex(user_0.address, 0));
+            nft_id_list.push(await nftContract.tokenOfOwnerByIndex(user_1.address, 0));
+            const parameter = JSON.parse(JSON.stringify(createBoxPara));
+            parameter.sell_all = false;
+            parameter.nft_id_list = nft_id_list;
+            await expect(mbContract.connect(user_0).createBox(...Object.values(parameter))).to.be.rejectedWith(
+                'now owner',
             );
         }
     });
@@ -719,6 +776,9 @@ describe('MysteryBox', () => {
         await expect(
             mbContract.connect(user_1).openBox(...Object.values(open_parameters), txParameters),
         ).to.be.rejectedWith('not whitelisted');
+
+        const boxInfo = await mbContract.getBoxInfo(open_parameters.box_id);
+        expect(boxInfo).to.have.property('qualification').that.to.be.eq(whitelistQlfContract.address);
     });
 
     it('Should signature verification qualification work', async () => {
@@ -742,10 +802,11 @@ describe('MysteryBox', () => {
                 mbContract.connect(user_1).openBox(...Object.values(open_parameters), txParameters),
             ).to.be.rejectedWith('not qualified');
         }
+        const boxInfo = await mbContract.getBoxInfo(open_parameters.box_id);
+        expect(boxInfo).to.have.property('qualification').that.to.be.eq(sigVerifyQlfContract.address);
     });
 
-    it('Should initialize not work', async () => {
-        // should not be able to call it again
+    it('Should not be able to call initialize', async () => {
         await expect(mbContract.connect(contractCreator).initialize()).to.be.rejectedWith(Error);
         await expect(mbContract.connect(user_0).initialize()).to.be.rejectedWith(Error);
         await expect(mbContract.connect(user_1).initialize()).to.be.rejectedWith(Error);

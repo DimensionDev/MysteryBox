@@ -2,7 +2,7 @@
 
 ## Brief introduction
 
-MysteryBox Smart Contract is an Ethereum smart contract for people to sell/buy NFT tokens. Inspired by [Fukubukuro](https://en.wikipedia.org/wiki/Fukubukuro), people can create a collection(different kinds) of NFT tokens and customers/players can pick an NFT(randomly) after payment.
+MysteryBox Smart Contract is an Ethereum smart contract for people to sell/buy NFT tokens. Inspired by [Fukubukuro](https://en.wikipedia.org/wiki/Fukubukuro), people can put NFT(s) in a box and customers/players can pick an NFT(randomly).
 
 For design details, please see [API document](docs/API.md).
 
@@ -10,14 +10,14 @@ For design details, please see [API document](docs/API.md).
 
 ### Project setup
 
-This project has [`git submodules`](https://git-scm.com/book/en/v2/Git-Tools-Submodules). After `clone`, you need to `update` the submodules.
+This project has [`git submodules`](https://git-scm.com/book/en/v2/Git-Tools-Submodules). You need to initialize these submodules first.
 
 ```bash
 git submodule init
 git submodule update
 ```
 
-To install required node.js modules:
+To install required node.js modules
 
 ```bash
 npm ci
@@ -47,7 +47,7 @@ Using the [`helper.js`](helper.js) script to set up the deployed smart contracts
 
 - This project is powered by [hardhat](https://hardhat.org/).
   You can change your network configuration in `hardhat.config.ts` file.
-- This smart contract involves some *randomness*, hence, the estimated gas consumption is probably not accurate. To make sure `transaction gas limit` is large/good enough, we need to give `a larger gas consumption`.
+- This smart contract involves some *randomness*, hence, the estimated gas consumption is probably not accurate. To make sure `transaction gas limit` is large enough, we need to give `a larger gas consumption`.
 
 ## Deployed Contract Address
 

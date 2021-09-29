@@ -76,13 +76,13 @@ contract MysteryBox is OwnableUpgradeable {
 
     function createBox (
         address nft_address,
-        string calldata name,
-        PaymentOption[] calldata payment,
+        string memory name,
+        PaymentOption[] memory payment,
         uint32 personal_limit,
         uint32 start_time,
         uint32 end_time,
         bool sell_all,
-        uint256[] calldata nft_id_list,
+        uint256[] memory nft_id_list,
         address qualification
     )
         external
@@ -281,7 +281,8 @@ contract MysteryBox is OwnableUpgradeable {
             uint32 personal_limit,
             bool started,
             bool expired,
-            uint256 remaining
+            uint256 remaining,
+            address qualification
         )
     {
         Box storage box = box_by_id[box_id];
@@ -299,6 +300,8 @@ contract MysteryBox is OwnableUpgradeable {
         else {
             remaining = box.nft_id_list.length;
         }
+
+        qualification = box.qualification;
     }
 
     function getPurchasedNft(uint256 box_id, address customer)
