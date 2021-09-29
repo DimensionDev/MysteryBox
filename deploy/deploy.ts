@@ -11,6 +11,7 @@ interface IDeployedContractAddress {
     MysteryBox: string;
     WhitelistQlf: string;
     SigVerifyQlf: string;
+    MaskERC1155NFT: string;
 }
 type DeployedContractAddress = Record<string, IDeployedContractAddress>;
 const deployedContractAddress: DeployedContractAddress = {
@@ -19,36 +20,42 @@ const deployedContractAddress: DeployedContractAddress = {
         MysteryBox: '0x294428f04b0F9EbC49B7Ad61E2736ebD6808c145',
         WhitelistQlf: '0x0000000000000000000000000000000000000000',
         SigVerifyQlf: '0x0000000000000000000000000000000000000000',
+        MaskERC1155NFT: '0x0000000000000000000000000000000000000000',
     },
     rinkeby: {
         MaskEnumerableNFT: '0x0c8FB5C985E00fb1D002b6B9700084492Fb4B9A8',
         MysteryBox: '0xF8ED169BC0cdA735A88d32AC10b88AA5B69181ac',
         WhitelistQlf: '0x50eCEebb7360Efb93094dDEA692e04274E548b1d',
         SigVerifyQlf: '0x0000000000000000000000000000000000000000',
+        MaskERC1155NFT: '0x06f856579b8186162fBC1034943A9cF51ff57400',
     },
     ropsten: {
         MaskEnumerableNFT: '0x25d0dAf7c544aee4f69cE656149b49301D5B2FeD',
         MysteryBox: '0x8EC8A8372bC401Ba37e47Bf54b1D2a3C76c17336',
         WhitelistQlf: '0x0000000000000000000000000000000000000000',
         SigVerifyQlf: '0x0000000000000000000000000000000000000000',
+        MaskERC1155NFT: '0x8ea2BB261FCc3e7bFab2aBFaA232e3Fa5DF1F30a',
     },
     bsc_mainnet: {
         MaskEnumerableNFT: '0xa8518287BfB7729A6CC2d67f757eB2074DA84913',
         MysteryBox: '0x0000000000000000000000000000000000000000',
         WhitelistQlf: '0x0000000000000000000000000000000000000000',
         SigVerifyQlf: '0x0000000000000000000000000000000000000000',
+        MaskERC1155NFT: '0x0000000000000000000000000000000000000000',
     },
     matic_mainnet: {
         MaskEnumerableNFT: '0x49C2a3D93C4B94eAd101d9936f1ebCA634394a78',
         MysteryBox: '0x02F98667b3A1202a320F67a669a5e4e451fD0cc1',
         WhitelistQlf: '0x0000000000000000000000000000000000000000',
         SigVerifyQlf: '0x0000000000000000000000000000000000000000',
+        MaskERC1155NFT: '0x0000000000000000000000000000000000000000',
     },
     bsc_test: {
         MaskEnumerableNFT: '0x0000000000000000000000000000000000000000',
         MysteryBox: '0x0000000000000000000000000000000000000000',
         WhitelistQlf: '0x0000000000000000000000000000000000000000',
         SigVerifyQlf: '0x0000000000000000000000000000000000000000',
+        MaskERC1155NFT: '0x0000000000000000000000000000000000000000',
     },
 };
 
@@ -62,7 +69,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         MaskNftParameter = MaskNFTInitParameters['mainnet'];
     }
 
-    if (true) {
+    if (false) {
         if (false) {
             const impl = await ethers.getContractFactory('MaskEnumerableNFT');
             const proxy = await upgrades.deployProxy(impl, [...Object.values(MaskNftParameter)]);
@@ -116,8 +123,21 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
                 constructorArguments: [],
             });
         }
-    } else {
         if (false) {
+            const impl = await ethers.getContractFactory('MaskERC1155NFT');
+            const proxy = await upgrades.deployProxy(impl, [...Object.values(MaskNftParameter)]);
+            await proxy.deployed();
+            console.log('MaskERC1155NFT proxy: ' + proxy.address);
+
+            const admin = await upgrades.admin.getInstance();
+            const impl_addr = await admin.getProxyImplementation(proxy.address);
+            await hre.run('verify:verify', {
+                address: impl_addr,
+                constructorArguments: [],
+            });
+        }
+    } else {
+        if (true) {
             // upgrade contract
             const implMysteryBox = await ethers.getContractFactory('MysteryBox');
             const instance = await upgrades.upgradeProxy(deployedContractAddress[network].MysteryBox, implMysteryBox);
@@ -130,7 +150,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
                 constructorArguments: [],
             });
         }
-        if (true) {
+        if (false) {
             // upgrade contract
             const implMysteryBox = await ethers.getContractFactory('MaskEnumerableNFT');
             const instance = await upgrades.upgradeProxy(

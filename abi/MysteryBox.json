@@ -176,12 +176,42 @@
           "type": "uint256"
         },
         {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "nft_id",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct MysteryBox.ERC1155_Item[]",
+          "name": "erc1155_list",
+          "type": "tuple[]"
+        }
+      ],
+      "name": "addERC1155IntoBox",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "box_id",
+          "type": "uint256"
+        },
+        {
           "internalType": "uint256[]",
-          "name": "nft_id_list",
+          "name": "erc721_list",
           "type": "uint256[]"
         }
       ],
-      "name": "addNftIntoBox",
+      "name": "addERC721IntoBox",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -247,71 +277,100 @@
     {
       "inputs": [
         {
-          "internalType": "address",
-          "name": "nft_address",
-          "type": "address"
-        },
-        {
-          "internalType": "string",
-          "name": "name",
-          "type": "string"
-        },
-        {
           "components": [
             {
+              "internalType": "uint32",
+              "name": "personal_limit",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint32",
+              "name": "start_time",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint32",
+              "name": "end_time",
+              "type": "uint32"
+            },
+            {
+              "internalType": "bool",
+              "name": "sell_all",
+              "type": "bool"
+            },
+            {
               "internalType": "address",
-              "name": "token_addr",
+              "name": "nft_address",
+              "type": "address"
+            },
+            {
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "address",
+                  "name": "token_addr",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "price",
+                  "type": "uint256"
+                }
+              ],
+              "internalType": "struct MysteryBox.PaymentOption[]",
+              "name": "payment",
+              "type": "tuple[]"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "erc721_list",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "address",
+              "name": "qualification",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "holder_token_addr",
               "type": "address"
             },
             {
               "internalType": "uint256",
-              "name": "price",
+              "name": "holder_min_token_amount",
               "type": "uint256"
+            },
+            {
+              "internalType": "enum MysteryBox.NftType",
+              "name": "nft_type",
+              "type": "uint8"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "uint256",
+                  "name": "nft_id",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "amount",
+                  "type": "uint256"
+                }
+              ],
+              "internalType": "struct MysteryBox.ERC1155_Item[]",
+              "name": "erc1155_list",
+              "type": "tuple[]"
             }
           ],
-          "internalType": "struct MysteryBox.PaymentOption[]",
-          "name": "payment",
-          "type": "tuple[]"
-        },
-        {
-          "internalType": "uint32",
-          "name": "personal_limit",
-          "type": "uint32"
-        },
-        {
-          "internalType": "uint32",
-          "name": "start_time",
-          "type": "uint32"
-        },
-        {
-          "internalType": "uint32",
-          "name": "end_time",
-          "type": "uint32"
-        },
-        {
-          "internalType": "bool",
-          "name": "sell_all",
-          "type": "bool"
-        },
-        {
-          "internalType": "uint256[]",
-          "name": "nft_id_list",
-          "type": "uint256[]"
-        },
-        {
-          "internalType": "address",
-          "name": "qualification",
-          "type": "address"
-        },
-        {
-          "internalType": "address",
-          "name": "holder_token_addr",
-          "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "holder_min_token_amount",
-          "type": "uint256"
+          "internalType": "struct MysteryBox.BoxOption",
+          "name": "box_option",
+          "type": "tuple"
         }
       ],
       "name": "createBox",
@@ -451,7 +510,7 @@
       "outputs": [
         {
           "internalType": "uint256[]",
-          "name": "nft_id_list",
+          "name": "nft_list",
           "type": "uint256[]"
         }
       ],
@@ -475,7 +534,7 @@
       "outputs": [
         {
           "internalType": "uint256[]",
-          "name": "nft_id_list",
+          "name": "nft_list",
           "type": "uint256[]"
         }
       ],
