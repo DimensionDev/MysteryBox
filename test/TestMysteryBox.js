@@ -151,6 +151,7 @@ describe('MysteryBox', () => {
             const boxInfo = await mbContract.getBoxInfo(not_sell_all_box_id);
             expect(boxInfo).to.have.property('remaining');
             expect(boxInfo.remaining.eq(nft_id_list.length)).to.be.true;
+            expect(boxInfo.total.eq(nft_id_list.length)).to.be.true;
 
             const nftList = await mbContract.getNftListForSale(not_sell_all_box_id, 0, nft_id_list.length);
             expect(nftList.map((id) => id.toString())).to.eql(nft_id_list.map((id) => id.toString()));
@@ -209,6 +210,7 @@ describe('MysteryBox', () => {
             const boxInfo = await mbContract.getBoxInfo(box_id);
             expect(boxInfo).to.have.property('remaining');
             expect(boxInfo.remaining.eq(nft_id_list.length)).to.be.true;
+            expect(boxInfo.total.eq(nft_id_list.length)).to.be.true;
         }
 
         const append_nft_id_list = [];
@@ -243,6 +245,7 @@ describe('MysteryBox', () => {
             const boxInfo = await mbContract.getBoxInfo(box_id);
             expect(boxInfo).to.have.property('remaining');
             expect(boxInfo.remaining.eq(final_nft_id_list.length)).to.be.true;
+            expect(boxInfo.total.eq(final_nft_id_list.length)).to.be.true;
         }
     });
 

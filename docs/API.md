@@ -130,7 +130,9 @@ Get basic information about a `MysteryBox`.
             uint32 personal_limit,
             bool started,
             bool expired,
-            uint256 remaining
+            uint256 remaining,
+            uint256 total,
+            address qualification
         )
     {}
 ```
@@ -146,6 +148,9 @@ Get basic information about a `MysteryBox`.
   - `started`: If sale is started.
   - `expired`: If sale ended.
   - `remaining`: How many NFT(s) left in the NFT box.
+  - `total`: total number of NFT(s) in this box.
+  - `qualification`: qualification smart contract address.
+
 - Events:
   - N/A
 

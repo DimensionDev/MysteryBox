@@ -39,6 +39,8 @@ contract MysteryBox is OwnableUpgradeable {
         uint256[] nft_id_list;
         address qualification;
         mapping(address => uint256[]) purchased_nft;
+        // total number of NFT(s)
+        uint256 total;
     }
 
     event CreationSuccess (
@@ -113,13 +115,16 @@ contract MysteryBox is OwnableUpgradeable {
         if (sell_all) {
             // validate it is an `Enumerable` NFT
             require(IERC721Enumerable(nft_address).totalSupply() > 0, "not enumerable nft");
-            require(IERC721(nft_address).balanceOf(msg.sender) > 0, "no nft owned");
+            uint256 nftBalance = IERC721(nft_address).balanceOf(msg.sender);
+            require(nftBalance > 0, "no nft owned");
             box.sell_all = true;
+            box.total = nftBalance;
         }
         else {
             require(nft_id_list.length > 0, "empty nft list");
             require(_check_ownership(nft_id_list, nft_address), "now owner");
             box.nft_id_list = nft_id_list;
+            box.total = nft_id_list.length;
         }
         emit CreationSuccess (
             msg.sender,
@@ -150,6 +155,7 @@ contract MysteryBox is OwnableUpgradeable {
             require(creator == nft_owner, "not nft owner");
             box.nft_id_list.push(nft_id_list[i]);
         }
+        box.total += nft_id_list.length;
     }
 
     function openBox(
@@ -282,6 +288,7 @@ contract MysteryBox is OwnableUpgradeable {
             bool started,
             bool expired,
             uint256 remaining,
+            uint256 total,
             address qualification
         )
     {
@@ -301,6 +308,7 @@ contract MysteryBox is OwnableUpgradeable {
             remaining = box.nft_id_list.length;
         }
 
+        total = box.total;
         qualification = box.qualification;
     }
 
