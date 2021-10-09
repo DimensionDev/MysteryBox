@@ -84,42 +84,38 @@ async function main() {
             const tx = await NFTApp.connect(testWallet_0).setApprovalForAll(MysteryBoxApp.address, true);
             await tx.wait();
         }
-        const tx = await MysteryBoxApp.connect(testWallet_0).create_box(...Object.values(creatBoxParameter));
+        const tx = await MysteryBoxApp.connect(testWallet_0).createBox(...Object.values(creatBoxParameter));
         await tx.wait();
     } else if (action === 'open') {
+        const box_id = parseInt(process.argv[3]);
+        openBoxParameters.box_id = box_id;
         txParameters.value = creatBoxParameter.payment[0][1];
-        const tx = await MysteryBoxApp.connect(testWallet_1).open_box(
-            ...Object.values(openBoxParameters),
-            txParameters,
-        );
+        const tx = await MysteryBoxApp.connect(testWallet_1).openBox(...Object.values(openBoxParameters), txParameters);
         await tx.wait();
     } else if (action === 'test') {
         {
-            const info = await MysteryBoxApp.get_box_info(1);
+            const info = await MysteryBoxApp.getBoxInfo(1);
             console.log(JSON.stringify(info, null, 2));
         }
     } else if (action === 'create_invalid') {
         const now = Math.floor(new Date().getTime() / 1000);
         if (true) {
             creatBoxParameter.start_time = now + 120 * seconds_in_a_day;
-            const tx = await MysteryBoxApp.connect(testWallet_0).create_box(...Object.values(creatBoxParameter));
+            const tx = await MysteryBoxApp.connect(testWallet_0).createBox(...Object.values(creatBoxParameter));
             const receipt = await tx.wait();
             console.log(receipt);
         }
         if (true) {
             creatBoxParameter.start_time = 0;
             creatBoxParameter.end_time = now + 60;
-            const tx = await MysteryBoxApp.connect(testWallet_0).create_box(...Object.values(creatBoxParameter));
+            const tx = await MysteryBoxApp.connect(testWallet_0).createBox(...Object.values(creatBoxParameter));
             const receipt = await tx.wait();
             console.log(receipt);
         }
     } else if (action === 'open_invalid') {
         txParameters.value = creatBoxParameter.payment[0][1];
         openBoxParameters.box_id = 3;
-        const tx = await MysteryBoxApp.connect(testWallet_1).open_box(
-            ...Object.values(openBoxParameters),
-            txParameters,
-        );
+        const tx = await MysteryBoxApp.connect(testWallet_1).openBox(...Object.values(openBoxParameters), txParameters);
         await tx.wait();
     } else {
         throw 'unknown command option';

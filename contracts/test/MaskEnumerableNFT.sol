@@ -4,7 +4,7 @@ pragma solidity >= 0.8.0;
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 
-contract MaskTestNFT is ERC721EnumerableUpgradeable, OwnableUpgradeable {
+contract MaskEnumerableNFT is ERC721EnumerableUpgradeable, OwnableUpgradeable {
     string private baseURI;
 
     function initialize(

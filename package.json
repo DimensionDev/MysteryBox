@@ -29,6 +29,7 @@
   },
   "homepage": "https://github.com/DimensionDev/MysteryBox#readme",
   "dependencies": {
+    "@nomiclabs/hardhat-etherscan": "^2.1.6",
     "@openzeppelin/contracts": "^4.1.0",
     "@openzeppelin/contracts-upgradeable": "^4.2.0",
     "@openzeppelin/hardhat-upgrades": "^1.9.0"

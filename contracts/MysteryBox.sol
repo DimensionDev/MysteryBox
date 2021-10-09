@@ -4,6 +4,7 @@ pragma solidity >= 0.8.0;
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/IERC721EnumerableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "./interfaces/IQLF.sol";
 
@@ -114,7 +115,9 @@ contract MysteryBox is OwnableUpgradeable {
 
         if (sell_all) {
             // validate it is an `Enumerable` NFT
-            require(IERC721Enumerable(nft_address).totalSupply() > 0, "not enumerable nft");
+            require(
+                IERC721(nft_address).supportsInterface(type(IERC721EnumerableUpgradeable).interfaceId),
+                "not enumerable nft");
             uint256 nftBalance = IERC721(nft_address).balanceOf(msg.sender);
             require(nftBalance > 0, "no nft owned");
             box.sell_all = true;

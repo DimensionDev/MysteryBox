@@ -90,7 +90,15 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     } else {
         // upgrade contract
         const implMysteryBox = await ethers.getContractFactory('MysteryBox');
-        await upgrades.upgradeProxy(deployedContractAddress[network].MysteryBox, implMysteryBox);
+        const instance = await upgrades.upgradeProxy(deployedContractAddress[network].MysteryBox, implMysteryBox);
+        await instance.deployTransaction.wait();
+        const admin = await upgrades.admin.getInstance();
+        const impl = await admin.getProxyImplementation(deployedContractAddress[network].MysteryBox);
+        // example: `npx hardhat verify --network rinkeby 0x8974Ce3955eE1306bA89687C558B6fC1E5be777B`
+        await hre.run('verify:verify', {
+            address: impl,
+            constructorArguments: [],
+        });
 
         // const implWhitelistQlf = await ethers.getContractFactory('WhitelistQlf');
         // await upgrades.upgradeProxy(deployedContractAddress[network].WhitelistQlf, implWhitelistQlf);
