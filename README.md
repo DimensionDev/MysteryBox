@@ -55,14 +55,14 @@ Using the [`helper.js`](helper.js) script to set up the deployed smart contracts
 
 | Chain   | Address                                                                                  |
 | ------- | ---------------------------------------------------------------------------------------- |
-| Mainnet | [0xxxxxxxxx][0xxxxxxxxx]                                                                 |
-| Ropsten | [0xxxxxxxxx][0xxxxxxxxx]                                                                 |
+| Mainnet | [0x0dFB34D213f613Dda67a2924F60b5301d42ABFb7][0x0dFB34D213f613Dda67a2924F60b5301d42ABFb7]                                                                 |
+| Ropsten | [0xdB59446B15AB6e97A4452BA3e23dD03E5004c854][0xdB59446B15AB6e97A4452BA3e23dD03E5004c854]                                                                 |
 | Rinkeby | [0xbFcf8210F5B6764D86a9C5252218ad627A6a949d][0xbFcf8210F5B6764D86a9C5252218ad627A6a949d] |
 | BSC     | [0xxxxxxxxx][0xxxxxxxxx]                                                                 |
 | Matic   | [0xxxxxxxxx][0xxxxxxxxx]                                                                 |
 
-[0xxxxxxxxx]: https://etherscan.io/address/0xxxxxxxxx
-[0xxxxxxxxx]: https://ropsten.etherscan.io/address/0xxxxxxxxx
+[0x0dFB34D213f613Dda67a2924F60b5301d42ABFb7]: https://etherscan.io/address/0x0dFB34D213f613Dda67a2924F60b5301d42ABFb7
+[0xdB59446B15AB6e97A4452BA3e23dD03E5004c854]: https://ropsten.etherscan.io/address/0xdB59446B15AB6e97A4452BA3e23dD03E5004c854
 [0xbFcf8210F5B6764D86a9C5252218ad627A6a949d]: https://rinkeby.etherscan.io/address/0xbFcf8210F5B6764D86a9C5252218ad627A6a949d
 [0xxxxxxxxx]: https://bscscan.com/address/0xxxxxxxxx
 [0xxxxxxxxx]: https://polygonscan.com/address/0xxxxxxxxx
@@ -114,6 +114,10 @@ Using the [`helper.js`](helper.js) script to set up the deployed smart contracts
 [0x9a656528700493348132823C6A3C59CdFa48283d]: https://rinkeby.etherscan.io/address/0x9a656528700493348132823C6A3C59CdFa48283d
 [0xxxxxxxxx]: https://bscscan.com/address/0xxxxxxxxx
 [0xxxxxxxxx]: https://polygonscan.com/address/0xxxxxxxxx
+
+### Known issue and limitation
+
+This smart contract only support [Enumerable ERC721 NFT](https://docs.openzeppelin.com/contracts/4.x/api/token/erc721#ERC721Enumerable).
 
 ## Contribute
 

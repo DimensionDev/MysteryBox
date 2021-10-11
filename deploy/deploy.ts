@@ -74,6 +74,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             const proxy = await upgrades.deployProxy(impl, []);
             await proxy.deployed();
             console.log('MysteryBox proxy: ' + proxy.address);
+
+            const admin = await upgrades.admin.getInstance();
+            const impl_addr = await admin.getProxyImplementation(proxy.address);
+            // example: `npx hardhat verify --network rinkeby 0x8974Ce3955eE1306bA89687C558B6fC1E5be777B`
+            await hre.run('verify:verify', {
+                address: impl_addr,
+                constructorArguments: [],
+            });
         }
         if (false) {
             const impl = await ethers.getContractFactory('WhitelistQlf');
