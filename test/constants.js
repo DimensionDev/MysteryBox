@@ -16,6 +16,11 @@ const MaskNFTInitParameters = {
         symbol: 'MaskTestNFT',
         baseURI: 'https://raw.githubusercontent.com/andy-at-mask/MysteryBoxAsset/master/json/default.json',
     },
+    ropsten: {
+        name: 'Mask Test NFT',
+        symbol: 'MaskTestNFT',
+        baseURI: 'https://raw.githubusercontent.com/andy-at-mask/MysteryBoxAsset/master/json/default.json',
+    },
     matic_mainnet: {
         name: 'Mask Test NFT',
         symbol: 'MaskTestNFT',

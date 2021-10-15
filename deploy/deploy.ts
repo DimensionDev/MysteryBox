@@ -5,7 +5,7 @@ import { ethers, upgrades } from 'hardhat';
 const { MaskNFTInitParameters } = require('../test/constants.js');
 
 interface IDeployedContractAddress {
-    MaskTestNFT: string;
+    MaskEnumerableNFT: string;
     MysteryBox: string;
     WhitelistQlf: string;
     SigVerifyQlf: string;
@@ -13,31 +13,31 @@ interface IDeployedContractAddress {
 type DeployedContractAddress = Record<string, IDeployedContractAddress>;
 const deployedContractAddress: DeployedContractAddress = {
     mainnet: {
-        MaskTestNFT: '0x0000000000000000000000000000000000000000',
-        MysteryBox: '0x0000000000000000000000000000000000000000',
+        MaskEnumerableNFT: '0x56136E69A5771436a9598804c5eA792230c21181',
+        MysteryBox: '0x0dFB34D213f613Dda67a2924F60b5301d42ABFb7',
         WhitelistQlf: '0x0000000000000000000000000000000000000000',
         SigVerifyQlf: '0x0000000000000000000000000000000000000000',
     },
     rinkeby: {
-        MaskTestNFT: '0x0000000000000000000000000000000000000000',
+        MaskEnumerableNFT: '0x0000000000000000000000000000000000000000',
         MysteryBox: '0x430C2F4bcf7327CeD17b5D2BD1a523df2d4Ae48e',
         WhitelistQlf: '0x0000000000000000000000000000000000000000',
         SigVerifyQlf: '0x0000000000000000000000000000000000000000',
     },
     bsc_mainnet: {
-        MaskTestNFT: '0x0000000000000000000000000000000000000000',
+        MaskEnumerableNFT: '0x0000000000000000000000000000000000000000',
         MysteryBox: '0x0000000000000000000000000000000000000000',
         WhitelistQlf: '0x0000000000000000000000000000000000000000',
         SigVerifyQlf: '0x0000000000000000000000000000000000000000',
     },
     matic_mainnet: {
-        MaskTestNFT: '0x0000000000000000000000000000000000000000',
+        MaskEnumerableNFT: '0x0000000000000000000000000000000000000000',
         MysteryBox: '0x0000000000000000000000000000000000000000',
         WhitelistQlf: '0x0000000000000000000000000000000000000000',
         SigVerifyQlf: '0x0000000000000000000000000000000000000000',
     },
     bsc_test: {
-        MaskTestNFT: '0x0000000000000000000000000000000000000000',
+        MaskEnumerableNFT: '0x0000000000000000000000000000000000000000',
         MysteryBox: '0x0000000000000000000000000000000000000000',
         WhitelistQlf: '0x0000000000000000000000000000000000000000',
         SigVerifyQlf: '0x0000000000000000000000000000000000000000',
@@ -54,7 +54,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     if (network === 'rinkeby') {
         const deploymentInfo = require('../.openzeppelin/rinkeby.json');
         const lastOne = deploymentInfo.proxies.length - 1;
-        deployedContractAddress[network].MaskTestNFT = deploymentInfo.proxies[lastOne - 1].address;
+        deployedContractAddress[network].MaskEnumerableNFT = deploymentInfo.proxies[lastOne - 1].address;
         deployedContractAddress[network].MysteryBox = deploymentInfo.proxies[lastOne].address;
         // deployedContractAddress[network].WhitelistQlf = deploymentInfo.proxies[lastOne - 1].address;
         // deployedContractAddress[network].SigVerifyQlf = deploymentInfo.proxies[lastOne].address;
@@ -64,12 +64,19 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
     if (false) {
         if (false) {
-            const impl = await ethers.getContractFactory('MaskTestNFT');
+            const impl = await ethers.getContractFactory('MaskEnumerableNFT');
             const proxy = await upgrades.deployProxy(impl, [...Object.values(MaskNftParameter)]);
             await proxy.deployed();
-            console.log('MaskTestNFT proxy: ' + proxy.address);
+            console.log('MaskEnumerableNFT proxy: ' + proxy.address);
+
+            const admin = await upgrades.admin.getInstance();
+            const impl_addr = await admin.getProxyImplementation(proxy.address);
+            await hre.run('verify:verify', {
+                address: impl_addr,
+                constructorArguments: [...Object.values(MaskNftParameter)],
+            });
         }
-        if (true) {
+        if (false) {
             const impl = await ethers.getContractFactory('MysteryBox');
             const proxy = await upgrades.deployProxy(impl, []);
             await proxy.deployed();
@@ -77,7 +84,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
             const admin = await upgrades.admin.getInstance();
             const impl_addr = await admin.getProxyImplementation(proxy.address);
-            // example: `npx hardhat verify --network rinkeby 0x8974Ce3955eE1306bA89687C558B6fC1E5be777B`
             await hre.run('verify:verify', {
                 address: impl_addr,
                 constructorArguments: [],
