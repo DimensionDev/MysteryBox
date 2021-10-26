@@ -641,7 +641,7 @@ describe('MysteryBox', () => {
         }
     });
 
-    it('Should sell "not_sell_all_box_id" NFT work', async () => {
+    it('Should sell "not_sell_all" enumerableNftContract work', async () => {
         const boxInfo = await mbContract.getBoxInfo(not_sell_all_box_id);
         expect(boxInfo).to.have.property('remaining');
         const totalNFT = boxInfo.remaining;
@@ -691,6 +691,90 @@ describe('MysteryBox', () => {
             expect(boxInfo).to.have.property('remaining');
             expect(boxInfo.remaining.eq(0)).to.be.true;
             expect(boxInfo.total.eq(not_sell_all_nft_id_list.length)).to.be.true;
+        }
+    });
+
+    it('Should sell "not_sell_all" nonEnumerableNftContract work', async () => {
+        let box_id;
+        const total = 50;
+        {
+            await nonEnumerableNftContract.connect(user_0).mint(total);
+            await nonEnumerableNftContract.connect(user_0).setApprovalForAll(mbContract.address, true);
+            const parameter = JSON.parse(JSON.stringify(createBoxPara));
+            parameter.nft_address = nonEnumerableNftContract.address;
+            parameter.sell_all = false;
+            const nftBalance = await nonEnumerableNftContract.balanceOf(user_0.address);
+            expect(total.toString()).to.be.eq(nftBalance.toString());
+
+            const id_list = [];
+            for (let i = 0; i < nftBalance; i ++) {
+                id_list.push(i);
+            }
+            parameter.nft_id_list = id_list;
+            await mbContract.connect(user_0).createBox(...Object.values(parameter));
+            const logs = await ethers.provider.getLogs(mbContract.filters.CreationSuccess());
+            const parsedLog = interface.parseLog(logs[0]);
+            const result = parsedLog.args;
+            expect(result).to.have.property('creator').that.to.be.eq(user_0.address);
+            expect(result).to.have.property('nft_address').that.to.be.eq(nonEnumerableNftContract.address);
+            expect(result).to.have.property('name').that.to.be.eq(parameter.name);
+            expect(result).to.have.property('start_time').that.to.be.eq(parameter.start_time);
+            expect(result).to.have.property('end_time').that.to.be.eq(parameter.end_time);
+            expect(result).to.have.property('sell_all').that.to.be.eq(parameter.sell_all);
+            expect(result).to.have.property('box_id');
+            box_id = result.box_id;
+        }
+
+        const boxInfo = await mbContract.getBoxInfo(box_id);
+        expect(boxInfo).to.have.property('remaining');
+        expect(total.toString()).to.be.eq(boxInfo.remaining.toString());
+        const totalNFT = boxInfo.remaining;
+        {
+            await testTokenAContract.transfer(signers[5].address, transferAmount);
+            await testTokenAContract.connect(signers[5]).approve(mbContract.address, transferAmount);
+            await testTokenAContract.transfer(signers[6].address, transferAmount);
+            await testTokenAContract.connect(signers[6]).approve(mbContract.address, transferAmount);
+            await testTokenAContract.transfer(signers[7].address, transferAmount);
+            await testTokenAContract.connect(signers[7]).approve(mbContract.address, transferAmount);
+            await testTokenAContract.transfer(signers[8].address, transferAmount);
+            await testTokenAContract.connect(signers[8]).approve(mbContract.address, transferAmount);
+        }
+        const contractTokenBalanceBefore = await testTokenAContract.balanceOf(mbContract.address);
+        {
+            expect((await nonEnumerableNftContract.balanceOf(signers[5].address)).eq(0)).to.be.true;
+            expect((await nonEnumerableNftContract.balanceOf(signers[6].address)).eq(0)).to.be.true;
+            expect((await nonEnumerableNftContract.balanceOf(signers[7].address)).eq(0)).to.be.true;
+            const parameters = JSON.parse(JSON.stringify(openBoxParameters));
+            parameters.amount = MaxNumberOfNFT;
+            parameters.payment_token_index = 1;
+            parameters.box_id = box_id;
+            await mbContract.connect(signers[5]).openBox(...Object.values(parameters));
+            await mbContract.connect(signers[6]).openBox(...Object.values(parameters));
+            await mbContract.connect(signers[7]).openBox(...Object.values(parameters));
+            await expect(mbContract.connect(signers[8]).openBox(...Object.values(parameters))).to.be.rejectedWith(
+                'no NFT left',
+            );
+            expect((await nonEnumerableNftContract.balanceOf(signers[5].address)).eq(MaxNumberOfNFT)).to.be.true;
+            expect((await nonEnumerableNftContract.balanceOf(signers[6].address)).eq(MaxNumberOfNFT)).to.be.true;
+            const remainingNFT = totalNFT.sub(MaxNumberOfNFT * 2);
+            expect((await nonEnumerableNftContract.balanceOf(signers[7].address)).eq(remainingNFT)).to.be.true;
+        }
+        // sold out, validate payment token amount
+        const paymentTokenAAmount = createBoxPara.payment[0][1].mul(totalNFT);
+        const contractTokenBalanceAfter = await testTokenAContract.balanceOf(mbContract.address);
+        expect(contractTokenBalanceAfter.eq(contractTokenBalanceBefore.add(paymentTokenAAmount))).to.be.true;
+        {
+            const boxInfo = await mbContract.getBoxInfo(box_id);
+            expect(boxInfo).to.have.property('payment');
+            expect(boxInfo.payment.map((info) => info.receivable_amount.toString())).to.eql([
+                '0',
+                paymentTokenAAmount.toString(),
+                '0',
+                '0',
+            ]);
+            expect(boxInfo).to.have.property('remaining');
+            expect(boxInfo.remaining.eq(0)).to.be.true;
+            expect(boxInfo.total.eq(totalNFT)).to.be.true;
         }
     });
 
