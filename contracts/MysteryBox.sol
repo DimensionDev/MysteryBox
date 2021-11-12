@@ -42,6 +42,7 @@ contract MysteryBox is OwnableUpgradeable {
         mapping(address => uint256[]) purchased_nft;
         // total number of NFT(s)
         uint256 total;
+        bool canceled;
     }
 
     event CreationSuccess (
@@ -59,6 +60,11 @@ contract MysteryBox is OwnableUpgradeable {
         address indexed customer,
         address indexed nft_address,
         uint256 amount
+    );
+
+    event CancelSuccess(
+        uint256 indexed box_id,
+        address indexed creator
     );
 
     event ClaimPayment (
@@ -161,6 +167,18 @@ contract MysteryBox is OwnableUpgradeable {
         box.total += nft_id_list.length;
     }
 
+    // cancel sale
+    function cancelBox (uint256 box_id)
+        external
+    {
+        Box storage box = box_by_id[box_id];
+        require(box.creator == msg.sender, "not box owner");
+        require(block.timestamp <= box.start_time, "sale started");
+        require(!(box.canceled), "sale canceled already");
+        box.canceled = true;
+        emit CancelSuccess(box_id, msg.sender);
+    }
+
     function openBox(
         uint256 box_id,
         uint8 amount,
@@ -176,6 +194,7 @@ contract MysteryBox is OwnableUpgradeable {
         require(box.end_time > block.timestamp, "expired");
         require(payment_token_index < box.payment.length, "invalid payment token");
         require((box.purchased_nft[msg.sender].length + amount) <= box.personal_limit, "exceeds personal limit");
+        require(!(box.canceled), "sale canceled");
 
         if (box.qualification != address(0)) {
             bool qualified;
@@ -292,7 +311,8 @@ contract MysteryBox is OwnableUpgradeable {
             bool expired,
             uint256 remaining,
             uint256 total,
-            address qualification
+            address qualification,
+            bool canceled
         )
     {
         Box storage box = box_by_id[box_id];
@@ -313,6 +333,7 @@ contract MysteryBox is OwnableUpgradeable {
 
         total = box.total;
         qualification = box.qualification;
+        canceled = box.canceled;
     }
 
     function getPurchasedNft(uint256 box_id, address customer)

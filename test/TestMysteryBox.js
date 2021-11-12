@@ -162,6 +162,7 @@ describe('MysteryBox', () => {
             expect(boxInfo).to.have.property('remaining');
             expect(boxInfo.remaining.eq(not_sell_all_nft_id_list.length)).to.be.true;
             expect(boxInfo.total.eq(not_sell_all_nft_id_list.length)).to.be.true;
+            expect(boxInfo).to.have.property('canceled').that.to.be.eq(false);
 
             const nftList = await mbContract.getNftListForSale(not_sell_all_box_id, 0, parameter.nft_id_list.length);
             expect(nftList.map((id) => id.toString())).to.eql(parameter.nft_id_list.map((id) => id.toString()));
@@ -221,6 +222,7 @@ describe('MysteryBox', () => {
             expect(boxInfo).to.have.property('remaining');
             expect(boxInfo.remaining.eq(nft_id_list.length)).to.be.true;
             expect(boxInfo.total.eq(nft_id_list.length)).to.be.true;
+            expect(boxInfo).to.have.property('canceled').that.to.be.eq(false);
         }
 
         const append_nft_id_list = [];
@@ -256,6 +258,49 @@ describe('MysteryBox', () => {
             expect(boxInfo).to.have.property('remaining');
             expect(boxInfo.remaining.eq(final_nft_id_list.length)).to.be.true;
             expect(boxInfo.total.eq(final_nft_id_list.length)).to.be.true;
+            expect(boxInfo).to.have.property('canceled').that.to.be.eq(false);
+        }
+    });
+
+    it('Should cancelBox work', async () => {
+        {
+            const boxInfo = await mbContract.getBoxInfo(sell_all_box_id);
+            expect(boxInfo).to.have.property('started').that.to.be.eq(true);
+            expect(boxInfo).to.have.property('canceled').that.to.be.eq(false);
+            await expect(mbContract.connect(user_1).cancelBox(sell_all_box_id)).to.be.rejectedWith('not box owner');
+            await expect(mbContract.connect(user_0).cancelBox(sell_all_box_id)).to.be.rejectedWith('sale started');
+        }
+        {
+            const open_parameter = JSON.parse(JSON.stringify(openBoxParameters));
+            const now = Math.floor(new Date().getTime() / 1000);
+            const parameter = JSON.parse(JSON.stringify(createBoxPara));
+            parameter.start_time = now + seconds_in_a_day;
+            await mbContract.connect(user_0).createBox(...Object.values(parameter));
+            const logs = await ethers.provider.getLogs(mbContract.filters.CreationSuccess());
+            const parsedLog = interface.parseLog(logs[0]);
+            const result = parsedLog.args;
+            open_parameter.box_id = result.box_id;
+            {
+                const boxInfo = await mbContract.getBoxInfo(open_parameter.box_id);
+                expect(boxInfo).to.have.property('started').that.to.be.eq(false);
+                expect(boxInfo).to.have.property('canceled').that.to.be.eq(false);
+            }
+            await expect(mbContract.connect(user_1).cancelBox(open_parameter.box_id)).to.be.rejectedWith(
+                'not box owner',
+            );
+            await mbContract.connect(user_0).cancelBox(open_parameter.box_id);
+            await expect(mbContract.connect(user_0).cancelBox(open_parameter.box_id)).to.be.rejectedWith(
+                'sale canceled already',
+            );
+            {
+                const boxInfo = await mbContract.getBoxInfo(open_parameter.box_id);
+                expect(boxInfo).to.have.property('started').that.to.be.eq(false);
+                expect(boxInfo).to.have.property('canceled').that.to.be.eq(true);
+            }
+            await helper.advanceTimeAndBlock(seconds_in_a_day);
+            await expect(
+                mbContract.connect(user_1).openBox(...Object.values(open_parameter), txParameters),
+            ).to.be.rejectedWith('sale canceled');
         }
     });
 
@@ -707,7 +752,7 @@ describe('MysteryBox', () => {
             expect(total.toString()).to.be.eq(nftBalance.toString());
 
             const id_list = [];
-            for (let i = 0; i < nftBalance; i ++) {
+            for (let i = 0; i < nftBalance; i++) {
                 id_list.push(i);
             }
             parameter.nft_id_list = id_list;

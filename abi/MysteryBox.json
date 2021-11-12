@@ -5,6 +5,25 @@
       "inputs": [
         {
           "indexed": true,
+          "internalType": "uint256",
+          "name": "box_id",
+          "type": "uint256"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "creator",
+          "type": "address"
+        }
+      ],
+      "name": "CancelSuccess",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
           "internalType": "address",
           "name": "creator",
           "type": "address"
@@ -150,6 +169,19 @@
         }
       ],
       "name": "addNftIntoBox",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "box_id",
+          "type": "uint256"
+        }
+      ],
+      "name": "cancelBox",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -308,6 +340,11 @@
           "internalType": "address",
           "name": "qualification",
           "type": "address"
+        },
+        {
+          "internalType": "bool",
+          "name": "canceled",
+          "type": "bool"
         }
       ],
       "stateMutability": "view",
