@@ -279,6 +279,15 @@ contract MysteryBox is OwnableUpgradeable {
         for (uint256 asset_index = 0; asset_index < box_ids.length; asset_index++) {
             Box storage box = box_by_id[box_ids[asset_index]];
             require(box.creator == msg.sender, "not owner");
+            uint256 total;
+            if (box.sell_all) {
+                total = IERC721(box.nft_address).balanceOf(msg.sender);
+            }
+            else {
+                total = box.nft_id_list.length;
+            }
+            require(box.end_time <= block.timestamp || total == 0, "not expired/sold-out");
+
             for (uint256 token_index = 0; token_index < box.payment.length; token_index++) {
                 address token_address = box.payment[token_index].token_addr;
                 uint256 amount = box.payment[token_index].receivable_amount;
