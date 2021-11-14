@@ -634,21 +634,23 @@ describe('MysteryBox', () => {
         const contractEthBalanceBeforeOpen = await ethers.provider.getBalance(mbContract.address);
         const user_8_EthBalance = await ethers.provider.getBalance(signers[8].address);
         const user_9_EthBalance = await ethers.provider.getBalance(signers[9].address);
+        const open_parameters = JSON.parse(JSON.stringify(openBoxParameters));
         {
-            const parameters = JSON.parse(JSON.stringify(openBoxParameters));
-            parameters.amount = MaxNumberOfNFT;
+            open_parameters.amount = MaxNumberOfNFT;
             const tx_parameters = {
-                value: txParameters.value.mul(parameters.amount),
+                value: txParameters.value.mul(open_parameters.amount),
             };
-            await mbContract.connect(signers[5]).openBox(...Object.values(parameters), tx_parameters);
-            await mbContract.connect(signers[6]).openBox(...Object.values(parameters), tx_parameters);
-            await mbContract.connect(signers[7]).openBox(...Object.values(parameters), tx_parameters);
-            await mbContract.connect(signers[8]).openBox(...Object.values(parameters), tx_parameters);
-            await mbContract.connect(signers[9]).openBox(...Object.values(parameters), tx_parameters);
+            await mbContract.connect(signers[5]).openBox(...Object.values(open_parameters), tx_parameters);
+            await mbContract.connect(signers[6]).openBox(...Object.values(open_parameters), tx_parameters);
+            await mbContract.connect(signers[7]).openBox(...Object.values(open_parameters), tx_parameters);
+            await mbContract.connect(signers[8]).openBox(...Object.values(open_parameters), tx_parameters);
+            await expect(mbContract.connect(user_0).claimPayment([open_parameters.box_id])).to.be.rejectedWith(
+                'not expired/sold-out',
+            );
+            await mbContract.connect(signers[9]).openBox(...Object.values(open_parameters), tx_parameters);
             await expect(
-                mbContract.connect(signers[10]).openBox(...Object.values(parameters), tx_parameters),
+                mbContract.connect(signers[10]).openBox(...Object.values(open_parameters), tx_parameters),
             ).to.be.rejectedWith('no NFT left');
-
             expect((await enumerableNftContract.balanceOf(signers[5].address)).eq(MaxNumberOfNFT)).to.be.true;
             expect((await enumerableNftContract.balanceOf(signers[6].address)).eq(MaxNumberOfNFT)).to.be.true;
             expect((await enumerableNftContract.balanceOf(signers[7].address)).eq(MaxNumberOfNFT)).to.be.true;
@@ -683,6 +685,12 @@ describe('MysteryBox', () => {
             expect(boxInfo).to.have.property('remaining');
             expect(boxInfo.remaining.eq(0)).to.be.true;
             expect(boxInfo.total.eq(totalNFT)).to.be.true;
+        }
+        await mbContract.connect(user_0).claimPayment([open_parameters.box_id]);
+        {
+            const boxInfo = await mbContract.getBoxInfo(sell_all_box_id);
+            expect(boxInfo).to.have.property('payment');
+            expect(boxInfo.payment.map((info) => info.receivable_amount.toString())).to.eql(['0', '0', '0', '0']);
         }
     });
 
@@ -930,7 +938,18 @@ describe('MysteryBox', () => {
         // token A balance before
         const authorTokenABalanceBeforeClaim = await testTokenAContract.balanceOf(user_0.address);
         const contractTokenABalanceBeforeClaim = await testTokenAContract.balanceOf(mbContract.address);
-        await mbContract.connect(user_0).claimPayment([open_parameters.box_id]);
+        await expect(mbContract.connect(user_0).claimPayment([not_sell_all_box_id])).to.be.rejectedWith(
+            'not expired/sold-out',
+        );
+        await expect(mbContract.connect(user_1).claimPayment([not_sell_all_box_id])).to.be.rejectedWith('not owner');
+
+        await helper.advanceTimeAndBlock(seconds_in_a_day * 90);
+        await mbContract.connect(user_0).claimPayment([not_sell_all_box_id]);
+        {
+            const boxInfo = await mbContract.getBoxInfo(not_sell_all_box_id);
+            // `claimPayment` can only claim payment in one of the boxes
+            expect(boxInfo.payment.map((info) => info.receivable_amount.toString())).to.eql(['0', '0', '0', '0']);
+        }
         const authorEthBalanceAfterClaim = await ethers.provider.getBalance(user_0.address);
         const contractEthBalanceAfterClaim = await ethers.provider.getBalance(mbContract.address);
         // token A balance after
@@ -952,7 +971,7 @@ describe('MysteryBox', () => {
                 '0',
             ]);
         }
-        await mbContract.connect(user_0).claimPayment([open_parameters.box_id]);
+        await mbContract.connect(user_0).claimPayment([not_sell_all_box_id]);
         {
             const authorEthBalanceAfterClaimAgain = await ethers.provider.getBalance(user_0.address);
             const contractEthBalanceAfterClaimAgain = await ethers.provider.getBalance(mbContract.address);
