@@ -121,9 +121,11 @@ contract MysteryBox is OwnableUpgradeable {
 
         if (sell_all) {
             // validate it is an `Enumerable` NFT
+            /* solhint-disable */
             require(
                 IERC721(nft_address).supportsInterface(type(IERC721EnumerableUpgradeable).interfaceId),
                 "not enumerable nft");
+            /* solhint-enable */
             uint256 nftBalance = IERC721(nft_address).balanceOf(msg.sender);
             require(nftBalance > 0, "no nft owned");
             box.sell_all = true;
