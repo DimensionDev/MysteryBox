@@ -51,8 +51,8 @@ describe('WhitelistQlf', () => {
     });
 
     it('Should white list work', async () => {
-        expect(await contract.whilte_list(user_0.address)).to.be.eq(false);
-        expect(await contract.whilte_list(user_1.address)).to.be.eq(false);
+        expect(await contract.white_list(user_0.address)).to.be.eq(false);
+        expect(await contract.white_list(user_1.address)).to.be.eq(false);
         {
             const result = await contract.is_qualified(user_0.address, []);
             expect(result.qualified).to.be.eq(false);
@@ -68,8 +68,8 @@ describe('WhitelistQlf', () => {
             'Ownable: caller is not the owner',
         );
         await contract.connect(contractCreator).add_white_list([user_0.address]);
-        expect(await contract.whilte_list(user_0.address)).to.be.eq(true);
-        expect(await contract.whilte_list(user_1.address)).to.be.eq(false);
+        expect(await contract.white_list(user_0.address)).to.be.eq(true);
+        expect(await contract.white_list(user_1.address)).to.be.eq(false);
         {
             const result = await contract.is_qualified(user_0.address, []);
             expect(result.qualified).to.be.eq(true);
@@ -84,8 +84,8 @@ describe('WhitelistQlf', () => {
             'Ownable: caller is not the owner',
         );
         await contract.connect(contractCreator).remove_white_list([user_0.address]);
-        expect(await contract.whilte_list(user_0.address)).to.be.eq(false);
-        expect(await contract.whilte_list(user_1.address)).to.be.eq(false);
+        expect(await contract.white_list(user_0.address)).to.be.eq(false);
+        expect(await contract.white_list(user_1.address)).to.be.eq(false);
         {
             const result = await contract.is_qualified(user_0.address, []);
             expect(result.qualified).to.be.eq(false);

@@ -78,6 +78,8 @@ contract MysteryBox is OwnableUpgradeable {
     // uint256 private constant REMAINING_GAS_PROTECTION = 50 * 1000;
     uint256 private _box_id;
     mapping(uint256 => Box) private box_by_id;
+    mapping(address => bool) public admin;
+    mapping(address => bool) public whitelist;
 
     function initialize() public initializer {
         __Ownable_init();
@@ -100,6 +102,7 @@ contract MysteryBox is OwnableUpgradeable {
         require(end_time > block.timestamp, "invalid end time");
         require(IERC721(nft_address).isApprovedForAll(msg.sender, address(this)), "not ApprovedForAll");
         require(payment.length > 0, "invalid payment");
+        require(whitelist[msg.sender] || admin[msg.sender], "not whitelisted");
 
         Box storage box = box_by_id[_box_id];
         for (uint256 i = 0; i < payment.length; i++) {
@@ -390,6 +393,19 @@ contract MysteryBox is OwnableUpgradeable {
                 uint256 token_index = i + cursor;
                 nft_id_list[i] = box.nft_id_list[token_index];
             }
+        }
+    }
+
+    function addAdmin(address[] memory addrs) external onlyOwner {
+        for (uint256 i = 0; i < addrs.length; i++) {
+            admin[addrs[i]] = true;
+        }
+    }
+
+    function addWhitelist(address[] memory addrs) external {
+        require(admin[msg.sender] || msg.sender == owner(), "not admin");
+        for (uint256 i = 0; i < addrs.length; i++) {
+            whitelist[addrs[i]] = true;
         }
     }
 

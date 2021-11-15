@@ -8,7 +8,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 // whilte list qualification
 contract WhitelistQlf is OwnableUpgradeable {
     uint32 public version;
-    mapping(address => bool) public whilte_list;
+    mapping(address => bool) public white_list;
 
     function initialize() public initializer
     {
@@ -18,13 +18,13 @@ contract WhitelistQlf is OwnableUpgradeable {
 
     function add_white_list(address[] memory addrs) external onlyOwner {
         for (uint256 i = 0; i < addrs.length; i++) {
-            whilte_list[addrs[i]] = true;
+            white_list[addrs[i]] = true;
         }
     }
 
     function remove_white_list(address[] memory addrs) external onlyOwner {
         for (uint256 i = 0; i < addrs.length; i++) {
-            whilte_list[addrs[i]] = false;
+            white_list[addrs[i]] = false;
         }
     }
 
@@ -38,7 +38,7 @@ contract WhitelistQlf is OwnableUpgradeable {
             string memory error_msg
         )
     {
-        if (!whilte_list[account]) {
+        if (!white_list[account]) {
             return (false, "not whitelisted");
         }
         return (true, "");
