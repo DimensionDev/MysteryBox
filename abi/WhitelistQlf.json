@@ -135,7 +135,7 @@
           "type": "address"
         }
       ],
-      "name": "whilte_list",
+      "name": "white_list",
       "outputs": [
         {
           "internalType": "bool",

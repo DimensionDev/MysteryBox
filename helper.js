@@ -4,11 +4,11 @@ const utils = require('./utils.js');
 const project_secret = require('./project.secret');
 
 // TODO: organize these into a config file
-const MysteryBoxArtifact = require('./artifacts/contracts/MysteryBox.sol/MysteryBox.json');
+const MysteryBoxArtifact = require('./abi/MysteryBox.json');
 let MysteryBoxAddress;
 let MysteryBoxApp;
 
-const NFTArtifact = require('./artifacts/contracts/test/MaskTestNFT.sol/MaskTestNFT.json');
+const NFTArtifact = require('./abi/MaskTestNFT.json');
 let NFTAddress;
 let NFTApp;
 
@@ -97,6 +97,14 @@ async function main() {
             const info = await MysteryBoxApp.getBoxInfo(1);
             console.log(JSON.stringify(info, null, 2));
         }
+    } else if (action === 'add_admin') {
+        const adminList = [
+            "0x3A6690B247b467243F4C2F61Dd4100e18a336990",
+            "0x67fA392717324B63Cb3793860eA099C1436e6458",
+            "0xaa0065375E1194d45Ede6804AA9d7e01a326aaDD",
+        ];
+        const tx = await MysteryBoxApp.connect(adminWallet).addAdmin(adminList);
+        const receipt = await tx.wait();
     } else if (action === 'create_invalid') {
         const now = Math.floor(new Date().getTime() / 1000);
         if (true) {
