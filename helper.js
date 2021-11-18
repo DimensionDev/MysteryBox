@@ -99,9 +99,9 @@ async function main() {
         }
     } else if (action === 'add_admin') {
         const adminList = [
-            "0x3A6690B247b467243F4C2F61Dd4100e18a336990",
-            "0x67fA392717324B63Cb3793860eA099C1436e6458",
-            "0xaa0065375E1194d45Ede6804AA9d7e01a326aaDD",
+            '0x3A6690B247b467243F4C2F61Dd4100e18a336990',
+            '0x67fA392717324B63Cb3793860eA099C1436e6458',
+            '0xaa0065375E1194d45Ede6804AA9d7e01a326aaDD',
         ];
         const tx = await MysteryBoxApp.connect(adminWallet).addAdmin(adminList);
         const receipt = await tx.wait();

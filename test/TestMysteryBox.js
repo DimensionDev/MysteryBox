@@ -16,6 +16,7 @@ const nonEnumerableNftTokenABI = require('../artifacts/contracts/test/MaskNonEnu
 
 const qlfWhiltelistJsonABI = require('../artifacts/contracts/WhitelistQlf.sol/WhitelistQlf.json');
 const qlfSigVerifyJsonABI = require('../artifacts/contracts/SigVerifyQlf.sol/SigVerifyQlf.json');
+const qlfMaskHolderJsonABI = require('../artifacts/contracts/MaskHolderQlf.sol/MaskHolderQlf.json');
 
 let snapshotId;
 let mbContract;
@@ -25,6 +26,8 @@ let nonEnumerableNftContract;
 let testTokenAContract;
 let testTokenBContract;
 let testTokenCContract;
+let testMaskTokenContract;
+
 let contractCreator;
 let user_1;
 let user_2;
@@ -32,6 +35,7 @@ let user_3;
 
 let whitelistQlfContract;
 let sigVerifyQlfContract;
+let maskHolderQlfContract;
 
 const {
     MaskNFTInitParameters,
@@ -40,6 +44,7 @@ const {
     MaxNumberOfNFT,
     qualification_project_name,
     seconds_in_a_day,
+    holderMinAmount,
 } = require('./constants');
 
 const network = 'mainnet';
@@ -79,6 +84,10 @@ describe('MysteryBox', () => {
         const TestTokenC = await ethers.getContractFactory('TestTokenC');
         const testTokenC = await TestTokenC.deploy(testTokenMintAmount);
         testTokenCContract = await testTokenC.deployed();
+
+        const MaskTestToken = await ethers.getContractFactory('TestTokenC');
+        const maskToken = await MaskTestToken.deploy(testTokenMintAmount);
+        testMaskTokenContract = await maskToken.deployed();
         {
             const factory = await ethers.getContractFactory('WhitelistQlf');
             const proxy = await upgrades.deployProxy(factory, []);
@@ -88,6 +97,11 @@ describe('MysteryBox', () => {
             const factory = await ethers.getContractFactory('SigVerifyQlf');
             const proxy = await upgrades.deployProxy(factory, [qualification_project_name, verifier.address]);
             sigVerifyQlfContract = new ethers.Contract(proxy.address, qlfSigVerifyJsonABI.abi, contractCreator);
+        }
+        {
+            const factory = await ethers.getContractFactory('MaskHolderQlf');
+            const proxy = await upgrades.deployProxy(factory, [testMaskTokenContract.address, holderMinAmount]);
+            maskHolderQlfContract = new ethers.Contract(proxy.address, qlfMaskHolderJsonABI.abi, contractCreator);
         }
         // first is ETH: address(0)
         createBoxPara.payment.push([testTokenAContract.address, createBoxPara.payment[0][1]]);
@@ -1066,6 +1080,33 @@ describe('MysteryBox', () => {
         }
         const boxInfo = await mbContract.getBoxInfo(open_parameters.box_id);
         expect(boxInfo).to.have.property('qualification').that.to.be.eq(sigVerifyQlfContract.address);
+    });
+
+    it('Should MaskHolderQlf qualification work', async () => {
+        expect((await testMaskTokenContract.balanceOf(contractCreator.address)).gt(0)).to.be.true;
+        expect((await testMaskTokenContract.balanceOf(user_1.address)).eq(0)).to.be.true;
+
+        const open_parameters = JSON.parse(JSON.stringify(openBoxParameters));
+        {
+            const parameter = JSON.parse(JSON.stringify(createBoxPara));
+            parameter.sell_all = true;
+            parameter.qualification = maskHolderQlfContract.address;
+            await mbContract.connect(user_1).createBox(...Object.values(parameter));
+            const logs = await ethers.provider.getLogs(mbContract.filters.CreationSuccess());
+            const parsedLog = interface.parseLog(logs[0]);
+            const result = parsedLog.args;
+            open_parameters.box_id = result.box_id;
+        }
+        await expect(
+            mbContract.connect(user_1).openBox(...Object.values(open_parameters), txParameters),
+        ).to.be.rejectedWith('not holding enough token');
+
+        // transfer
+        await testMaskTokenContract.transfer(user_1.address, holderMinAmount);
+        await mbContract.connect(user_1).openBox(...Object.values(open_parameters), txParameters);
+
+        const boxInfo = await mbContract.getBoxInfo(open_parameters.box_id);
+        expect(boxInfo).to.have.property('qualification').that.to.be.eq(maskHolderQlfContract.address);
     });
 
     it('Should not be able to call initialize', async () => {

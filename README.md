@@ -55,8 +55,8 @@ Using the [`helper.js`](helper.js) script to set up the deployed smart contracts
 
 | Chain   | Address                                                                                  |
 | ------- | ---------------------------------------------------------------------------------------- |
-| Mainnet | [0x0dFB34D213f613Dda67a2924F60b5301d42ABFb7][0x0dFB34D213f613Dda67a2924F60b5301d42ABFb7]                                                                 |
-| Ropsten | [0xdB59446B15AB6e97A4452BA3e23dD03E5004c854][0xdB59446B15AB6e97A4452BA3e23dD03E5004c854]                                                                 |
+| Mainnet | [0x0dFB34D213f613Dda67a2924F60b5301d42ABFb7][0x0dFB34D213f613Dda67a2924F60b5301d42ABFb7] |
+| Ropsten | [0xdB59446B15AB6e97A4452BA3e23dD03E5004c854][0xdB59446B15AB6e97A4452BA3e23dD03E5004c854] |
 | Rinkeby | [0xbFcf8210F5B6764D86a9C5252218ad627A6a949d][0xbFcf8210F5B6764D86a9C5252218ad627A6a949d] |
 | BSC     | [0xxxxxxxxx][0xxxxxxxxx]                                                                 |
 | Matic   | [0xxxxxxxxx][0xxxxxxxxx]                                                                 |
@@ -71,7 +71,7 @@ Using the [`helper.js`](helper.js) script to set up the deployed smart contracts
 
 | Chain   | Address                                                                                  |
 | ------- | ---------------------------------------------------------------------------------------- |
-| Mainnet | [0x56136E69A5771436a9598804c5eA792230c21181][0x56136E69A5771436a9598804c5eA792230c21181]                                                                 |
+| Mainnet | [0x56136E69A5771436a9598804c5eA792230c21181][0x56136E69A5771436a9598804c5eA792230c21181] |
 | Ropsten | [0xxxxxxxxx][0xxxxxxxxx]                                                                 |
 | Rinkeby | [0x0c8FB5C985E00fb1D002b6B9700084492Fb4B9A8][0x0c8FB5C985E00fb1D002b6B9700084492Fb4B9A8] |
 | BSC     | [0xxxxxxxxx][0xxxxxxxxx]                                                                 |
@@ -114,6 +114,24 @@ Using the [`helper.js`](helper.js) script to set up the deployed smart contracts
 [0x9a656528700493348132823C6A3C59CdFa48283d]: https://rinkeby.etherscan.io/address/0x9a656528700493348132823C6A3C59CdFa48283d
 [0xxxxxxxxx]: https://bscscan.com/address/0xxxxxxxxx
 [0xxxxxxxxx]: https://polygonscan.com/address/0xxxxxxxxx
+
+### MaskHolderQlf
+
+| Chain   | Address                                                                                  |
+| ------- | ---------------------------------------------------------------------------------------- |
+| Mainnet | [0xxxxxxxxx][0xxxxxxxxx]                                                                 |
+| Ropsten | [0xxxxxxxxx][0xxxxxxxxx]                                                                 |
+| Rinkeby | [0x26c3DE1430dc105b205F47fc497ED3015768C9B0][0x26c3DE1430dc105b205F47fc497ED3015768C9B0] |
+| BSC     | [0xxxxxxxxx][0xxxxxxxxx]                                                                 |
+| Matic   | [0xxxxxxxxx][0xxxxxxxxx]                                                                 |
+
+[0xxxxxxxxx]: https://etherscan.io/address/0xxxxxxxxx
+[0xxxxxxxxx]: https://ropsten.etherscan.io/address/0xxxxxxxxx
+[0x26c3DE1430dc105b205F47fc497ED3015768C9B0]: https://rinkeby.etherscan.io/address/0x26c3DE1430dc105b205F47fc497ED3015768C9B0
+[0xxxxxxxxx]: https://bscscan.com/address/0xxxxxxxxx
+[0xxxxxxxxx]: https://polygonscan.com/address/0xxxxxxxxx
+
+[testnet $MASK token address](https://github.com/DimensionDev/misc_smart_contract#masktoken---testnet-only)
 
 ### Known issue and limitation
 
