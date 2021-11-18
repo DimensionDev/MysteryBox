@@ -88,6 +88,7 @@ const openBoxParameters = {
 
 const qualification_project_name = 'MASK';
 const qualification_verifier = '0x720272934CE8e42106f7d4F79B666C52030FCdA6';
+const holderMinAmount = ethers.utils.parseUnits('100', 18).toString();
 
 module.exports = {
     MaskNFTInitParameters,
@@ -98,4 +99,5 @@ module.exports = {
     qualification_project_name,
     qualification_verifier,
     seconds_in_a_day,
+    holderMinAmount,
 };

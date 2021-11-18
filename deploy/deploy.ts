@@ -2,7 +2,9 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { DeployFunction } from 'hardhat-deploy/types';
 import { ethers, upgrades } from 'hardhat';
 
-const { MaskNFTInitParameters } = require('../test/constants.js');
+const { MaskNFTInitParameters, holderMinAmount } = require('../test/constants.js');
+
+const { ContractAddressConfig } = require('../SmartContractProjectConfig/config.js');
 
 interface IDeployedContractAddress {
     MaskEnumerableNFT: string;
@@ -106,6 +108,21 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             const proxy = await upgrades.deployProxy(impl, []);
             await proxy.deployed();
             console.log('MysteryBox proxy: ' + proxy.address);
+        }
+        if (false) {
+            const impl = await ethers.getContractFactory('MaskHolderQlf');
+            const proxy = await upgrades.deployProxy(impl, [
+                ContractAddressConfig[network].MaskTokenAddress,
+                holderMinAmount,
+            ]);
+            await proxy.deployed();
+            console.log('MaskHolderQlf proxy: ' + proxy.address);
+            const admin = await upgrades.admin.getInstance();
+            const impl_addr = await admin.getProxyImplementation(proxy.address);
+            await hre.run('verify:verify', {
+                address: impl_addr,
+                constructorArguments: [],
+            });
         }
     } else {
         if (true) {
