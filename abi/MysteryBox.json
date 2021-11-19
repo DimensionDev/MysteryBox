@@ -302,6 +302,11 @@
           "internalType": "address",
           "name": "qualification",
           "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "holder_min_token_amount",
+          "type": "uint256"
         }
       ],
       "name": "createBox",
@@ -390,6 +395,11 @@
           "internalType": "bool",
           "name": "canceled",
           "type": "bool"
+        },
+        {
+          "internalType": "uint256",
+          "name": "holder_min_token_amount",
+          "type": "uint256"
         }
       ],
       "stateMutability": "view",
@@ -450,6 +460,19 @@
     },
     {
       "inputs": [],
+      "name": "holderTokenAddr",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
       "name": "initialize",
       "outputs": [],
       "stateMutability": "nonpayable",
@@ -499,6 +522,19 @@
     {
       "inputs": [],
       "name": "renounceOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "addr",
+          "type": "address"
+        }
+      ],
+      "name": "setMaskTokenAddr",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"

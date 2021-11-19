@@ -105,6 +105,10 @@ async function main() {
         ];
         const tx = await MysteryBoxApp.connect(adminWallet).addAdmin(adminList);
         const receipt = await tx.wait();
+    } else if (action === 'set_mask_addr') {
+        const mask_addr = '0x46eD2e50A9f27de0dC47b04E7580E8E91fCE7246';
+        const tx = await MysteryBoxApp.connect(adminWallet).setMaskTokenAddr(mask_addr);
+        await tx.wait();
     } else if (action === 'create_invalid') {
         const now = Math.floor(new Date().getTime() / 1000);
         if (true) {
