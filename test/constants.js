@@ -44,6 +44,7 @@ const CreateBoxParameters = {
         sell_all: true,
         nft_id_list: [],
         qualification: ZeroAddress,
+        holder_min_token_amount: 0,
     },
     rinkeby: {
         nft_address: '0x0c8FB5C985E00fb1D002b6B9700084492Fb4B9A8',
@@ -60,6 +61,7 @@ const CreateBoxParameters = {
         sell_all: true,
         nft_id_list: [],
         qualification: ZeroAddress,
+        holder_min_token_amount: 0,
     },
     matic_mainnet: {
         nft_address: '0x0000000000000000000000000000000000000000',
@@ -76,6 +78,7 @@ const CreateBoxParameters = {
         sell_all: true,
         nft_id_list: [],
         qualification: ZeroAddress,
+        holder_min_token_amount: 0,
     },
 };
 

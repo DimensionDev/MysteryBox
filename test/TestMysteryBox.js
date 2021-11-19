@@ -1007,6 +1007,39 @@ describe('MysteryBox', () => {
         }
     });
 
+    it('Should MaskHolder work', async () => {
+        await expect(mbContract.connect(user_1).setMaskTokenAddr(testMaskTokenContract.address)).to.be.rejectedWith(
+            'Ownable: caller is not the owner',
+        );
+        await mbContract.setMaskTokenAddr(testMaskTokenContract.address);
+
+        expect((await testMaskTokenContract.balanceOf(contractCreator.address)).gt(0)).to.be.true;
+        expect((await testMaskTokenContract.balanceOf(user_1.address)).eq(0)).to.be.true;
+
+        const open_parameters = JSON.parse(JSON.stringify(openBoxParameters));
+        {
+            const parameter = JSON.parse(JSON.stringify(createBoxPara));
+            parameter.sell_all = true;
+            parameter.holder_min_token_amount = holderMinAmount;
+            await mbContract.connect(user_1).createBox(...Object.values(parameter));
+            const logs = await ethers.provider.getLogs(mbContract.filters.CreationSuccess());
+            const parsedLog = interface.parseLog(logs[0]);
+            const result = parsedLog.args;
+            open_parameters.box_id = result.box_id;
+        }
+        await expect(
+            mbContract.connect(user_1).openBox(...Object.values(open_parameters), txParameters),
+        ).to.be.rejectedWith('not holding enough token');
+
+        // transfer
+        await testMaskTokenContract.transfer(user_1.address, holderMinAmount);
+        await mbContract.connect(user_1).openBox(...Object.values(open_parameters), txParameters);
+
+        const boxInfo = await mbContract.getBoxInfo(open_parameters.box_id);
+        expect(boxInfo).to.have.property('holder_min_token_amount');
+        expect(boxInfo.holder_min_token_amount.eq(holderMinAmount)).to.be.true;
+    });
+
     it('Should addAdmin/addWhitelist work', async () => {
         let user_test = signers[4];
         await enumerableNftContract.connect(user_test).mint(10);
