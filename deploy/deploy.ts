@@ -23,7 +23,7 @@ const deployedContractAddress: DeployedContractAddress = {
     rinkeby: {
         MaskEnumerableNFT: '0x0000000000000000000000000000000000000000',
         MysteryBox: '0xbFcf8210F5B6764D86a9C5252218ad627A6a949d',
-        WhitelistQlf: '0x996A9DCe6247cd8AaFA60de34cDD5332d9AdE702',
+        WhitelistQlf: '0x50eCEebb7360Efb93094dDEA692e04274E548b1d',
         SigVerifyQlf: '0x0000000000000000000000000000000000000000',
     },
     ropsten: {
@@ -58,17 +58,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const { deploy } = deployments;
     const { deployer } = await getNamedAccounts();
     const MaskNftParameter = MaskNFTInitParameters[network];
-
-    if (network === 'rinkeby') {
-        const deploymentInfo = require('../.openzeppelin/rinkeby.json');
-        const lastOne = deploymentInfo.proxies.length - 1;
-        deployedContractAddress[network].MaskEnumerableNFT = deploymentInfo.proxies[lastOne - 1].address;
-        deployedContractAddress[network].MysteryBox = deploymentInfo.proxies[lastOne].address;
-        // deployedContractAddress[network].WhitelistQlf = deploymentInfo.proxies[lastOne - 1].address;
-        // deployedContractAddress[network].SigVerifyQlf = deploymentInfo.proxies[lastOne].address;
-    } else {
-        // TODO
-    }
 
     if (false) {
         if (false) {
@@ -125,7 +114,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             });
         }
     } else {
-        if (true) {
+        if (false) {
             // upgrade contract
             const implMysteryBox = await ethers.getContractFactory('MysteryBox');
             const instance = await upgrades.upgradeProxy(deployedContractAddress[network].MysteryBox, implMysteryBox);
@@ -138,7 +127,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
                 constructorArguments: [],
             });
         }
-        if (false) {
+        if (true) {
             // upgrade contract
             const implWhitelistQlf = await ethers.getContractFactory('WhitelistQlf');
             const instance = await upgrades.upgradeProxy(
@@ -153,12 +142,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
                 constructorArguments: [],
             });
         }
-
-        // const implWhitelistQlf = await ethers.getContractFactory('WhitelistQlf');
-        // await upgrades.upgradeProxy(deployedContractAddress[network].WhitelistQlf, implWhitelistQlf);
-
-        // const implSigVerifyQlf = await ethers.getContractFactory('SigVerifyQlf');
-        // await upgrades.upgradeProxy(deployedContractAddress[network].SigVerifyQlf, implSigVerifyQlf);
     }
 };
 
