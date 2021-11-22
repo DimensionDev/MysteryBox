@@ -50,7 +50,7 @@ describe('WhitelistQlf', () => {
         expect(version.toString()).to.be.eq('1');
     });
 
-    it('Should white list work', async () => {
+    it('Should whitelist work', async () => {
         expect(await contract.white_list(user_0.address)).to.be.eq(false);
         expect(await contract.white_list(user_1.address)).to.be.eq(false);
         {
@@ -64,10 +64,8 @@ describe('WhitelistQlf', () => {
             expect(result.error_msg).to.be.eq('not whitelisted');
         }
         // add
-        await expect(contract.connect(user_0).add_white_list([user_0.address])).to.be.rejectedWith(
-            'Ownable: caller is not the owner',
-        );
-        await contract.connect(contractCreator).add_white_list([user_0.address]);
+        await expect(contract.connect(user_0).addWhitelist([user_0.address])).to.be.rejectedWith('not admin');
+        await contract.connect(contractCreator).addWhitelist([user_0.address]);
         expect(await contract.white_list(user_0.address)).to.be.eq(true);
         expect(await contract.white_list(user_1.address)).to.be.eq(false);
         {
@@ -80,10 +78,8 @@ describe('WhitelistQlf', () => {
             expect(result.error_msg).to.be.eq('not whitelisted');
         }
         // remove
-        await expect(contract.connect(user_0).remove_white_list([user_0.address])).to.be.rejectedWith(
-            'Ownable: caller is not the owner',
-        );
-        await contract.connect(contractCreator).remove_white_list([user_0.address]);
+        await expect(contract.connect(user_0).removeWhitelist([user_0.address])).to.be.rejectedWith('not admin');
+        await contract.connect(contractCreator).removeWhitelist([user_0.address]);
         expect(await contract.white_list(user_0.address)).to.be.eq(false);
         expect(await contract.white_list(user_1.address)).to.be.eq(false);
         {
@@ -95,6 +91,27 @@ describe('WhitelistQlf', () => {
             const result = await contract.is_qualified(user_1.address, []);
             expect(result.qualified).to.be.eq(false);
             expect(result.error_msg).to.be.eq('not whitelisted');
+        }
+    });
+
+    it('Should addAdmin/addWhitelist work', async () => {
+        let user_test = signers[4];
+        expect(await contract.white_list(user_1.address)).to.be.eq(false);
+        expect(await contract.admin(user_1.address)).to.be.eq(false);
+        {
+            const result = await contract.is_qualified(user_test.address, []);
+            expect(result.qualified).to.be.eq(false);
+        }
+        await expect(contract.connect(user_1).addAdmin([user_test.address])).to.be.rejectedWith(
+            'Ownable: caller is not the owner',
+        );
+        await contract.connect(contractCreator).addAdmin([user_1.address]);
+        expect(await contract.admin(user_1.address)).to.be.eq(true);
+        await contract.connect(user_1).addWhitelist([user_test.address]);
+        expect(await contract.white_list(user_test.address)).to.be.eq(true);
+        {
+            const result = await contract.is_qualified(user_test.address, []);
+            expect(result.qualified).to.be.eq(true);
         }
     });
 });
