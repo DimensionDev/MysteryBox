@@ -89,13 +89,13 @@ Using the [`helper.js`](helper.js) script to set up the deployed smart contracts
 | ------- | ---------------------------------------------------------------------------------------- |
 | Mainnet | [0xxxxxxxxx][0xxxxxxxxx]                                                                 |
 | Ropsten | [0xxxxxxxxx][0xxxxxxxxx]                                                                 |
-| Rinkeby | [0x996A9DCe6247cd8AaFA60de34cDD5332d9AdE702][0x996A9DCe6247cd8AaFA60de34cDD5332d9AdE702] |
+| Rinkeby | [0x50eCEebb7360Efb93094dDEA692e04274E548b1d][0x50eCEebb7360Efb93094dDEA692e04274E548b1d] |
 | BSC     | [0xxxxxxxxx][0xxxxxxxxx]                                                                 |
 | Matic   | [0xxxxxxxxx][0xxxxxxxxx]                                                                 |
 
 [0xxxxxxxxx]: https://etherscan.io/address/0xxxxxxxxx
 [0xxxxxxxxx]: https://ropsten.etherscan.io/address/0xxxxxxxxx
-[0x996A9DCe6247cd8AaFA60de34cDD5332d9AdE702]: https://rinkeby.etherscan.io/address/0x996A9DCe6247cd8AaFA60de34cDD5332d9AdE702
+[0x50eCEebb7360Efb93094dDEA692e04274E548b1d]: https://rinkeby.etherscan.io/address/0x50eCEebb7360Efb93094dDEA692e04274E548b1d
 [0xxxxxxxxx]: https://bscscan.com/address/0xxxxxxxxx
 [0xxxxxxxxx]: https://polygonscan.com/address/0xxxxxxxxx
 

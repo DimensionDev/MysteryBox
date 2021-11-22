@@ -9,6 +9,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 contract WhitelistQlf is OwnableUpgradeable {
     uint32 public version;
     mapping(address => bool) public white_list;
+    mapping(address => bool) public admin;
 
     function initialize() public initializer
     {
@@ -16,13 +17,21 @@ contract WhitelistQlf is OwnableUpgradeable {
         version = 1;
     }
 
-    function add_white_list(address[] memory addrs) external onlyOwner {
+    function addAdmin(address[] memory addrs) external onlyOwner {
+        for (uint256 i = 0; i < addrs.length; i++) {
+            admin[addrs[i]] = true;
+        }
+    }
+
+    function addWhitelist(address[] memory addrs) external {
+        require(admin[msg.sender] || msg.sender == owner(), "not admin");
         for (uint256 i = 0; i < addrs.length; i++) {
             white_list[addrs[i]] = true;
         }
     }
 
-    function remove_white_list(address[] memory addrs) external onlyOwner {
+    function removeWhitelist(address[] memory addrs) external {
+        require(admin[msg.sender] || msg.sender == owner(), "not admin");
         for (uint256 i = 0; i < addrs.length; i++) {
             white_list[addrs[i]] = false;
         }
@@ -38,9 +47,9 @@ contract WhitelistQlf is OwnableUpgradeable {
             string memory error_msg
         )
     {
-        if (!white_list[account]) {
-            return (false, "not whitelisted");
+        if (white_list[account] || admin[account]) {
+            return (true, "");
         }
-        return (true, "");
+        return (false, "not whitelisted");
     }
 }
