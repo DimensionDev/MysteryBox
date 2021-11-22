@@ -211,7 +211,10 @@ contract MysteryBox is OwnableUpgradeable {
         require(!(box.canceled), "sale canceled");
 
         if (box.holder_min_token_amount > 0) {
-            require(IERC20(holderTokenAddr).balanceOf(msg.sender) >= box.holder_min_token_amount, "not holding enough token");
+            require(
+                IERC20(holderTokenAddr).balanceOf(msg.sender) >= box.holder_min_token_amount,
+                "not holding enough token"
+            );
         }
 
         if (box.qualification != address(0)) {

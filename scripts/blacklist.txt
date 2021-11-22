@@ -1,0 +1,16 @@
+0x86812da3a623ab9606976078588b80c315e55fa3 is a contract
+0x69af81e73a73b40adf4f3d4223cd9b1ece623074 is a contract
+0xa40bb1c47f6dd27142a2bd7c93bfa98db9d1f5c5 is a contract
+0x31fa985bb0c282a814e7f3f0dce88b2a44197f60 is a contract
+0x674bdf20a0f284d710bc40872100128e2d66bd3f is a contract
+0x88ad09518695c6c3712ac10a214be5109a655671 is a contract
+0xde21f729137c5af1b01d73af1dc21effa2b8a0d6 is a contract
+0x4d246be90c2f36730bb853ad41d0a189061192d3 is a contract
+0x66bb15df3f9b4b68109799ab5d89bc42d07113f2 is a contract
+0x9a06cbd76d8bd043dba1530be4686fd298e4b464 is a contract
+0x1f91969bce00d7bd2939fbb9cdaf96d9b50fac61 is a contract
+0x247e63265b360cd389e1194ec9561fa9ab26dcbe is a contract
+0xd25d84b989bfafc2c77ab1d4fa1a04fc0eea9d24 is a contract, ETH
+0x40ec5b33f54e0e8a33a975908c5ba1c14e5bbbdf is a contract, ETH
+0x9a2d4f269a9b5d2a9a7b0635f505bdab03f2c928 is a contract, ETH
+0xb76e40277b79b78dfa954cbec863d0e4fd0656ca is a contract, ETH
