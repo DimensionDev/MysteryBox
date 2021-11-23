@@ -114,7 +114,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             });
         }
     } else {
-        if (false) {
+        if (true) {
             // upgrade contract
             const implMysteryBox = await ethers.getContractFactory('MysteryBox');
             const instance = await upgrades.upgradeProxy(deployedContractAddress[network].MysteryBox, implMysteryBox);
@@ -127,7 +127,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
                 constructorArguments: [],
             });
         }
-        if (true) {
+        if (false) {
             // upgrade contract
             const implWhitelistQlf = await ethers.getContractFactory('WhitelistQlf');
             const instance = await upgrades.upgradeProxy(

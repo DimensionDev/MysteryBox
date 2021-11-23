@@ -1066,6 +1066,13 @@ describe('MysteryBox', () => {
             'Ownable: caller is not the owner',
         );
         await mbContract.connect(user_test).createBox(...Object.values(parameter));
+
+        await expect(mbContract.connect(user_test).removeWhitelist([user_test.address])).to.be.rejectedWith('not admin');
+        await mbContract.connect(user_1).removeWhitelist([user_test.address]);
+        expect(await mbContract.whitelist(user_test.address)).to.be.eq(false);
+        await expect(mbContract.connect(user_test).createBox(...Object.values(parameter))).to.be.rejectedWith(
+            'not whitelisted',
+        );
     });
 
     it('Should whitelist qualification work', async () => {
@@ -1080,7 +1087,7 @@ describe('MysteryBox', () => {
             const result = parsedLog.args;
             open_parameters.box_id = result.box_id;
         }
-        await whitelistQlfContract.add_white_list([user_1.address]);
+        await whitelistQlfContract.addWhitelist([user_1.address]);
         await mbContract.connect(user_1).openBox(...Object.values(open_parameters), txParameters);
         await expect(
             mbContract.connect(user_2).openBox(...Object.values(open_parameters), txParameters),
