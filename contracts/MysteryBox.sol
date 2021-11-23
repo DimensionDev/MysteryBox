@@ -431,6 +431,13 @@ contract MysteryBox is OwnableUpgradeable {
         }
     }
 
+    function removeWhitelist(address[] memory addrs) external {
+        require(admin[msg.sender] || msg.sender == owner(), "not admin");
+        for (uint256 i = 0; i < addrs.length; i++) {
+            whitelist[addrs[i]] = false;
+        }
+    }
+
     function _random() internal view returns (uint256 rand) {
         uint256 blocknumber = block.number;
         uint256 random_gap = uint256(keccak256(abi.encodePacked(blockhash(blocknumber-1), msg.sender))) % 255;
