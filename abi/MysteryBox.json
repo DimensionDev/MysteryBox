@@ -304,6 +304,11 @@
           "type": "address"
         },
         {
+          "internalType": "address",
+          "name": "holder_token_addr",
+          "type": "address"
+        },
+        {
           "internalType": "uint256",
           "name": "holder_min_token_amount",
           "type": "uint256"
@@ -340,6 +345,40 @@
           "type": "string"
         },
         {
+          "internalType": "uint32",
+          "name": "personal_limit",
+          "type": "uint32"
+        },
+        {
+          "internalType": "address",
+          "name": "qualification",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "holder_token_addr",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "holder_min_token_amount",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "box_id",
+          "type": "uint256"
+        }
+      ],
+      "name": "getBoxStatus",
+      "outputs": [
+        {
           "components": [
             {
               "internalType": "address",
@@ -362,11 +401,6 @@
           "type": "tuple[]"
         },
         {
-          "internalType": "uint32",
-          "name": "personal_limit",
-          "type": "uint32"
-        },
-        {
           "internalType": "bool",
           "name": "started",
           "type": "bool"
@@ -377,6 +411,11 @@
           "type": "bool"
         },
         {
+          "internalType": "bool",
+          "name": "canceled",
+          "type": "bool"
+        },
+        {
           "internalType": "uint256",
           "name": "remaining",
           "type": "uint256"
@@ -384,21 +423,6 @@
         {
           "internalType": "uint256",
           "name": "total",
-          "type": "uint256"
-        },
-        {
-          "internalType": "address",
-          "name": "qualification",
-          "type": "address"
-        },
-        {
-          "internalType": "bool",
-          "name": "canceled",
-          "type": "bool"
-        },
-        {
-          "internalType": "uint256",
-          "name": "holder_min_token_amount",
           "type": "uint256"
         }
       ],
@@ -460,19 +484,6 @@
     },
     {
       "inputs": [],
-      "name": "holderTokenAddr",
-      "outputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
       "name": "initialize",
       "outputs": [],
       "stateMutability": "nonpayable",
@@ -520,21 +531,21 @@
       "type": "function"
     },
     {
-      "inputs": [],
-      "name": "renounceOwnership",
+      "inputs": [
+        {
+          "internalType": "address[]",
+          "name": "addrs",
+          "type": "address[]"
+        }
+      ],
+      "name": "removeWhitelist",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
     },
     {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "addr",
-          "type": "address"
-        }
-      ],
-      "name": "setMaskTokenAddr",
+      "inputs": [],
+      "name": "renounceOwnership",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"

@@ -35,6 +35,7 @@ contract MysteryBox is OwnableUpgradeable {
         uint32 personal_limit;
         uint32 start_time;
         uint32 end_time;
+        bool canceled;
         // sell all NFT(s) owned
         bool sell_all;
         uint256[] nft_id_list;
@@ -42,8 +43,10 @@ contract MysteryBox is OwnableUpgradeable {
         mapping(address => uint256[]) purchased_nft;
         // total number of NFT(s)
         uint256 total;
-        bool canceled;
-        // `mask holder`
+
+        // `token address`
+        address holder_token_addr;
+        // `token holder`
         uint256 holder_min_token_amount;
     }
 
@@ -82,7 +85,6 @@ contract MysteryBox is OwnableUpgradeable {
     mapping(uint256 => Box) private box_by_id;
     mapping(address => bool) public admin;
     mapping(address => bool) public whitelist;
-    address public holderTokenAddr;
 
     function initialize() public initializer {
         __Ownable_init();
@@ -98,6 +100,7 @@ contract MysteryBox is OwnableUpgradeable {
         bool sell_all,
         uint256[] memory nft_id_list,
         address qualification,
+        address holder_token_addr,
         uint256 holder_min_token_amount
     )
         external
@@ -125,10 +128,10 @@ contract MysteryBox is OwnableUpgradeable {
         box.end_time = end_time;
         box.sell_all = sell_all;
         box.qualification = qualification;
+        box.holder_token_addr = holder_token_addr;
         box.holder_min_token_amount = holder_min_token_amount;
-        if (holderTokenAddr == address(0)) {
-            // ETH mainnet mask token address, save 1 transaction
-            holderTokenAddr = address(0x69af81e73A73B40adF4f3d4223Cd9b1ECE623074);
+        if (holder_token_addr != address(0)) {
+            require(IERC20(holder_token_addr).totalSupply() > 0, "Not a valid ERC20 token address");
         }
 
         if (sell_all) {
@@ -210,9 +213,9 @@ contract MysteryBox is OwnableUpgradeable {
         require((box.purchased_nft[msg.sender].length + amount) <= box.personal_limit, "exceeds personal limit");
         require(!(box.canceled), "sale canceled");
 
-        if (box.holder_min_token_amount > 0) {
+        if (box.holder_min_token_amount > 0 && box.holder_token_addr != address(0)) {
             require(
-                IERC20(holderTokenAddr).balanceOf(msg.sender) >= box.holder_min_token_amount,
+                IERC20(box.holder_token_addr).balanceOf(msg.sender) >= box.holder_min_token_amount,
                 "not holding enough token"
             );
         }
@@ -335,14 +338,9 @@ contract MysteryBox is OwnableUpgradeable {
             address creator,
             address nft_address,
             string memory name,
-            PaymentInfo[] memory payment,
             uint32 personal_limit,
-            bool started,
-            bool expired,
-            uint256 remaining,
-            uint256 total,
             address qualification,
-            bool canceled,
+            address holder_token_addr,
             uint256 holder_min_token_amount
         )
     {
@@ -350,22 +348,37 @@ contract MysteryBox is OwnableUpgradeable {
         creator = box.creator;
         nft_address = box.nft_address;
         name = box.name;
-        payment = box.payment;
         personal_limit = box.personal_limit;
+        qualification = box.qualification;
+        holder_token_addr = box.holder_token_addr;
+        holder_min_token_amount = box.holder_min_token_amount;
+    }
+
+    function getBoxStatus(uint256 box_id)
+        external
+        view
+        returns (
+            PaymentInfo[] memory payment,
+            bool started,
+            bool expired,
+            bool canceled,
+            uint256 remaining,
+            uint256 total
+        )
+    {
+        Box storage box = box_by_id[box_id];
+        payment = box.payment;
         started = block.timestamp > box.start_time;
         expired = block.timestamp > box.end_time;
+        canceled = box.canceled;
 
         if (box.sell_all) {
-            remaining = IERC721(nft_address).balanceOf(creator);
+            remaining = IERC721(box.nft_address).balanceOf(box.creator);
         }
         else {
             remaining = box.nft_id_list.length;
         }
-
         total = box.total;
-        qualification = box.qualification;
-        canceled = box.canceled;
-        holder_min_token_amount = box.holder_min_token_amount;
     }
 
     function getPurchasedNft(uint256 box_id, address customer)
@@ -412,10 +425,6 @@ contract MysteryBox is OwnableUpgradeable {
                 nft_id_list[i] = box.nft_id_list[token_index];
             }
         }
-    }
-
-    function setMaskTokenAddr(address addr) external onlyOwner {
-        holderTokenAddr = addr;
     }
 
     function addAdmin(address[] memory addrs) external onlyOwner {

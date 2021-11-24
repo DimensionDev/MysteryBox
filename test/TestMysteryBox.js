@@ -175,11 +175,11 @@ describe('MysteryBox', () => {
             expect(result).to.have.property('box_id');
             not_sell_all_box_id = result.box_id;
 
-            const boxInfo = await mbContract.getBoxInfo(not_sell_all_box_id);
-            expect(boxInfo).to.have.property('remaining');
-            expect(boxInfo.remaining.eq(not_sell_all_nft_id_list.length)).to.be.true;
-            expect(boxInfo.total.eq(not_sell_all_nft_id_list.length)).to.be.true;
-            expect(boxInfo).to.have.property('canceled').that.to.be.eq(false);
+            const boxStatus = await mbContract.getBoxStatus(not_sell_all_box_id);
+            expect(boxStatus).to.have.property('remaining');
+            expect(boxStatus.remaining.eq(not_sell_all_nft_id_list.length)).to.be.true;
+            expect(boxStatus.total.eq(not_sell_all_nft_id_list.length)).to.be.true;
+            expect(boxStatus).to.have.property('canceled').that.to.be.eq(false);
 
             const nftList = await mbContract.getNftListForSale(not_sell_all_box_id, 0, parameter.nft_id_list.length);
             expect(nftList.map((id) => id.toString())).to.eql(parameter.nft_id_list.map((id) => id.toString()));
@@ -235,11 +235,11 @@ describe('MysteryBox', () => {
             const nftList = await mbContract.getNftListForSale(box_id, 0, mintNftAmount);
             expect(nftList.map((id) => id.toString())).to.eql(nft_id_list.map((id) => id.toString()));
 
-            const boxInfo = await mbContract.getBoxInfo(box_id);
-            expect(boxInfo).to.have.property('remaining');
-            expect(boxInfo.remaining.eq(nft_id_list.length)).to.be.true;
-            expect(boxInfo.total.eq(nft_id_list.length)).to.be.true;
-            expect(boxInfo).to.have.property('canceled').that.to.be.eq(false);
+            const boxStatus = await mbContract.getBoxStatus(box_id);
+            expect(boxStatus).to.have.property('remaining');
+            expect(boxStatus.remaining.eq(nft_id_list.length)).to.be.true;
+            expect(boxStatus.total.eq(nft_id_list.length)).to.be.true;
+            expect(boxStatus).to.have.property('canceled').that.to.be.eq(false);
         }
 
         const append_nft_id_list = [];
@@ -271,19 +271,19 @@ describe('MysteryBox', () => {
             const final_nft_id_list = nft_id_list.concat(append_nft_id_list);
             const nftList = await mbContract.getNftListForSale(box_id, 0, mintNftAmount);
             expect(nftList.map((id) => id.toString())).to.eql(final_nft_id_list.map((id) => id.toString()));
-            const boxInfo = await mbContract.getBoxInfo(box_id);
-            expect(boxInfo).to.have.property('remaining');
-            expect(boxInfo.remaining.eq(final_nft_id_list.length)).to.be.true;
-            expect(boxInfo.total.eq(final_nft_id_list.length)).to.be.true;
-            expect(boxInfo).to.have.property('canceled').that.to.be.eq(false);
+            const boxStatus = await mbContract.getBoxStatus(box_id);
+            expect(boxStatus).to.have.property('remaining');
+            expect(boxStatus.remaining.eq(final_nft_id_list.length)).to.be.true;
+            expect(boxStatus.total.eq(final_nft_id_list.length)).to.be.true;
+            expect(boxStatus).to.have.property('canceled').that.to.be.eq(false);
         }
     });
 
     it('Should cancelBox work', async () => {
         {
-            const boxInfo = await mbContract.getBoxInfo(sell_all_box_id);
-            expect(boxInfo).to.have.property('started').that.to.be.eq(true);
-            expect(boxInfo).to.have.property('canceled').that.to.be.eq(false);
+            const boxStatus = await mbContract.getBoxStatus(sell_all_box_id);
+            expect(boxStatus).to.have.property('started').that.to.be.eq(true);
+            expect(boxStatus).to.have.property('canceled').that.to.be.eq(false);
             await expect(mbContract.connect(user_2).cancelBox(sell_all_box_id)).to.be.rejectedWith('not box owner');
             await expect(mbContract.connect(user_1).cancelBox(sell_all_box_id)).to.be.rejectedWith('sale started');
         }
@@ -298,9 +298,9 @@ describe('MysteryBox', () => {
             const result = parsedLog.args;
             open_parameter.box_id = result.box_id;
             {
-                const boxInfo = await mbContract.getBoxInfo(open_parameter.box_id);
-                expect(boxInfo).to.have.property('started').that.to.be.eq(false);
-                expect(boxInfo).to.have.property('canceled').that.to.be.eq(false);
+                const boxStatus = await mbContract.getBoxStatus(open_parameter.box_id);
+                expect(boxStatus).to.have.property('started').that.to.be.eq(false);
+                expect(boxStatus).to.have.property('canceled').that.to.be.eq(false);
             }
             await expect(mbContract.connect(user_2).cancelBox(open_parameter.box_id)).to.be.rejectedWith(
                 'not box owner',
@@ -310,9 +310,9 @@ describe('MysteryBox', () => {
                 'sale canceled already',
             );
             {
-                const boxInfo = await mbContract.getBoxInfo(open_parameter.box_id);
-                expect(boxInfo).to.have.property('started').that.to.be.eq(false);
-                expect(boxInfo).to.have.property('canceled').that.to.be.eq(true);
+                const boxStatus = await mbContract.getBoxStatus(open_parameter.box_id);
+                expect(boxStatus).to.have.property('started').that.to.be.eq(false);
+                expect(boxStatus).to.have.property('canceled').that.to.be.eq(true);
             }
             await helper.advanceTimeAndBlock(seconds_in_a_day);
             await expect(
@@ -371,8 +371,8 @@ describe('MysteryBox', () => {
             open_parameter.box_id = result.box_id;
         }
         {
-            const boxInfo = await mbContract.getBoxInfo(open_parameter.box_id);
-            expect(boxInfo).to.have.property('started').that.to.be.eq(false);
+            const boxStatus = await mbContract.getBoxStatus(open_parameter.box_id);
+            expect(boxStatus).to.have.property('started').that.to.be.eq(false);
         }
         await expect(
             mbContract.connect(user_2).openBox(...Object.values(open_parameter), txParameters),
@@ -387,27 +387,29 @@ describe('MysteryBox', () => {
             expect(boxInfo).to.have.property('creator').that.to.be.eq(user_1.address);
             expect(boxInfo).to.have.property('nft_address').that.to.be.eq(enumerableNftContract.address);
             expect(boxInfo).to.have.property('name').that.to.be.eq(createBoxPara.name);
-            expect(boxInfo).to.have.property('payment');
-            expect(boxInfo.payment.map((info) => info.token_addr.toString())).to.eql([
+            expect(boxInfo).to.have.property('personal_limit').that.to.be.eq(createBoxPara.personal_limit);
+            expect(boxInfo).to.have.property('qualification').that.to.be.eq(createBoxPara.qualification);
+
+            const boxStatus = await mbContract.getBoxStatus(sell_all_box_id);
+            expect(boxStatus).to.have.property('payment');
+            expect(boxStatus.payment.map((info) => info.token_addr.toString())).to.eql([
                 createBoxPara.payment[0][0].toString(),
                 createBoxPara.payment[1][0].toString(),
                 createBoxPara.payment[2][0].toString(),
                 createBoxPara.payment[3][0].toString(),
             ]);
-            expect(boxInfo.payment.map((info) => info.price.toString())).to.eql([
+            expect(boxStatus.payment.map((info) => info.price.toString())).to.eql([
                 createBoxPara.payment[0][1].toString(),
                 createBoxPara.payment[1][1].toString(),
                 createBoxPara.payment[2][1].toString(),
                 createBoxPara.payment[3][1].toString(),
             ]);
-            expect(boxInfo.payment.map((info) => info.receivable_amount.toString())).to.eql(['0', '0', '0', '0']);
-            expect(boxInfo).to.have.property('personal_limit').that.to.be.eq(createBoxPara.personal_limit);
-            expect(boxInfo).to.have.property('started').that.to.be.eq(true);
-            expect(boxInfo).to.have.property('expired').that.to.be.eq(false);
-            expect(boxInfo).to.have.property('remaining');
-            expect(boxInfo.remaining.eq(expectedRemaining)).to.be.true;
-            expect(boxInfo.total.eq(expectedRemaining)).to.be.true;
-            expect(boxInfo).to.have.property('qualification').that.to.be.eq(createBoxPara.qualification);
+            expect(boxStatus.payment.map((info) => info.receivable_amount.toString())).to.eql(['0', '0', '0', '0']);
+            expect(boxStatus).to.have.property('started').that.to.be.eq(true);
+            expect(boxStatus).to.have.property('expired').that.to.be.eq(false);
+            expect(boxStatus).to.have.property('remaining');
+            expect(boxStatus.remaining.eq(expectedRemaining)).to.be.true;
+            expect(boxStatus.total.eq(expectedRemaining)).to.be.true;
         }
         const tx_parameters = {
             value: txParameters.value,
@@ -438,34 +440,36 @@ describe('MysteryBox', () => {
         }
         {
             const boxInfo = await mbContract.getBoxInfo(sell_all_box_id);
+            const boxStatus = await mbContract.getBoxStatus(sell_all_box_id);
             expect(boxInfo).to.have.property('creator').that.to.be.eq(user_1.address);
             expect(boxInfo).to.have.property('nft_address').that.to.be.eq(enumerableNftContract.address);
             expect(boxInfo).to.have.property('name').that.to.be.eq(createBoxPara.name);
-            expect(boxInfo).to.have.property('payment');
-            expect(boxInfo.payment.map((info) => info.token_addr.toString())).to.eql([
+            expect(boxInfo).to.have.property('personal_limit').that.to.be.eq(createBoxPara.personal_limit);
+
+            expect(boxStatus).to.have.property('payment');
+            expect(boxStatus.payment.map((info) => info.token_addr.toString())).to.eql([
                 createBoxPara.payment[0][0].toString(),
                 createBoxPara.payment[1][0].toString(),
                 createBoxPara.payment[2][0].toString(),
                 createBoxPara.payment[3][0].toString(),
             ]);
-            expect(boxInfo.payment.map((info) => info.price.toString())).to.eql([
+            expect(boxStatus.payment.map((info) => info.price.toString())).to.eql([
                 createBoxPara.payment[0][1].toString(),
                 createBoxPara.payment[1][1].toString(),
                 createBoxPara.payment[2][1].toString(),
                 createBoxPara.payment[3][1].toString(),
             ]);
-            expect(boxInfo.payment.map((info) => info.receivable_amount.toString())).to.eql([
+            expect(boxStatus.payment.map((info) => info.receivable_amount.toString())).to.eql([
                 createBoxPara.payment[0][1].toString(),
                 '0',
                 '0',
                 '0',
             ]);
-            expect(boxInfo).to.have.property('personal_limit').that.to.be.eq(createBoxPara.personal_limit);
-            expect(boxInfo).to.have.property('started').that.to.be.eq(true);
-            expect(boxInfo).to.have.property('expired').that.to.be.eq(false);
-            expect(boxInfo).to.have.property('remaining');
-            expect(boxInfo.remaining.eq(expectedRemaining.sub(1))).to.be.true;
-            expect(boxInfo.total.eq(expectedRemaining)).to.be.true;
+            expect(boxStatus).to.have.property('started').that.to.be.eq(true);
+            expect(boxStatus).to.have.property('expired').that.to.be.eq(false);
+            expect(boxStatus).to.have.property('remaining');
+            expect(boxStatus.remaining.eq(expectedRemaining.sub(1))).to.be.true;
+            expect(boxStatus.total.eq(expectedRemaining)).to.be.true;
         }
     });
 
@@ -487,8 +491,8 @@ describe('MysteryBox', () => {
             mbContract.connect(user_2).openBox(...Object.values(open_parameter), txParameters),
         ).to.be.rejectedWith('expired');
         {
-            const boxInfo = await mbContract.getBoxInfo(open_parameter.box_id);
-            expect(boxInfo).to.have.property('expired').that.to.be.eq(true);
+            const boxStatus = await mbContract.getBoxStatus(open_parameter.box_id);
+            expect(boxStatus).to.have.property('expired').that.to.be.eq(true);
         }
     });
 
@@ -629,14 +633,15 @@ describe('MysteryBox', () => {
         ).to.be.rejectedWith('exceeds personal limit');
         {
             const boxInfo = await mbContract.getBoxInfo(parameters.box_id);
+            const boxStatus = await mbContract.getBoxStatus(parameters.box_id);
             expect(boxInfo).to.have.property('creator').that.to.be.eq(user_1.address);
             expect(boxInfo).to.have.property('nft_address').that.to.be.eq(enumerableNftContract.address);
             expect(boxInfo).to.have.property('name').that.to.be.eq(createBoxPara.name);
-            expect(boxInfo).to.have.property('started').that.to.be.eq(true);
-            expect(boxInfo).to.have.property('expired').that.to.be.eq(false);
-            expect(boxInfo).to.have.property('remaining');
-            expect(boxInfo.remaining.eq(nftBalance.sub(MaxNumberOfNFT))).to.be.true;
-            expect(boxInfo.total.eq(nftBalance)).to.be.true;
+            expect(boxStatus).to.have.property('started').that.to.be.eq(true);
+            expect(boxStatus).to.have.property('expired').that.to.be.eq(false);
+            expect(boxStatus).to.have.property('remaining');
+            expect(boxStatus.remaining.eq(nftBalance.sub(MaxNumberOfNFT))).to.be.true;
+            expect(boxStatus.total.eq(nftBalance)).to.be.true;
         }
     });
 
@@ -686,35 +691,37 @@ describe('MysteryBox', () => {
         expect(contractEthBalanceAfterOpen.eq(contractEthBalanceBeforeOpen.add(totalPaymentEth))).to.be.true;
         {
             const boxInfo = await mbContract.getBoxInfo(sell_all_box_id);
+            const boxStatus = await mbContract.getBoxStatus(sell_all_box_id);
             expect(boxInfo).to.have.property('creator').that.to.be.eq(user_1.address);
             expect(boxInfo).to.have.property('nft_address').that.to.be.eq(enumerableNftContract.address);
             expect(boxInfo).to.have.property('name').that.to.be.eq(createBoxPara.name);
-            expect(boxInfo).to.have.property('payment');
-            expect(boxInfo.payment.map((info) => info.receivable_amount.toString())).to.eql([
+            expect(boxInfo).to.have.property('personal_limit').that.to.be.eq(createBoxPara.personal_limit);
+
+            expect(boxStatus).to.have.property('payment');
+            expect(boxStatus.payment.map((info) => info.receivable_amount.toString())).to.eql([
                 totalPaymentEth.toString(),
                 '0',
                 '0',
                 '0',
             ]);
-            expect(boxInfo).to.have.property('personal_limit').that.to.be.eq(createBoxPara.personal_limit);
-            expect(boxInfo).to.have.property('started').that.to.be.eq(true);
-            expect(boxInfo).to.have.property('expired').that.to.be.eq(false);
-            expect(boxInfo).to.have.property('remaining');
-            expect(boxInfo.remaining.eq(0)).to.be.true;
-            expect(boxInfo.total.eq(totalNFT)).to.be.true;
+            expect(boxStatus).to.have.property('started').that.to.be.eq(true);
+            expect(boxStatus).to.have.property('expired').that.to.be.eq(false);
+            expect(boxStatus).to.have.property('remaining');
+            expect(boxStatus.remaining.eq(0)).to.be.true;
+            expect(boxStatus.total.eq(totalNFT)).to.be.true;
         }
         await mbContract.connect(user_1).claimPayment([open_parameters.box_id]);
         {
-            const boxInfo = await mbContract.getBoxInfo(sell_all_box_id);
-            expect(boxInfo).to.have.property('payment');
-            expect(boxInfo.payment.map((info) => info.receivable_amount.toString())).to.eql(['0', '0', '0', '0']);
+            const boxStatus = await mbContract.getBoxStatus(sell_all_box_id);
+            expect(boxStatus).to.have.property('payment');
+            expect(boxStatus.payment.map((info) => info.receivable_amount.toString())).to.eql(['0', '0', '0', '0']);
         }
     });
 
     it('Should sell "not_sell_all" enumerableNftContract work', async () => {
-        const boxInfo = await mbContract.getBoxInfo(not_sell_all_box_id);
-        expect(boxInfo).to.have.property('remaining');
-        const totalNFT = boxInfo.remaining;
+        const boxStatus = await mbContract.getBoxStatus(not_sell_all_box_id);
+        expect(boxStatus).to.have.property('remaining');
+        const totalNFT = boxStatus.remaining;
         {
             await testTokenAContract.transfer(signers[5].address, transferAmount);
             await testTokenAContract.connect(signers[5]).approve(mbContract.address, transferAmount);
@@ -750,17 +757,17 @@ describe('MysteryBox', () => {
         const contractTokenBalanceAfter = await testTokenAContract.balanceOf(mbContract.address);
         expect(contractTokenBalanceAfter.eq(contractTokenBalanceBefore.add(paymentTokenAAmount))).to.be.true;
         {
-            const boxInfo = await mbContract.getBoxInfo(not_sell_all_box_id);
-            expect(boxInfo).to.have.property('payment');
-            expect(boxInfo.payment.map((info) => info.receivable_amount.toString())).to.eql([
+            const boxStatus = await mbContract.getBoxStatus(not_sell_all_box_id);
+            expect(boxStatus).to.have.property('payment');
+            expect(boxStatus.payment.map((info) => info.receivable_amount.toString())).to.eql([
                 '0',
                 paymentTokenAAmount.toString(),
                 '0',
                 '0',
             ]);
-            expect(boxInfo).to.have.property('remaining');
-            expect(boxInfo.remaining.eq(0)).to.be.true;
-            expect(boxInfo.total.eq(not_sell_all_nft_id_list.length)).to.be.true;
+            expect(boxStatus).to.have.property('remaining');
+            expect(boxStatus.remaining.eq(0)).to.be.true;
+            expect(boxStatus.total.eq(not_sell_all_nft_id_list.length)).to.be.true;
         }
     });
 
@@ -795,10 +802,10 @@ describe('MysteryBox', () => {
             box_id = result.box_id;
         }
 
-        const boxInfo = await mbContract.getBoxInfo(box_id);
-        expect(boxInfo).to.have.property('remaining');
-        expect(total.toString()).to.be.eq(boxInfo.remaining.toString());
-        const totalNFT = boxInfo.remaining;
+        const boxStatus = await mbContract.getBoxStatus(not_sell_all_box_id);
+        expect(boxStatus).to.have.property('remaining');
+        expect(total.toString()).to.be.eq(boxStatus.remaining.toString());
+        const totalNFT = boxStatus.remaining;
         {
             await testTokenAContract.transfer(signers[5].address, transferAmount);
             await testTokenAContract.connect(signers[5]).approve(mbContract.address, transferAmount);
@@ -834,24 +841,24 @@ describe('MysteryBox', () => {
         const contractTokenBalanceAfter = await testTokenAContract.balanceOf(mbContract.address);
         expect(contractTokenBalanceAfter.eq(contractTokenBalanceBefore.add(paymentTokenAAmount))).to.be.true;
         {
-            const boxInfo = await mbContract.getBoxInfo(box_id);
-            expect(boxInfo).to.have.property('payment');
-            expect(boxInfo.payment.map((info) => info.receivable_amount.toString())).to.eql([
+            const boxStatus = await mbContract.getBoxStatus(box_id);
+            expect(boxStatus).to.have.property('payment');
+            expect(boxStatus.payment.map((info) => info.receivable_amount.toString())).to.eql([
                 '0',
                 paymentTokenAAmount.toString(),
                 '0',
                 '0',
             ]);
-            expect(boxInfo).to.have.property('remaining');
-            expect(boxInfo.remaining.eq(0)).to.be.true;
-            expect(boxInfo.total.eq(totalNFT)).to.be.true;
+            expect(boxStatus).to.have.property('remaining');
+            expect(boxStatus.remaining.eq(0)).to.be.true;
+            expect(boxStatus.total.eq(totalNFT)).to.be.true;
         }
     });
 
     it('Should work if "NFT tokens transfered elsewhere"', async () => {
-        const boxInfo = await mbContract.getBoxInfo(not_sell_all_box_id);
-        expect(boxInfo).to.have.property('remaining');
-        expect(boxInfo.remaining.eq(not_sell_all_nft_id_list.length)).to.be.true;
+        const boxStatus = await mbContract.getBoxStatus(not_sell_all_box_id);
+        expect(boxStatus).to.have.property('remaining');
+        expect(boxStatus.remaining.eq(not_sell_all_nft_id_list.length)).to.be.true;
 
         // transfer NFT(s) elsewhere, remaining random numebr of NFT(s)
         const max = MaxNumberOfNFT / 2;
@@ -871,8 +878,8 @@ describe('MysteryBox', () => {
         parameters.box_id = not_sell_all_box_id;
 
         while (true) {
-            const boxInfo = await mbContract.getBoxInfo(not_sell_all_box_id);
-            if (boxInfo.remaining.eq(0)) {
+            const boxStatus = await mbContract.getBoxStatus(not_sell_all_box_id);
+            if (boxStatus.remaining.eq(0)) {
                 break;
             }
 
@@ -895,8 +902,8 @@ describe('MysteryBox', () => {
 
     it('Should claimPayment work', async () => {
         {
-            const boxInfo = await mbContract.getBoxInfo(not_sell_all_box_id);
-            expect(boxInfo.payment.map((info) => info.receivable_amount.toString())).to.eql(['0', '0', '0', '0']);
+            const boxStatus = await mbContract.getBoxStatus(not_sell_all_box_id);
+            expect(boxStatus.payment.map((info) => info.receivable_amount.toString())).to.eql(['0', '0', '0', '0']);
         }
         const tx_parameters = {
             value: txParameters.value,
@@ -907,8 +914,8 @@ describe('MysteryBox', () => {
         const paymentEthAmount = createBoxPara.payment[0][1];
         const paymentTokenAAmount = createBoxPara.payment[1][1];
         {
-            const boxInfo = await mbContract.getBoxInfo(not_sell_all_box_id);
-            expect(boxInfo.payment.map((info) => info.receivable_amount.toString())).to.eql([
+            const boxStatus = await mbContract.getBoxStatus(not_sell_all_box_id);
+            expect(boxStatus.payment.map((info) => info.receivable_amount.toString())).to.eql([
                 paymentEthAmount.toString(),
                 '0',
                 '0',
@@ -918,8 +925,8 @@ describe('MysteryBox', () => {
         open_parameters.payment_token_index = 1;
         await mbContract.connect(user_2).openBox(...Object.values(open_parameters));
         {
-            const boxInfo = await mbContract.getBoxInfo(not_sell_all_box_id);
-            expect(boxInfo.payment.map((info) => info.receivable_amount.toString())).to.eql([
+            const boxStatus = await mbContract.getBoxStatus(not_sell_all_box_id);
+            expect(boxStatus.payment.map((info) => info.receivable_amount.toString())).to.eql([
                 paymentEthAmount.toString(),
                 paymentTokenAAmount.toString(),
                 '0',
@@ -931,8 +938,8 @@ describe('MysteryBox', () => {
             sell_all_open_parameters.box_id = sell_all_box_id;
             await mbContract.connect(user_2).openBox(...Object.values(sell_all_open_parameters), tx_parameters);
             {
-                const boxInfo = await mbContract.getBoxInfo(not_sell_all_box_id);
-                expect(boxInfo.payment.map((info) => info.receivable_amount.toString())).to.eql([
+                const boxStatus = await mbContract.getBoxStatus(not_sell_all_box_id);
+                expect(boxStatus.payment.map((info) => info.receivable_amount.toString())).to.eql([
                     paymentEthAmount.toString(),
                     paymentTokenAAmount.toString(),
                     '0',
@@ -940,8 +947,8 @@ describe('MysteryBox', () => {
                 ]);
             }
             {
-                const boxInfo = await mbContract.getBoxInfo(sell_all_box_id);
-                expect(boxInfo.payment.map((info) => info.receivable_amount.toString())).to.eql([
+                const boxStatus = await mbContract.getBoxStatus(sell_all_box_id);
+                expect(boxStatus.payment.map((info) => info.receivable_amount.toString())).to.eql([
                     paymentEthAmount.toString(),
                     '0',
                     '0',
@@ -963,9 +970,9 @@ describe('MysteryBox', () => {
         await helper.advanceTimeAndBlock(seconds_in_a_day * 90);
         await mbContract.connect(user_1).claimPayment([not_sell_all_box_id]);
         {
-            const boxInfo = await mbContract.getBoxInfo(not_sell_all_box_id);
+            const boxStatus = await mbContract.getBoxStatus(not_sell_all_box_id);
             // `claimPayment` can only claim payment in one of the boxes
-            expect(boxInfo.payment.map((info) => info.receivable_amount.toString())).to.eql(['0', '0', '0', '0']);
+            expect(boxStatus.payment.map((info) => info.receivable_amount.toString())).to.eql(['0', '0', '0', '0']);
         }
         const authorEthBalanceAfterClaim = await ethers.provider.getBalance(user_1.address);
         const contractEthBalanceAfterClaim = await ethers.provider.getBalance(mbContract.address);
@@ -979,9 +986,9 @@ describe('MysteryBox', () => {
         expect(contractTokenABalanceBeforeClaim.eq(contractTokenABalanceAfterClaim.add(paymentTokenAAmount))).to.be
             .true;
         {
-            const boxInfo = await mbContract.getBoxInfo(sell_all_box_id);
+            const boxStatus = await mbContract.getBoxStatus(sell_all_box_id);
             // `claimPayment` can only claim payment in one of the boxes
-            expect(boxInfo.payment.map((info) => info.receivable_amount.toString())).to.eql([
+            expect(boxStatus.payment.map((info) => info.receivable_amount.toString())).to.eql([
                 paymentEthAmount.toString(),
                 '0',
                 '0',
@@ -1008,17 +1015,13 @@ describe('MysteryBox', () => {
     });
 
     it('Should MaskHolder work', async () => {
-        await expect(mbContract.connect(user_1).setMaskTokenAddr(testMaskTokenContract.address)).to.be.rejectedWith(
-            'Ownable: caller is not the owner',
-        );
-        await mbContract.setMaskTokenAddr(testMaskTokenContract.address);
-
         expect((await testMaskTokenContract.balanceOf(contractCreator.address)).gt(0)).to.be.true;
         expect((await testMaskTokenContract.balanceOf(user_1.address)).eq(0)).to.be.true;
 
         const open_parameters = JSON.parse(JSON.stringify(openBoxParameters));
         {
             const parameter = JSON.parse(JSON.stringify(createBoxPara));
+            parameter.holder_token_addr = testMaskTokenContract.address;
             parameter.sell_all = true;
             parameter.holder_min_token_amount = holderMinAmount;
             await mbContract.connect(user_1).createBox(...Object.values(parameter));
@@ -1038,6 +1041,8 @@ describe('MysteryBox', () => {
         const boxInfo = await mbContract.getBoxInfo(open_parameters.box_id);
         expect(boxInfo).to.have.property('holder_min_token_amount');
         expect(boxInfo.holder_min_token_amount.eq(holderMinAmount)).to.be.true;
+        expect(boxInfo).to.have.property('holder_token_addr');
+        expect(boxInfo.holder_token_addr).to.be.eq(testMaskTokenContract.address);
     });
 
     it('Should addAdmin/addWhitelist work', async () => {
@@ -1067,7 +1072,9 @@ describe('MysteryBox', () => {
         );
         await mbContract.connect(user_test).createBox(...Object.values(parameter));
 
-        await expect(mbContract.connect(user_test).removeWhitelist([user_test.address])).to.be.rejectedWith('not admin');
+        await expect(mbContract.connect(user_test).removeWhitelist([user_test.address])).to.be.rejectedWith(
+            'not admin',
+        );
         await mbContract.connect(user_1).removeWhitelist([user_test.address]);
         expect(await mbContract.whitelist(user_test.address)).to.be.eq(false);
         await expect(mbContract.connect(user_test).createBox(...Object.values(parameter))).to.be.rejectedWith(
