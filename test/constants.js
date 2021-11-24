@@ -30,7 +30,7 @@ const MaskNFTInitParameters = {
 
 const CreateBoxParameters = {
     mainnet: {
-        nft_address: '0x0000000000000000000000000000000000000000',
+        nft_address: ZeroAddress,
         name: 'Mask Test NFT Sale',
         payment: [
             // 0.1 ETH
@@ -44,6 +44,7 @@ const CreateBoxParameters = {
         sell_all: true,
         nft_id_list: [],
         qualification: ZeroAddress,
+        holder_token_addr: ZeroAddress,
         holder_min_token_amount: 0,
     },
     rinkeby: {
@@ -61,10 +62,11 @@ const CreateBoxParameters = {
         sell_all: true,
         nft_id_list: [],
         qualification: ZeroAddress,
+        holder_token_addr: ZeroAddress,
         holder_min_token_amount: 0,
     },
     matic_mainnet: {
-        nft_address: '0x0000000000000000000000000000000000000000',
+        nft_address: ZeroAddress,
         name: 'Mask Test NFT Sale',
         payment: [
             // 0.1 ETH
@@ -78,6 +80,7 @@ const CreateBoxParameters = {
         sell_all: true,
         nft_id_list: [],
         qualification: ZeroAddress,
+        holder_token_addr: ZeroAddress,
         holder_min_token_amount: 0,
     },
 };

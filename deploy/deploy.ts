@@ -22,7 +22,7 @@ const deployedContractAddress: DeployedContractAddress = {
     },
     rinkeby: {
         MaskEnumerableNFT: '0x0000000000000000000000000000000000000000',
-        MysteryBox: '0xbFcf8210F5B6764D86a9C5252218ad627A6a949d',
+        MysteryBox: '0xc3D410eDd9C54662fa3D87731bfAf33EBbf04A39',
         WhitelistQlf: '0x50eCEebb7360Efb93094dDEA692e04274E548b1d',
         SigVerifyQlf: '0x0000000000000000000000000000000000000000',
     },

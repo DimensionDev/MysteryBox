@@ -57,13 +57,13 @@ Using the [`helper.js`](helper.js) script to set up the deployed smart contracts
 | ------- | ---------------------------------------------------------------------------------------- |
 | Mainnet | [0x0dFB34D213f613Dda67a2924F60b5301d42ABFb7][0x0dFB34D213f613Dda67a2924F60b5301d42ABFb7] |
 | Ropsten | [0xdB59446B15AB6e97A4452BA3e23dD03E5004c854][0xdB59446B15AB6e97A4452BA3e23dD03E5004c854] |
-| Rinkeby | [0xbFcf8210F5B6764D86a9C5252218ad627A6a949d][0xbFcf8210F5B6764D86a9C5252218ad627A6a949d] |
+| Rinkeby | [0xc3D410eDd9C54662fa3D87731bfAf33EBbf04A39][0xc3D410eDd9C54662fa3D87731bfAf33EBbf04A39] |
 | BSC     | [0xxxxxxxxx][0xxxxxxxxx]                                                                 |
 | Matic   | [0xxxxxxxxx][0xxxxxxxxx]                                                                 |
 
 [0x0dFB34D213f613Dda67a2924F60b5301d42ABFb7]: https://etherscan.io/address/0x0dFB34D213f613Dda67a2924F60b5301d42ABFb7
 [0xdB59446B15AB6e97A4452BA3e23dD03E5004c854]: https://ropsten.etherscan.io/address/0xdB59446B15AB6e97A4452BA3e23dD03E5004c854
-[0xbFcf8210F5B6764D86a9C5252218ad627A6a949d]: https://rinkeby.etherscan.io/address/0xbFcf8210F5B6764D86a9C5252218ad627A6a949d
+[0xc3D410eDd9C54662fa3D87731bfAf33EBbf04A39]: https://rinkeby.etherscan.io/address/0xc3D410eDd9C54662fa3D87731bfAf33EBbf04A39
 [0xxxxxxxxx]: https://bscscan.com/address/0xxxxxxxxx
 [0xxxxxxxxx]: https://polygonscan.com/address/0xxxxxxxxx
 
