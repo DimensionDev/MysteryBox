@@ -66,11 +66,11 @@ const CreateBoxParameters = {
         holder_min_token_amount: 0,
     },
     matic_mainnet: {
-        nft_address: ZeroAddress,
+        nft_address: "0x49C2a3D93C4B94eAd101d9936f1ebCA634394a78",
         name: 'Mask Test NFT Sale',
         payment: [
-            // 0.1 ETH
-            [ZeroAddress, ethers.utils.parseUnits('0.1', 'ether')],
+            // 10 MATIC
+            [ZeroAddress, ethers.utils.parseUnits('10', 'ether')],
             // USDT
             // ['0xD92E713d051C37EbB2561803a3b5FBAbc4962431', ethers.utils.parseUnits('1', 18)],
         ],
