@@ -27,17 +27,18 @@ contract MysteryBox is OwnableUpgradeable {
     }
 
     struct Box {
-        address creator;
-        address nft_address;
-        string name;
-        PaymentInfo[] payment;
         // maxmimum number of NFT(s) user can buy
         uint32 personal_limit;
         uint32 start_time;
         uint32 end_time;
+        address creator;
         bool canceled;
         // sell all NFT(s) owned
         bool sell_all;
+        address nft_address;
+        string name;
+        PaymentInfo[] payment;
+
         uint256[] nft_id_list;
         address qualification;
         mapping(address => uint256[]) purchased_nft;
