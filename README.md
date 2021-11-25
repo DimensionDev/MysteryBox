@@ -35,7 +35,7 @@ To run unit test:
 npm run test
 ```
 
-To deploy the smart contract on Ethereum `rinkeby` testnet
+To deploy the smart contract on Ethereum `rinkeby` testnet:
 
 ```bash
 npm run deploy:rinkeby
@@ -55,17 +55,17 @@ Using the [`helper.js`](helper.js) script to set up the deployed smart contracts
 
 | Chain   | Address                                                                                  |
 | ------- | ---------------------------------------------------------------------------------------- |
-| Mainnet | [0x0dFB34D213f613Dda67a2924F60b5301d42ABFb7][0x0dFB34D213f613Dda67a2924F60b5301d42ABFb7] |
-| Ropsten | [0xdB59446B15AB6e97A4452BA3e23dD03E5004c854][0xdB59446B15AB6e97A4452BA3e23dD03E5004c854] |
-| Rinkeby | [0xc3D410eDd9C54662fa3D87731bfAf33EBbf04A39][0xc3D410eDd9C54662fa3D87731bfAf33EBbf04A39] |
+| Mainnet | [0x294428f04b0F9EbC49B7Ad61E2736ebD6808c145][0x294428f04b0F9EbC49B7Ad61E2736ebD6808c145] |
+| Ropsten | [0x0a04e23f95E9DB2Fe4C31252548F663fFe3AAe4d][0x0a04e23f95E9DB2Fe4C31252548F663fFe3AAe4d] |
+| Rinkeby | [0xF8ED169BC0cdA735A88d32AC10b88AA5B69181ac][0xF8ED169BC0cdA735A88d32AC10b88AA5B69181ac] |
 | BSC     | [0xxxxxxxxx][0xxxxxxxxx]                                                                 |
-| Matic   | [0xxxxxxxxx][0xxxxxxxxx]                                                                 |
+| Matic   | [0x02F98667b3A1202a320F67a669a5e4e451fD0cc1][0x02F98667b3A1202a320F67a669a5e4e451fD0cc1] |
 
-[0x0dFB34D213f613Dda67a2924F60b5301d42ABFb7]: https://etherscan.io/address/0x0dFB34D213f613Dda67a2924F60b5301d42ABFb7
-[0xdB59446B15AB6e97A4452BA3e23dD03E5004c854]: https://ropsten.etherscan.io/address/0xdB59446B15AB6e97A4452BA3e23dD03E5004c854
-[0xc3D410eDd9C54662fa3D87731bfAf33EBbf04A39]: https://rinkeby.etherscan.io/address/0xc3D410eDd9C54662fa3D87731bfAf33EBbf04A39
+[0x294428f04b0F9EbC49B7Ad61E2736ebD6808c145]: https://etherscan.io/address/0x294428f04b0F9EbC49B7Ad61E2736ebD6808c145
+[0x0a04e23f95E9DB2Fe4C31252548F663fFe3AAe4d]: https://ropsten.etherscan.io/address/0x0a04e23f95E9DB2Fe4C31252548F663fFe3AAe4d
+[0xF8ED169BC0cdA735A88d32AC10b88AA5B69181ac]: https://rinkeby.etherscan.io/address/0xF8ED169BC0cdA735A88d32AC10b88AA5B69181ac
 [0xxxxxxxxx]: https://bscscan.com/address/0xxxxxxxxx
-[0xxxxxxxxx]: https://polygonscan.com/address/0xxxxxxxxx
+[0x02F98667b3A1202a320F67a669a5e4e451fD0cc1]: https://polygonscan.com/address/0x02F98667b3A1202a320F67a669a5e4e451fD0cc1
 
 ### MaskTestNFT
 
@@ -75,13 +75,13 @@ Using the [`helper.js`](helper.js) script to set up the deployed smart contracts
 | Ropsten | [0xxxxxxxxx][0xxxxxxxxx]                                                                 |
 | Rinkeby | [0x0c8FB5C985E00fb1D002b6B9700084492Fb4B9A8][0x0c8FB5C985E00fb1D002b6B9700084492Fb4B9A8] |
 | BSC     | [0xxxxxxxxx][0xxxxxxxxx]                                                                 |
-| Matic   | [0xxxxxxxxx][0xxxxxxxxx]                                                                 |
+| Matic   | [0x49C2a3D93C4B94eAd101d9936f1ebCA634394a78][0x49C2a3D93C4B94eAd101d9936f1ebCA634394a78] |
 
 [0x56136E69A5771436a9598804c5eA792230c21181]: https://etherscan.io/address/0x56136E69A5771436a9598804c5eA792230c21181
 [0xxxxxxxxx]: https://ropsten.etherscan.io/address/0xxxxxxxxx
 [0x0c8FB5C985E00fb1D002b6B9700084492Fb4B9A8]: https://rinkeby.etherscan.io/address/0x0c8FB5C985E00fb1D002b6B9700084492Fb4B9A8
 [0xxxxxxxxx]: https://bscscan.com/address/0xxxxxxxxx
-[0xxxxxxxxx]: https://polygonscan.com/address/0xxxxxxxxx
+[0x49C2a3D93C4B94eAd101d9936f1ebCA634394a78]: https://polygonscan.com/address/0x49C2a3D93C4B94eAd101d9936f1ebCA634394a78
 
 ### WhitelistQlf
 

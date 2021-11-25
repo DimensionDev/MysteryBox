@@ -164,6 +164,7 @@ async function main() {
             '0x67fA392717324B63Cb3793860eA099C1436e6458',
             '0xaa0065375E1194d45Ede6804AA9d7e01a326aaDD',
             '0xD5C2c5f2E10802846bbD86C5Fd8438b7CA4Ff83A',
+            '0x67fA392717324B63Cb3793860eA099C1436e6458',
         ];
         const tx = await MysteryBoxApp.connect(adminWallet).addAdmin(adminList);
         const receipt = await tx.wait();

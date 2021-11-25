@@ -16,19 +16,19 @@ type DeployedContractAddress = Record<string, IDeployedContractAddress>;
 const deployedContractAddress: DeployedContractAddress = {
     mainnet: {
         MaskEnumerableNFT: '0x56136E69A5771436a9598804c5eA792230c21181',
-        MysteryBox: '0x0dFB34D213f613Dda67a2924F60b5301d42ABFb7',
+        MysteryBox: '0x294428f04b0F9EbC49B7Ad61E2736ebD6808c145',
         WhitelistQlf: '0x0000000000000000000000000000000000000000',
         SigVerifyQlf: '0x0000000000000000000000000000000000000000',
     },
     rinkeby: {
         MaskEnumerableNFT: '0x0000000000000000000000000000000000000000',
-        MysteryBox: '0xc3D410eDd9C54662fa3D87731bfAf33EBbf04A39',
+        MysteryBox: '0xF8ED169BC0cdA735A88d32AC10b88AA5B69181ac',
         WhitelistQlf: '0x50eCEebb7360Efb93094dDEA692e04274E548b1d',
         SigVerifyQlf: '0x0000000000000000000000000000000000000000',
     },
     ropsten: {
         MaskEnumerableNFT: '0x0000000000000000000000000000000000000000',
-        MysteryBox: '0xB604C213FC3903E0C77c4a05Fe6FA0ff33924597',
+        MysteryBox: '0x0a04e23f95E9DB2Fe4C31252548F663fFe3AAe4d',
         WhitelistQlf: '0x0000000000000000000000000000000000000000',
         SigVerifyQlf: '0x0000000000000000000000000000000000000000',
     },
@@ -39,8 +39,8 @@ const deployedContractAddress: DeployedContractAddress = {
         SigVerifyQlf: '0x0000000000000000000000000000000000000000',
     },
     matic_mainnet: {
-        MaskEnumerableNFT: '0x0000000000000000000000000000000000000000',
-        MysteryBox: '0x0000000000000000000000000000000000000000',
+        MaskEnumerableNFT: '0x49C2a3D93C4B94eAd101d9936f1ebCA634394a78',
+        MysteryBox: '0x02F98667b3A1202a320F67a669a5e4e451fD0cc1',
         WhitelistQlf: '0x0000000000000000000000000000000000000000',
         SigVerifyQlf: '0x0000000000000000000000000000000000000000',
     },
@@ -59,7 +59,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const { deployer } = await getNamedAccounts();
     const MaskNftParameter = MaskNFTInitParameters[network];
 
-    if (false) {
+    if (true) {
         if (false) {
             const impl = await ethers.getContractFactory('MaskEnumerableNFT');
             const proxy = await upgrades.deployProxy(impl, [...Object.values(MaskNftParameter)]);
@@ -70,10 +70,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             const impl_addr = await admin.getProxyImplementation(proxy.address);
             await hre.run('verify:verify', {
                 address: impl_addr,
-                constructorArguments: [...Object.values(MaskNftParameter)],
+                constructorArguments: [],
             });
         }
-        if (false) {
+        if (true) {
             const impl = await ethers.getContractFactory('MysteryBox');
             const proxy = await upgrades.deployProxy(impl, []);
             await proxy.deployed();
