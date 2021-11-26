@@ -434,6 +434,12 @@ contract MysteryBox is OwnableUpgradeable {
         }
     }
 
+    function removeAdmin(address[] memory addrs) external onlyOwner {
+        for (uint256 i = 0; i < addrs.length; i++) {
+            admin[addrs[i]] = false;
+        }
+    }
+
     function addWhitelist(address[] memory addrs) external {
         require(admin[msg.sender] || msg.sender == owner(), "not admin");
         for (uint256 i = 0; i < addrs.length; i++) {

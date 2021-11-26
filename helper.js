@@ -31,7 +31,8 @@ const transactionParameters = {
 };
 
 //------------------------------------------------------------------------------------------------
-const network = 'rinkeby';
+// const network = 'rinkeby';
+const network = 'matic_mainnet';
 
 const txParameters = {
     gasLimit: 6000000,
@@ -108,7 +109,7 @@ async function main() {
     } else if (network === 'rinkeby') {
         {
             const deploymentInfo = require('./.openzeppelin/rinkeby.json');
-            if (deploymentInfo.proxies.length < 4) {
+            if (deploymentInfo.proxies.length < 1) {
                 throw 'project not deployed properly';
             }
             NFTAddress = '0x0c8FB5C985E00fb1D002b6B9700084492Fb4B9A8';
@@ -118,6 +119,17 @@ async function main() {
         NetworkProvider = new ethers.providers.JsonRpcProvider(
             'https://rinkeby.infura.io/v3/' + project_secret.infura_project_id,
         );
+    } else if (network === 'matic_mainnet') {
+        {
+            const deploymentInfo = require('./.openzeppelin/unknown-137.json');
+            if (deploymentInfo.proxies.length < 1) {
+                throw 'project not deployed properly';
+            }
+            NFTAddress = '0x49C2a3D93C4B94eAd101d9936f1ebCA634394a78';
+            const lastOne = deploymentInfo.proxies.length - 1;
+            MysteryBoxAddress = deploymentInfo.proxies[lastOne].address;
+        }
+        NetworkProvider = new ethers.providers.JsonRpcProvider('https://polygon-rpc.com/');
     } else {
         //
         NetworkProvider = new ethers.providers.JsonRpcProvider(
@@ -163,7 +175,7 @@ async function main() {
             '0x3A6690B247b467243F4C2F61Dd4100e18a336990',
             '0x67fA392717324B63Cb3793860eA099C1436e6458',
             '0xaa0065375E1194d45Ede6804AA9d7e01a326aaDD',
-            '0xD5C2c5f2E10802846bbD86C5Fd8438b7CA4Ff83A',
+            '0x790116d0685eB197B886DAcAD9C247f785987A4a',
             '0x67fA392717324B63Cb3793860eA099C1436e6458',
         ];
         const tx = await MysteryBoxApp.connect(adminWallet).addAdmin(adminList);

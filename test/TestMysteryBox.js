@@ -1080,6 +1080,10 @@ describe('MysteryBox', () => {
         await expect(mbContract.connect(user_test).createBox(...Object.values(parameter))).to.be.rejectedWith(
             'not whitelisted',
         );
+
+        await mbContract.connect(contractCreator).removeAdmin([user_1.address]);
+        expect(await mbContract.admin(user_1.address)).to.be.eq(false);
+        await expect(mbContract.connect(user_1).addWhitelist([user_test.address])).to.be.rejectedWith('not admin');
     });
 
     it('Should whitelist qualification work', async () => {
