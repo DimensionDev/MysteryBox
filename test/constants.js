@@ -66,7 +66,7 @@ const CreateBoxParameters = {
         holder_min_token_amount: 0,
     },
     matic_mainnet: {
-        nft_address: "0x49C2a3D93C4B94eAd101d9936f1ebCA634394a78",
+        nft_address: '0x49C2a3D93C4B94eAd101d9936f1ebCA634394a78',
         name: 'Mask Test NFT Sale',
         payment: [
             // 10 MATIC
