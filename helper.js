@@ -31,8 +31,8 @@ const transactionParameters = {
 };
 
 //------------------------------------------------------------------------------------------------
-// const network = 'rinkeby';
-const network = 'matic_mainnet';
+const network = 'rinkeby';
+// const network = 'matic_mainnet';
 
 const txParameters = {
     gasLimit: 6000000,
@@ -170,7 +170,7 @@ async function main() {
             const info = await MysteryBoxApp.getBoxInfo(1);
             console.log(JSON.stringify(info, null, 2));
         }
-    } else if (action === 'add_admin') {
+    } else if (action === 'addAdmin') {
         const adminList = [
             '0x3A6690B247b467243F4C2F61Dd4100e18a336990',
             '0x67fA392717324B63Cb3793860eA099C1436e6458',
@@ -179,6 +179,12 @@ async function main() {
             '0x67fA392717324B63Cb3793860eA099C1436e6458',
         ];
         const tx = await MysteryBoxApp.connect(adminWallet).addAdmin(adminList);
+        const receipt = await tx.wait();
+    } else if (action === 'removeAdmin') {
+        const adminList = [
+            '0xD5C2c5f2E10802846bbD86C5Fd8438b7CA4Ff83A',
+        ];
+        const tx = await MysteryBoxApp.connect(adminWallet).removeAdmin(adminList);
         const receipt = await tx.wait();
     } else if (action === 'set_mask_addr') {
         const mask_addr = '0x46eD2e50A9f27de0dC47b04E7580E8E91fCE7246';
