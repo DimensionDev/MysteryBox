@@ -21,7 +21,7 @@ const deployedContractAddress: DeployedContractAddress = {
         SigVerifyQlf: '0x0000000000000000000000000000000000000000',
     },
     rinkeby: {
-        MaskEnumerableNFT: '0x0000000000000000000000000000000000000000',
+        MaskEnumerableNFT: '0x25d0dAf7c544aee4f69cE656149b49301D5B2FeD',
         MysteryBox: '0xF8ED169BC0cdA735A88d32AC10b88AA5B69181ac',
         WhitelistQlf: '0x50eCEebb7360Efb93094dDEA692e04274E548b1d',
         SigVerifyQlf: '0x0000000000000000000000000000000000000000',
@@ -33,7 +33,7 @@ const deployedContractAddress: DeployedContractAddress = {
         SigVerifyQlf: '0x0000000000000000000000000000000000000000',
     },
     bsc_mainnet: {
-        MaskEnumerableNFT: '0x0000000000000000000000000000000000000000',
+        MaskEnumerableNFT: '0xa8518287BfB7729A6CC2d67f757eB2074DA84913',
         MysteryBox: '0x0000000000000000000000000000000000000000',
         WhitelistQlf: '0x0000000000000000000000000000000000000000',
         SigVerifyQlf: '0x0000000000000000000000000000000000000000',
@@ -57,9 +57,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const { deployments, getNamedAccounts } = hre;
     const { deploy } = deployments;
     const { deployer } = await getNamedAccounts();
-    const MaskNftParameter = MaskNFTInitParameters[network];
+    let MaskNftParameter = MaskNFTInitParameters[network];
+    if (typeof MaskNftParameter === 'undefined') {
+        MaskNftParameter = MaskNFTInitParameters['mainnet'];
+    }
 
-    if (true) {
+    if (false) {
         if (false) {
             const impl = await ethers.getContractFactory('MaskEnumerableNFT');
             const proxy = await upgrades.deployProxy(impl, [...Object.values(MaskNftParameter)]);
@@ -73,7 +76,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
                 constructorArguments: [],
             });
         }
-        if (true) {
+        if (false) {
             const impl = await ethers.getContractFactory('MysteryBox');
             const proxy = await upgrades.deployProxy(impl, []);
             await proxy.deployed();
