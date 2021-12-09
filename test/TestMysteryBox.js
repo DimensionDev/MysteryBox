@@ -718,6 +718,117 @@ describe('MysteryBox', () => {
         }
     });
 
+    it('Should support lots of NFT', async () => {
+        for (let i = 0; i < 18; i++) {
+            await enumerableNftContract.connect(user_1).mint(50);
+        }
+        const id_list = [];
+        let box_id;
+        {
+            const parameter = JSON.parse(JSON.stringify(createBoxPara));
+            parameter.personal_limit = 255;
+            parameter.sell_all = false;
+            const nftBalance = await enumerableNftContract.balanceOf(user_1.address);
+            // all the NFT ids owned, total 1000 NFT(s)
+            for (let i = 0; i < nftBalance; i++) {
+                const nftId = await enumerableNftContract.tokenOfOwnerByIndex(user_1.address, i);
+                id_list.push(nftId);
+            }
+            parameter.nft_id_list = id_list;
+            await mbContract.connect(user_1).createBox(...Object.values(parameter));
+
+            const logs = await ethers.provider.getLogs(mbContract.filters.CreationSuccess());
+            const parsedLog = interface.parseLog(logs[0]);
+            const result = parsedLog.args;
+            expect(result).to.have.property('creator').that.to.be.eq(user_1.address);
+            expect(result).to.have.property('nft_address').that.to.be.eq(enumerableNftContract.address);
+            expect(result).to.have.property('name').that.to.be.eq(parameter.name);
+            expect(result).to.have.property('start_time').that.to.be.eq(parameter.start_time);
+            expect(result).to.have.property('end_time').that.to.be.eq(parameter.end_time);
+            expect(result).to.have.property('sell_all').that.to.be.eq(parameter.sell_all);
+            expect(result).to.have.property('box_id');
+            box_id = result.box_id;
+
+            const boxStatus = await mbContract.getBoxStatus(box_id);
+            expect(boxStatus).to.have.property('remaining');
+            expect(boxStatus.remaining.eq(id_list.length)).to.be.true;
+            expect(boxStatus.total.eq(id_list.length)).to.be.true;
+            expect(boxStatus).to.have.property('canceled').that.to.be.eq(false);
+
+            const nftList = await mbContract.getNftListForSale(box_id, 0, parameter.nft_id_list.length);
+            expect(nftList.map((id) => id.toString())).to.eql(parameter.nft_id_list.map((id) => id.toString()));
+        }
+        // mint another 1000 NFT(s)
+        for (let i = 0; i < 20; i++) {
+            await enumerableNftContract.connect(user_1).mint(50);
+        }
+        const id_list_batch_2 = [];
+        {
+            const nftBalance = await enumerableNftContract.balanceOf(user_1.address);
+            // all the NFT ids owned, total 1000 NFT(s)
+            for (let i = id_list.length; i < nftBalance; i++) {
+                const nftId = await enumerableNftContract.tokenOfOwnerByIndex(user_1.address, i);
+                id_list_batch_2.push(nftId);
+            }
+            await mbContract.connect(user_1).addNftIntoBox(box_id, id_list_batch_2);
+            const boxStatus = await mbContract.getBoxStatus(box_id);
+            expect(boxStatus).to.have.property('remaining');
+            expect(boxStatus.remaining.eq(id_list.length + id_list_batch_2.length)).to.be.true;
+            expect(boxStatus.total.eq(id_list.length + id_list_batch_2.length)).to.be.true;
+            expect(boxStatus).to.have.property('canceled').that.to.be.eq(false);
+
+            const nftList = await mbContract.getNftListForSale(box_id, id_list.length, id_list_batch_2.length);
+            expect(nftList.map((id) => id.toString())).to.eql(id_list_batch_2.map((id) => id.toString()));
+        }
+        const nftBalance_before_batch_3 = await enumerableNftContract.balanceOf(user_1.address);
+        // mint another 1000 NFT(s)
+        for (let i = 0; i < 20; i++) {
+            await enumerableNftContract.connect(user_1).mint(50);
+        }
+        const id_list_batch_3 = [];
+        {
+            const nftBalance = await enumerableNftContract.balanceOf(user_1.address);
+            // all the NFT ids owned, total 1000 NFT(s)
+            for (let i = nftBalance_before_batch_3; i < nftBalance; i++) {
+                const nftId = await enumerableNftContract.tokenOfOwnerByIndex(user_1.address, i);
+                id_list_batch_3.push(nftId);
+            }
+            await mbContract.connect(user_1).addNftIntoBox(box_id, id_list_batch_3);
+            const boxStatus = await mbContract.getBoxStatus(box_id);
+            expect(boxStatus).to.have.property('remaining');
+            expect(boxStatus.remaining.eq(nftBalance_before_batch_3.add(id_list_batch_3.length))).to.be.true;
+            expect(boxStatus.total.eq(nftBalance_before_batch_3.add(id_list_batch_3.length))).to.be.true;
+            expect(boxStatus).to.have.property('canceled').that.to.be.eq(false);
+
+            const nftList = await mbContract.getNftListForSale(
+                box_id,
+                nftBalance_before_batch_3,
+                id_list_batch_3.length,
+            );
+            expect(nftList.map((id) => id.toString())).to.eql(id_list_batch_3.map((id) => id.toString()));
+        }
+        {
+            const nftBalance_before = await enumerableNftContract.balanceOf(user_1.address);
+            const buy_batch = 255;
+            // buy 255 NFT(s)
+            const parameters = JSON.parse(JSON.stringify(openBoxParameters));
+            parameters.box_id = box_id;
+            parameters.amount = buy_batch;
+            const tx_parameters = {
+                value: txParameters.value.mul(parameters.amount),
+            };
+            await mbContract.connect(user_2).openBox(...Object.values(parameters), tx_parameters);
+            const user_2_balance = await enumerableNftContract.balanceOf(user_2.address);
+            const nftBalance_after = await enumerableNftContract.balanceOf(user_1.address);
+
+            expect(user_2_balance.eq(255)).to.be.true;
+            const boxStatus = await mbContract.getBoxStatus(box_id);
+            expect(boxStatus).to.have.property('remaining');
+            expect(boxStatus.remaining.eq(nftBalance_before.sub(buy_batch))).to.be.true;
+            expect(boxStatus.remaining.eq(nftBalance_after)).to.be.true;
+        }
+    });
+
     it('Should sell "not_sell_all" enumerableNftContract work', async () => {
         const boxStatus = await mbContract.getBoxStatus(not_sell_all_box_id);
         expect(boxStatus).to.have.property('remaining');
