@@ -28,7 +28,7 @@ const deployedContractAddress: DeployedContractAddress = {
     },
     ropsten: {
         MaskEnumerableNFT: '0x25d0dAf7c544aee4f69cE656149b49301D5B2FeD',
-        MysteryBox: '0x0a04e23f95E9DB2Fe4C31252548F663fFe3AAe4d',
+        MysteryBox: '0x8EC8A8372bC401Ba37e47Bf54b1D2a3C76c17336',
         WhitelistQlf: '0x0000000000000000000000000000000000000000',
         SigVerifyQlf: '0x0000000000000000000000000000000000000000',
     },
@@ -62,7 +62,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         MaskNftParameter = MaskNFTInitParameters['mainnet'];
     }
 
-    if (false) {
+    if (true) {
         if (false) {
             const impl = await ethers.getContractFactory('MaskEnumerableNFT');
             const proxy = await upgrades.deployProxy(impl, [...Object.values(MaskNftParameter)]);
@@ -76,7 +76,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
                 constructorArguments: [],
             });
         }
-        if (false) {
+        if (true) {
             const impl = await ethers.getContractFactory('MysteryBox');
             const proxy = await upgrades.deployProxy(impl, []);
             await proxy.deployed();
