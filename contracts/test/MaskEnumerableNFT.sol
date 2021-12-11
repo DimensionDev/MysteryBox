@@ -7,6 +7,11 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721Enumer
 contract MaskEnumerableNFT is ERC721EnumerableUpgradeable, OwnableUpgradeable {
     string private baseURI;
 
+    // index ==> resource URI
+    mapping(uint256 => string) private resource_list;
+    // id ==> resource index
+    mapping(uint256 => uint256) private index_by_id;
+
     function initialize(
         string memory _name,
         string memory _symbol,
@@ -27,20 +32,28 @@ contract MaskEnumerableNFT is ERC721EnumerableUpgradeable, OwnableUpgradeable {
         }
     }
 
+    function mint_other_types(uint256 number, uint256 resource_index) external {
+        for (uint256 i = 0; i < number; i++) {
+            uint256 id = totalSupply();
+            _safeMint(msg.sender, id);
+            index_by_id[id] = resource_index;
+        }
+    }
+
     /**
      * @dev See {IERC721Metadata-tokenURI}.
      */
     function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
-        return baseURI;
-        /*
-        require(_exists(tokenId), "ERC721Metadata: URI query for nonexistent token");
+        uint256 index = index_by_id[tokenId];
+        string memory uri = resource_list[index];
+        bytes memory uri_length = bytes(uri);
+        if (uri_length.length == 0) {
+            return baseURI;
+        }
+        return uri;
+    }
 
-        if (bytes(baseURI).length > 0) {
-            return string(abi.encodePacked(baseURI, StringsUpgradeable.toString(tokenId), ".json"));
-        }
-        else {
-            return "";
-        }
-        */
+    function set_resource(uint256 index, string memory resource) external onlyOwner {
+        resource_list[index] = resource;
     }
 }
