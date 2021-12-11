@@ -21,13 +21,13 @@ const deployedContractAddress: DeployedContractAddress = {
         SigVerifyQlf: '0x0000000000000000000000000000000000000000',
     },
     rinkeby: {
-        MaskEnumerableNFT: '0x25d0dAf7c544aee4f69cE656149b49301D5B2FeD',
+        MaskEnumerableNFT: '0x0c8FB5C985E00fb1D002b6B9700084492Fb4B9A8',
         MysteryBox: '0xF8ED169BC0cdA735A88d32AC10b88AA5B69181ac',
         WhitelistQlf: '0x50eCEebb7360Efb93094dDEA692e04274E548b1d',
         SigVerifyQlf: '0x0000000000000000000000000000000000000000',
     },
     ropsten: {
-        MaskEnumerableNFT: '0x0000000000000000000000000000000000000000',
+        MaskEnumerableNFT: '0x25d0dAf7c544aee4f69cE656149b49301D5B2FeD',
         MysteryBox: '0x0a04e23f95E9DB2Fe4C31252548F663fFe3AAe4d',
         WhitelistQlf: '0x0000000000000000000000000000000000000000',
         SigVerifyQlf: '0x0000000000000000000000000000000000000000',
@@ -117,7 +117,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             });
         }
     } else {
-        if (true) {
+        if (false) {
             // upgrade contract
             const implMysteryBox = await ethers.getContractFactory('MysteryBox');
             const instance = await upgrades.upgradeProxy(deployedContractAddress[network].MysteryBox, implMysteryBox);
@@ -125,6 +125,21 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             const admin = await upgrades.admin.getInstance();
             const impl = await admin.getProxyImplementation(deployedContractAddress[network].MysteryBox);
             // example: `npx hardhat verify --network rinkeby 0x8974Ce3955eE1306bA89687C558B6fC1E5be777B`
+            await hre.run('verify:verify', {
+                address: impl,
+                constructorArguments: [],
+            });
+        }
+        if (true) {
+            // upgrade contract
+            const implMysteryBox = await ethers.getContractFactory('MaskEnumerableNFT');
+            const instance = await upgrades.upgradeProxy(
+                deployedContractAddress[network].MaskEnumerableNFT,
+                implMysteryBox,
+            );
+            await instance.deployTransaction.wait();
+            const admin = await upgrades.admin.getInstance();
+            const impl = await admin.getProxyImplementation(deployedContractAddress[network].MaskEnumerableNFT);
             await hre.run('verify:verify', {
                 address: impl,
                 constructorArguments: [],

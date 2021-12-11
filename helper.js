@@ -10,7 +10,7 @@ const MysteryBoxArtifact = require('./abi/MysteryBox.json');
 let MysteryBoxAddress;
 let MysteryBoxApp;
 
-const NFTArtifact = require('./abi/MaskTestNFT.json');
+const NFTArtifact = require('./abi/MaskEnumerableNFT.json');
 let NFTAddress;
 let NFTApp;
 
@@ -210,6 +210,17 @@ async function main() {
         openBoxParameters.box_id = 3;
         const tx = await MysteryBoxApp.connect(testWallet_1).openBox(...Object.values(openBoxParameters), txParameters);
         await tx.wait();
+    } else if (action === 'set_resource') {
+        const resource_list = [
+            'https://raw.githubusercontent.com/andy-at-mask/MysteryBoxAsset/master/json/default.json',
+            'https://raw.githubusercontent.com/andy-at-mask/MysteryBoxAsset/master/json/gif.json',
+            'https://raw.githubusercontent.com/andy-at-mask/MysteryBoxAsset/master/json/mp4.json',
+        ];
+        for (let i = 0; i < resource_list.length; i++) {
+            console.log('setting: ' + i + ' URI: ' + resource_list[i]);
+            const tx = await NFTApp.set_resource(i, resource_list[i]);
+            await tx.wait();
+        }
     } else if (action === 'write_whitelist') {
         const batch_number = 450;
         const wallet_list = [];
