@@ -4,7 +4,7 @@ pragma solidity >= 0.8.0;
 
 import "./interfaces/IQLF.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
 // merkel proof qualification
 contract MerkleProofQlf is OwnableUpgradeable {
@@ -21,6 +21,7 @@ contract MerkleProofQlf is OwnableUpgradeable {
     function set_merkle_root(bytes32 _merkle_root) external onlyOwner {
         merkle_root = _merkle_root;
     }
+
     function is_qualified(address account, bytes memory proof)
         virtual
         external
@@ -31,7 +32,15 @@ contract MerkleProofQlf is OwnableUpgradeable {
             string memory error_msg
         )
     {
-        // TODO: validate if `account` is included
+        uint256 index;
+        bytes32[] memory _proof;
+        // solhint-disable-next-line
+        (index, _proof) = abi.decode(proof, (uint256, bytes32[]));
+        // validate whitelist user
+        bytes32 leaf = keccak256(abi.encodePacked(index, account));
+        if (MerkleProof.verify(_proof, merkle_root, leaf)) {
+            return (true, "");
+        }
         return (false, "not qualified");
     }
 }

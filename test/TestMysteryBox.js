@@ -3,6 +3,7 @@ const MockDate = require('mockdate');
 const expect = chai.expect;
 const helper = require('./helper');
 const { soliditySha3 } = require('web3-utils');
+const abiCoder = new ethers.utils.AbiCoder();
 
 chai.use(require('chai-as-promised'));
 
@@ -17,6 +18,7 @@ const nonEnumerableNftTokenABI = require('../artifacts/contracts/test/MaskNonEnu
 const qlfWhiltelistJsonABI = require('../artifacts/contracts/WhitelistQlf.sol/WhitelistQlf.json');
 const qlfSigVerifyJsonABI = require('../artifacts/contracts/SigVerifyQlf.sol/SigVerifyQlf.json');
 const qlfMaskHolderJsonABI = require('../artifacts/contracts/MaskHolderQlf.sol/MaskHolderQlf.json');
+const qlfMerkleRootJsonABI = require('../artifacts/contracts/MerkleProofQlf.sol/MerkleProofQlf.json');
 
 let snapshotId;
 let mbContract;
@@ -36,6 +38,7 @@ let user_3;
 let whitelistQlfContract;
 let sigVerifyQlfContract;
 let maskHolderQlfContract;
+let merkleRootQlfContract;
 
 const {
     MaskNFTInitParameters,
@@ -53,6 +56,7 @@ const createBoxPara = CreateBoxParameters[network];
 let sell_all_box_id;
 let not_sell_all_box_id;
 const not_sell_all_nft_id_list = [];
+const proofs = require('../dist/proofs.json');
 
 const txParameters = {
     gasLimit: 6000000,
@@ -102,6 +106,11 @@ describe('MysteryBox', () => {
             const factory = await ethers.getContractFactory('MaskHolderQlf');
             const proxy = await upgrades.deployProxy(factory, [testMaskTokenContract.address, holderMinAmount]);
             maskHolderQlfContract = new ethers.Contract(proxy.address, qlfMaskHolderJsonABI.abi, contractCreator);
+        }
+        {
+            const factory = await ethers.getContractFactory('MerkleProofQlf');
+            const proxy = await upgrades.deployProxy(factory, [proofs.merkleRoot]);
+            merkleRootQlfContract = new ethers.Contract(proxy.address, qlfMerkleRootJsonABI.abi, contractCreator);
         }
         // first is ETH: address(0)
         createBoxPara.payment.push([testTokenAContract.address, createBoxPara.payment[0][1]]);
@@ -1242,6 +1251,37 @@ describe('MysteryBox', () => {
         }
         const boxInfo = await mbContract.getBoxInfo(open_parameters.box_id);
         expect(boxInfo).to.have.property('qualification').that.to.be.eq(sigVerifyQlfContract.address);
+    });
+
+    it('Should merkle root qualification work', async () => {
+        const open_parameters = JSON.parse(JSON.stringify(openBoxParameters));
+        {
+            const parameter = JSON.parse(JSON.stringify(createBoxPara));
+            parameter.sell_all = true;
+            parameter.qualification = merkleRootQlfContract.address;
+            await mbContract.connect(user_1).createBox(...Object.values(parameter));
+            const logs = await ethers.provider.getLogs(mbContract.filters.CreationSuccess());
+            const parsedLog = interface.parseLog(logs[0]);
+            const result = parsedLog.args;
+            open_parameters.box_id = result.box_id;
+        }
+        const boxInfo = await mbContract.getBoxInfo(open_parameters.box_id);
+        expect(boxInfo).to.have.property('qualification').that.to.be.eq(merkleRootQlfContract.address);
+        {
+            let user_1_index = proofs.leaves.length;
+            for (let i = 0; i < proofs.leaves.length; i++) {
+                if (proofs.leaves[i].address == user_1.address) {
+                    user_1_index = i;
+                }
+            }
+            expect(user_1_index < proofs.leaves.length).to.be.true;
+            const proof = abiCoder.encode(['uint256', 'bytes32[]'], [user_1_index, proofs.leaves[user_1_index].proof]);
+            open_parameters.proof = proof;
+            await mbContract.connect(user_1).openBox(...Object.values(open_parameters), txParameters);
+            await expect(
+                mbContract.connect(user_2).openBox(...Object.values(open_parameters), txParameters),
+            ).to.be.rejectedWith('not qualified');
+        }
     });
 
     it('Should MaskHolderQlf qualification work', async () => {
