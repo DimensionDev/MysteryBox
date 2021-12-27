@@ -8,6 +8,7 @@
     "test": "npx hardhat test",
     "test:coverage": "hardhat coverage",
     "lint": "npx hardhat check",
+    "generate_merkle_tree": "hardhat generate_merkle_tree",
     "deploy:mainnet": "hardhat --network mainnet deploy",
     "deploy:ropsten": "hardhat --network ropsten deploy",
     "deploy:rinkeby": "hardhat --network rinkeby deploy",
