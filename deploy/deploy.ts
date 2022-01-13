@@ -86,6 +86,18 @@ const deployedContractAddress: DeployedContractAddress = {
         WhitelistQlf: '0x0000000000000000000000000000000000000000',
         SigVerifyQlf: '0x0000000000000000000000000000000000000000',
     },
+    aurora: {
+        MysteryBox: '0x5B966f3a32Db9C180843bCb40267A66b73E4f022',
+        MaskEnumerableNFT: '0x54a0A221C25Fc0a347EC929cFC5db0be17fA2a2B',
+        WhitelistQlf: '0x83D6b366f21e413f214EB077D5378478e71a5eD2',
+        SigVerifyQlf: '0x0000000000000000000000000000000000000000',
+    },
+    fuse: {
+        MysteryBox: '0x5B966f3a32Db9C180843bCb40267A66b73E4f022',
+        MaskEnumerableNFT: '0x54a0A221C25Fc0a347EC929cFC5db0be17fA2a2B',
+        WhitelistQlf: '0x83D6b366f21e413f214EB077D5378478e71a5eD2',
+        SigVerifyQlf: '0x0000000000000000000000000000000000000000',
+    },
 };
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
