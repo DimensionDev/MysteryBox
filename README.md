@@ -53,19 +53,21 @@ Using the [`helper.js`](helper.js) script to set up the deployed smart contracts
 
 ### MysteryBox
 
-| Chain            | Address                                                                                                                                 |
-| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| Mainnet          | [0x294428f04b0F9EbC49B7Ad61E2736ebD6808c145](https://etherscan.io/address/0x294428f04b0F9EbC49B7Ad61E2736ebD6808c145)                   |
-| Ropsten          | [0xc7387b6Ac310ae15576451d2d37058711331105c](https://ropsten.etherscan.io/address/0xc7387b6Ac310ae15576451d2d37058711331105c)           |
-| Rinkeby          | [0x0c8FB5C985E00fb1D002b6B9700084492Fb4B9A8](https://rinkeby.etherscan.io/address/0x0c8FB5C985E00fb1D002b6B9700084492Fb4B9A8)           |
-| BSC              | [0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://bscscan.com/address/0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)                    |
-| Matic            | [0x02F98667b3A1202a320F67a669a5e4e451fD0cc1](https://polygonscan.com/address/0x02F98667b3A1202a320F67a669a5e4e451fD0cc1)                |
-| Goerli           | [0xd4ABB07c7f6D57C17812520c9Ea5d597c7Bf09Ec](https://goerli.etherscan.io/address/0xd4ABB07c7f6D57C17812520c9Ea5d597c7Bf09Ec)            |
-| Fantom           | [0x19f179D7e0D7d9F9d5386afFF64271D98A91615B](https://ftmscan.com/address/0x19f179D7e0D7d9F9d5386afFF64271D98A91615B)                    |
-| Celo             | [0x578a7Fee5f0D8CEc7d00578Bf37374C5b95C4b98](https://explorer.celo.org/address/0x578a7Fee5f0D8CEc7d00578Bf37374C5b95C4b98/transactions) |
-| Avalanche        | [0x05ee315E407C21a594f807D61d6CC11306D1F149](https://snowtrace.io/address/0x05ee315E407C21a594f807D61d6CC11306D1F149)                   |
-| Kovan-optimistic | [0x3eadcFB5FbCEd62B07DDB41aeACFCbff601cf36B](https://kovan-optimistic.etherscan.io/address/0x3eadcFB5FbCEd62B07DDB41aeACFCbff601cf36B)  |
-| Optimistic       | [0xF9F7C1496c21bC0180f4B64daBE0754ebFc8A8c0](https://optimistic.etherscan.io/address/0xF9F7C1496c21bC0180f4B64daBE0754ebFc8A8c0)        |
+| Chain            | Address                                                                                                                                           |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Mainnet          | [0x294428f04b0F9EbC49B7Ad61E2736ebD6808c145](https://etherscan.io/address/0x294428f04b0F9EbC49B7Ad61E2736ebD6808c145)                             |
+| Ropsten          | [0xc7387b6Ac310ae15576451d2d37058711331105c](https://ropsten.etherscan.io/address/0xc7387b6Ac310ae15576451d2d37058711331105c)                     |
+| Rinkeby          | [0x0c8FB5C985E00fb1D002b6B9700084492Fb4B9A8](https://rinkeby.etherscan.io/address/0x0c8FB5C985E00fb1D002b6B9700084492Fb4B9A8)                     |
+| BSC              | [0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://bscscan.com/address/0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)                              |
+| Matic            | [0x02F98667b3A1202a320F67a669a5e4e451fD0cc1](https://polygonscan.com/address/0x02F98667b3A1202a320F67a669a5e4e451fD0cc1)                          |
+| Goerli           | [0xd4ABB07c7f6D57C17812520c9Ea5d597c7Bf09Ec](https://goerli.etherscan.io/address/0xd4ABB07c7f6D57C17812520c9Ea5d597c7Bf09Ec)                      |
+| Fantom           | [0x19f179D7e0D7d9F9d5386afFF64271D98A91615B](https://ftmscan.com/address/0x19f179D7e0D7d9F9d5386afFF64271D98A91615B)                              |
+| Celo             | [0x578a7Fee5f0D8CEc7d00578Bf37374C5b95C4b98](https://explorer.celo.org/address/0x578a7Fee5f0D8CEc7d00578Bf37374C5b95C4b98/transactions)           |
+| Avalanche        | [0x05ee315E407C21a594f807D61d6CC11306D1F149](https://snowtrace.io/address/0x05ee315E407C21a594f807D61d6CC11306D1F149)                             |
+| Kovan-optimistic | [0x3eadcFB5FbCEd62B07DDB41aeACFCbff601cf36B](https://kovan-optimistic.etherscan.io/address/0x3eadcFB5FbCEd62B07DDB41aeACFCbff601cf36B)            |
+| Optimistic       | [0xF9F7C1496c21bC0180f4B64daBE0754ebFc8A8c0](https://optimistic.etherscan.io/address/0xF9F7C1496c21bC0180f4B64daBE0754ebFc8A8c0)                  |
+| Aurora           | [0x5B966f3a32Db9C180843bCb40267A66b73E4f022](https://explorer.mainnet.aurora.dev/address/0x5B966f3a32Db9C180843bCb40267A66b73E4f022/transactions) |
+| Fuse             | [0x5B966f3a32Db9C180843bCb40267A66b73E4f022](https://explorer.fuse.io/address/0x5B966f3a32Db9C180843bCb40267A66b73E4f022/transactions)            |
 
 ### MaskTestNFT
 
@@ -82,6 +84,8 @@ Using the [`helper.js`](helper.js) script to set up the deployed smart contracts
 | Avalanche        | [0x812463356F58fc8194645A1838ee6C52D8ca2D26](https://snowtrace.io/address/0x812463356F58fc8194645A1838ee6C52D8ca2D26)                   |
 | Kovan-optimistic | [0x7DBA54465650ee4077E295d81130a21D5eDc04F9](https://kovan-optimistic.etherscan.io/address/0x7DBA54465650ee4077E295d81130a21D5eDc04F9)  |
 | Optimistic       | [0x578a7Fee5f0D8CEc7d00578Bf37374C5b95C4b98](https://optimistic.etherscan.io/address/0x578a7Fee5f0D8CEc7d00578Bf37374C5b95C4b98)        |
+| Aurora           | [0x54a0A221C25Fc0a347EC929cFC5db0be17fA2a2B](https://explorer.mainnet.aurora.dev/address/0x54a0A221C25Fc0a347EC929cFC5db0be17fA2a2B/transactions) |
+| Fuse             | [0x54a0A221C25Fc0a347EC929cFC5db0be17fA2a2B](https://explorer.fuse.io/address/0x54a0A221C25Fc0a347EC929cFC5db0be17fA2a2B/transactions)            |
 
 ### WhitelistQlf
 
@@ -98,6 +102,8 @@ Using the [`helper.js`](helper.js) script to set up the deployed smart contracts
 | Avalanche        | [0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://snowtrace.io/address/0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)                   |
 | Kovan-optimistic | [0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://kovan-optimistic.etherscan.io/address/0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)  |
 | Optimistic       | [0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://optimistic.etherscan.io/address/0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)        |
+| Aurora           | [0x83D6b366f21e413f214EB077D5378478e71a5eD2](https://explorer.mainnet.aurora.dev/address/0x83D6b366f21e413f214EB077D5378478e71a5eD2/transactions) |
+| Fuse             | [0x83D6b366f21e413f214EB077D5378478e71a5eD2](https://explorer.fuse.io/address/0x83D6b366f21e413f214EB077D5378478e71a5eD2/transactions)            |
 
 ### SigVerifyQlf
 
@@ -114,6 +120,8 @@ Using the [`helper.js`](helper.js) script to set up the deployed smart contracts
 | Avalanche        | [0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://snowtrace.io/address/0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)                   |
 | Kovan-optimistic | [0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://kovan-optimistic.etherscan.io/address/0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)  |
 | Optimistic       | [0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://optimistic.etherscan.io/address/0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)        |
+| Aurora           | [0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://explorer.mainnet.aurora.dev/address/0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/transactions) |
+| Fuse             | [0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://explorer.fuse.io/address/0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/transactions)            |
 
 ### MaskHolderQlf
 
@@ -130,6 +138,8 @@ Using the [`helper.js`](helper.js) script to set up the deployed smart contracts
 | Avalanche        | [0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://snowtrace.io/address/0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)                   |
 | Kovan-optimistic | [0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://kovan-optimistic.etherscan.io/address/0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)  |
 | Optimistic       | [0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://optimistic.etherscan.io/address/0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)        |
+| Aurora           | [0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://explorer.mainnet.aurora.dev/address/0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/transactions) |
+| Fuse             | [0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://explorer.fuse.io/address/0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/transactions)            |
 
 [testnet $MASK token address](https://github.com/DimensionDev/misc_smart_contract#masktoken---testnet-only)
 
