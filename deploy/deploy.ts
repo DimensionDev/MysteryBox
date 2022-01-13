@@ -111,7 +111,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     }
 
     if (true) {
-        if (false) {
+        if (true) {
             const impl = await ethers.getContractFactory('MysteryBox');
             const proxy = await upgrades.deployProxy(impl, []);
             await proxy.deployed();
@@ -119,12 +119,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
             const admin = await upgrades.admin.getInstance();
             const impl_addr = await admin.getProxyImplementation(proxy.address);
-            await hre.run('verify:verify', {
-                address: impl_addr,
-                constructorArguments: [],
-            });
+            if (false)
+                await hre.run('verify:verify', {
+                    address: impl_addr,
+                    constructorArguments: [],
+                });
         }
-        if (true) {
+        if (false) {
             const impl = await ethers.getContractFactory('MaskEnumerableNFT');
             const proxy = await upgrades.deployProxy(impl, [...Object.values(MaskNftParameter)]);
             await proxy.deployed();
@@ -132,22 +133,24 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
             const admin = await upgrades.admin.getInstance();
             const impl_addr = await admin.getProxyImplementation(proxy.address);
-            await hre.run('verify:verify', {
-                address: impl_addr,
-                constructorArguments: [],
-            });
+            if (false)
+                await hre.run('verify:verify', {
+                    address: impl_addr,
+                    constructorArguments: [],
+                });
         }
-        if (true) {
+        if (false) {
             const impl = await ethers.getContractFactory('WhitelistQlf');
             const proxy = await upgrades.deployProxy(impl, []);
             await proxy.deployed();
             console.log('WhitelistQlf proxy: ' + proxy.address);
             const admin = await upgrades.admin.getInstance();
             const impl_addr = await admin.getProxyImplementation(proxy.address);
-            await hre.run('verify:verify', {
-                address: impl_addr,
-                constructorArguments: [],
-            });
+            if (false)
+                await hre.run('verify:verify', {
+                    address: impl_addr,
+                    constructorArguments: [],
+                });
         }
         if (false) {
             const impl = await ethers.getContractFactory('SigVerifyQlf');
@@ -156,10 +159,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             console.log('SigVerifyQlf proxy: ' + proxy.address);
             const admin = await upgrades.admin.getInstance();
             const impl_addr = await admin.getProxyImplementation(proxy.address);
-            await hre.run('verify:verify', {
-                address: impl_addr,
-                constructorArguments: [],
-            });
+            if (false)
+                await hre.run('verify:verify', {
+                    address: impl_addr,
+                    constructorArguments: [],
+                });
         }
         if (false) {
             const impl = await ethers.getContractFactory('MaskHolderQlf');
@@ -171,10 +175,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             console.log('MaskHolderQlf proxy: ' + proxy.address);
             const admin = await upgrades.admin.getInstance();
             const impl_addr = await admin.getProxyImplementation(proxy.address);
-            await hre.run('verify:verify', {
-                address: impl_addr,
-                constructorArguments: [],
-            });
+            if (false)
+                await hre.run('verify:verify', {
+                    address: impl_addr,
+                    constructorArguments: [],
+                });
         }
     } else {
         if (true) {

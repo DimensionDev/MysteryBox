@@ -7,10 +7,9 @@ import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
 // merkel proof qualification
 contract MerkleProofQlf {
-    uint32 public version;
+    uint32 constant public version = 4;
 
     constructor() {
-        version = 4;
     }
 
     function is_qualified(address account, bytes memory proof)
