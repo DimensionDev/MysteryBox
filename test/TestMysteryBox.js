@@ -3,6 +3,7 @@ const MockDate = require('mockdate');
 const expect = chai.expect;
 const helper = require('./helper');
 const { soliditySha3 } = require('web3-utils');
+const web3 = require('web3');
 const abiCoder = new ethers.utils.AbiCoder();
 
 chai.use(require('chai-as-promised'));
@@ -99,8 +100,8 @@ describe('MysteryBox', () => {
         }
         {
             const factory = await ethers.getContractFactory('SigVerifyQlf');
-            const proxy = await upgrades.deployProxy(factory, [qualification_project_name, verifier.address]);
-            sigVerifyQlfContract = new ethers.Contract(proxy.address, qlfSigVerifyJsonABI.abi, contractCreator);
+            const SigVerifyQlf = await factory.deploy();
+            sigVerifyQlfContract = await SigVerifyQlf.deployed();
         }
         {
             const factory = await ethers.getContractFactory('MaskHolderQlf');
@@ -1298,13 +1299,16 @@ describe('MysteryBox', () => {
         expect(boxInfo).to.have.property('qualification').that.to.be.eq(whitelistQlfContract.address);
     });
 
-    /*
     it('Should signature verification qualification work', async () => {
         const open_parameters = JSON.parse(JSON.stringify(openBoxParameters));
         {
             const parameter = JSON.parse(JSON.stringify(createBoxPara));
             parameter.sell_all = true;
             parameter.qualification = sigVerifyQlfContract.address;
+            // convert address to bytes32
+            const qualification_data = web3.utils.padLeft(verifier.address.toString(), 64);
+            parameter.qualification_data = qualification_data;
+
             await mbContract.connect(user_1).createBox(...Object.values(parameter));
             const logs = await ethers.provider.getLogs(mbContract.filters.CreationSuccess());
             const parsedLog = interface.parseLog(logs[0]);
@@ -1312,7 +1316,7 @@ describe('MysteryBox', () => {
             open_parameters.box_id = result.box_id;
         }
         {
-            const msg_hash = soliditySha3(qualification_project_name, user_1.address);
+            const msg_hash = soliditySha3(user_1.address);
             const signature = await verifier.signMessage(ethers.utils.arrayify(msg_hash));
             open_parameters.proof = signature;
             await mbContract.connect(user_1).openBox(...Object.values(open_parameters), txParameters);
@@ -1323,7 +1327,6 @@ describe('MysteryBox', () => {
         const boxInfo = await mbContract.getBoxInfo(open_parameters.box_id);
         expect(boxInfo).to.have.property('qualification').that.to.be.eq(sigVerifyQlfContract.address);
     });
-    */
 
     it('Should merkle root qualification work', async () => {
         const open_parameters = JSON.parse(JSON.stringify(openBoxParameters));
