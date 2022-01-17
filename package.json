@@ -27,6 +27,10 @@
     "deploy:aurora_test": "hardhat --network aurora_test deploy",
     "deploy:aurora": "hardhat --network aurora deploy",
     "deploy:fuse": "hardhat --network fuse deploy",
+    "deploy:boba": "hardhat --network boba deploy",
+    "deploy:boba_test": "hardhat --network boba_test deploy",
+    "deploy:metis": "hardhat --network metis deploy",
+    "deploy:metis_test": "hardhat --network metis_test deploy",
     "format": "prettier --write './test/*.js' './deploy/*.ts' './*.js'"
   },
   "repository": {
