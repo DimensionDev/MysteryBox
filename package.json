@@ -31,6 +31,7 @@
     "deploy:boba_test": "hardhat --network boba_test deploy",
     "deploy:metis": "hardhat --network metis deploy",
     "deploy:metis_test": "hardhat --network metis_test deploy",
+    "deploy:moonriver": "hardhat --network moonriver deploy",
     "format": "prettier --write './test/*.js' './deploy/*.ts' './*.js'"
   },
   "repository": {
