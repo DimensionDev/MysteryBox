@@ -68,7 +68,8 @@ Using the [`helper.js`](helper.js) script to set up the deployed smart contracts
 | Optimistic       | [0xF9F7C1496c21bC0180f4B64daBE0754ebFc8A8c0](https://optimistic.etherscan.io/address/0xF9F7C1496c21bC0180f4B64daBE0754ebFc8A8c0)                  |
 | Aurora           | [0x5B966f3a32Db9C180843bCb40267A66b73E4f022](https://explorer.mainnet.aurora.dev/address/0x5B966f3a32Db9C180843bCb40267A66b73E4f022/transactions) |
 | Fuse             | [0x5B966f3a32Db9C180843bCb40267A66b73E4f022](https://explorer.fuse.io/address/0x5B966f3a32Db9C180843bCb40267A66b73E4f022/transactions)            |
-| Boba             | [0x5B966f3a32Db9C180843bCb40267A66b73E4f022](https://blockexplorer.boba.network/address/0x5B966f3a32Db9C180843bCb40267A66b73E4f022/transactions)            |
+| Boba             | [0x5B966f3a32Db9C180843bCb40267A66b73E4f022](https://blockexplorer.boba.network/address/0x5B966f3a32Db9C180843bCb40267A66b73E4f022/transactions)  |
+| Moonriver        | [0x5B966f3a32Db9C180843bCb40267A66b73E4f022](https://moonriver.moonscan.io/address/0x6cc1b1058F9153358278C35E0b2D382f1585854B)                    |
 
 ### MaskTestNFT
 
