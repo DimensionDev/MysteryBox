@@ -109,8 +109,8 @@ describe('MysteryBox', () => {
         }
         {
             const factory = await ethers.getContractFactory('MerkleProofQlf');
-            const proxy = await upgrades.deployProxy(factory, [proofs.merkleRoot]);
-            merkleRootQlfContract = new ethers.Contract(proxy.address, qlfMerkleRootJsonABI.abi, contractCreator);
+            const MerkleProofQlf = await factory.deploy();
+            merkleRootQlfContract = await MerkleProofQlf.deployed();
         }
         // first is ETH: address(0)
         createBoxPara.payment.push([testTokenAContract.address, createBoxPara.payment[0][1]]);
@@ -398,6 +398,7 @@ describe('MysteryBox', () => {
             expect(boxInfo).to.have.property('name').that.to.be.eq(createBoxPara.name);
             expect(boxInfo).to.have.property('personal_limit').that.to.be.eq(createBoxPara.personal_limit);
             expect(boxInfo).to.have.property('qualification').that.to.be.eq(createBoxPara.qualification);
+            expect(boxInfo).to.have.property('qualification_data').that.to.be.eq(createBoxPara.qualification_data);
 
             const boxStatus = await mbContract.getBoxStatus(sell_all_box_id);
             expect(boxStatus).to.have.property('payment');
@@ -1259,14 +1260,19 @@ describe('MysteryBox', () => {
             const parameter = JSON.parse(JSON.stringify(createBoxPara));
             parameter.sell_all = true;
             parameter.qualification = merkleRootQlfContract.address;
+            parameter.qualification_data = proofs.merkleRoot;
+
             await mbContract.connect(user_1).createBox(...Object.values(parameter));
             const logs = await ethers.provider.getLogs(mbContract.filters.CreationSuccess());
             const parsedLog = interface.parseLog(logs[0]);
             const result = parsedLog.args;
             open_parameters.box_id = result.box_id;
         }
-        const boxInfo = await mbContract.getBoxInfo(open_parameters.box_id);
-        expect(boxInfo).to.have.property('qualification').that.to.be.eq(merkleRootQlfContract.address);
+        {
+            const boxInfo = await mbContract.getBoxInfo(open_parameters.box_id);
+            expect(boxInfo).to.have.property('qualification').that.to.be.eq(merkleRootQlfContract.address);
+            expect(boxInfo).to.have.property('qualification_data').that.to.be.eq(proofs.merkleRoot);
+        }
         {
             let user_1_index = proofs.leaves.length;
             for (let i = 0; i < proofs.leaves.length; i++) {
@@ -1281,6 +1287,35 @@ describe('MysteryBox', () => {
             await expect(
                 mbContract.connect(user_2).openBox(...Object.values(open_parameters), txParameters),
             ).to.be.rejectedWith('not qualified');
+        }
+        {
+            let user_2_index = proofs.leaves.length;
+            for (let i = 0; i < proofs.leaves.length; i++) {
+                if (proofs.leaves[i].address == user_2.address) {
+                    user_2_index = i;
+                }
+            }
+            expect(user_2_index < proofs.leaves.length).to.be.true;
+
+            const proof = abiCoder.encode(['uint256', 'bytes32[]'], [user_2_index, proofs.leaves[user_2_index].proof]);
+            open_parameters.proof = proof;
+            await expect(
+                mbContract.connect(user_2).setQualificationData(open_parameters.box_id, createBoxPara.qualification_data),
+            ).to.be.rejectedWith('not box owner');
+            await mbContract.connect(user_1).setQualificationData(open_parameters.box_id, createBoxPara.qualification_data);
+            {
+                const boxInfo = await mbContract.getBoxInfo(open_parameters.box_id);
+                expect(boxInfo).to.have.property('qualification_data').that.to.be.eq(createBoxPara.qualification_data);
+            }
+            await expect(
+                mbContract.connect(user_2).openBox(...Object.values(open_parameters), txParameters),
+            ).to.be.rejectedWith('not qualified');
+            await mbContract.connect(user_1).setQualificationData(open_parameters.box_id, proofs.merkleRoot);
+            {
+                const boxInfo = await mbContract.getBoxInfo(open_parameters.box_id);
+                expect(boxInfo).to.have.property('qualification_data').that.to.be.eq(proofs.merkleRoot);
+            }
+            await mbContract.connect(user_2).openBox(...Object.values(open_parameters), txParameters);
         }
     });
 
