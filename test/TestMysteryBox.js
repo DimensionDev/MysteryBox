@@ -18,7 +18,6 @@ const nonEnumerableNftTokenABI = require('../artifacts/contracts/test/MaskNonEnu
 const qlfWhiltelistJsonABI = require('../artifacts/contracts/WhitelistQlf.sol/WhitelistQlf.json');
 const qlfSigVerifyJsonABI = require('../artifacts/contracts/SigVerifyQlf.sol/SigVerifyQlf.json');
 const qlfMaskHolderJsonABI = require('../artifacts/contracts/MaskHolderQlf.sol/MaskHolderQlf.json');
-const qlfMerkleRootJsonABI = require('../artifacts/contracts/MerkleProofQlf.sol/MerkleProofQlf.json');
 
 let snapshotId;
 let mbContract;
@@ -1229,6 +1228,7 @@ describe('MysteryBox', () => {
         expect(boxInfo).to.have.property('qualification').that.to.be.eq(whitelistQlfContract.address);
     });
 
+    /*
     it('Should signature verification qualification work', async () => {
         const open_parameters = JSON.parse(JSON.stringify(openBoxParameters));
         {
@@ -1253,6 +1253,7 @@ describe('MysteryBox', () => {
         const boxInfo = await mbContract.getBoxInfo(open_parameters.box_id);
         expect(boxInfo).to.have.property('qualification').that.to.be.eq(sigVerifyQlfContract.address);
     });
+    */
 
     it('Should merkle root qualification work', async () => {
         const open_parameters = JSON.parse(JSON.stringify(openBoxParameters));
