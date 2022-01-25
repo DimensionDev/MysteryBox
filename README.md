@@ -57,7 +57,7 @@ Using the [`helper.js`](helper.js) script to set up the deployed smart contracts
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Mainnet          | [0x294428f04b0F9EbC49B7Ad61E2736ebD6808c145](https://etherscan.io/address/0x294428f04b0F9EbC49B7Ad61E2736ebD6808c145)                             |
 | Ropsten          | [0xc7387b6Ac310ae15576451d2d37058711331105c](https://ropsten.etherscan.io/address/0xc7387b6Ac310ae15576451d2d37058711331105c)                     |
-| Rinkeby          | [0x0c8FB5C985E00fb1D002b6B9700084492Fb4B9A8](https://rinkeby.etherscan.io/address/0x0c8FB5C985E00fb1D002b6B9700084492Fb4B9A8)                     |
+| Rinkeby          | [0xF8ED169BC0cdA735A88d32AC10b88AA5B69181ac](https://rinkeby.etherscan.io/address/0xF8ED169BC0cdA735A88d32AC10b88AA5B69181ac)                     |
 | BSC              | [0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://bscscan.com/address/0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)                              |
 | Matic            | [0x02F98667b3A1202a320F67a669a5e4e451fD0cc1](https://polygonscan.com/address/0x02F98667b3A1202a320F67a669a5e4e451fD0cc1)                          |
 | Goerli           | [0xd4ABB07c7f6D57C17812520c9Ea5d597c7Bf09Ec](https://goerli.etherscan.io/address/0xd4ABB07c7f6D57C17812520c9Ea5d597c7Bf09Ec)                      |
@@ -132,6 +132,24 @@ Using the [`helper.js`](helper.js) script to set up the deployed smart contracts
 | Mainnet          | [0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://etherscan.io/address/0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)                   |
 | Ropsten          | [0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://ropsten.etherscan.io/address/0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)           |
 | Rinkeby          | [0x26c3DE1430dc105b205F47fc497ED3015768C9B0](https://rinkeby.etherscan.io/address/0x26c3DE1430dc105b205F47fc497ED3015768C9B0)           |
+| BSC              | [0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://bscscan.com/address/0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)                    |
+| Matic            | [0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://polygonscan.com/address/0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)                |
+| Goerli           | [0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://goerli.etherscan.io/address/0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)            |
+| Fantom           | [0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://ftmscan.com/address/0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)                    |
+| Celo             | [0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://explorer.celo.org/address/0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/transactions) |
+| Avalanche        | [0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://snowtrace.io/address/0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)                   |
+| Kovan-optimistic | [0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://kovan-optimistic.etherscan.io/address/0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)  |
+| Optimistic       | [0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://optimistic.etherscan.io/address/0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)        |
+| Aurora           | [0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://explorer.mainnet.aurora.dev/address/0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/transactions) |
+| Fuse             | [0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://explorer.fuse.io/address/0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/transactions)            |
+
+### MerkleProofQlf
+
+| Chain            | Address                                                                                                                                 |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Mainnet          | [0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://etherscan.io/address/0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)                   |
+| Ropsten          | [0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://ropsten.etherscan.io/address/0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)           |
+| Rinkeby          | [0xA5F6347bA1ee2a849131E8b64584A1ca847bC180](https://rinkeby.etherscan.io/address/0xA5F6347bA1ee2a849131E8b64584A1ca847bC180)           |
 | BSC              | [0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://bscscan.com/address/0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)                    |
 | Matic            | [0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://polygonscan.com/address/0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)                |
 | Goerli           | [0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://goerli.etherscan.io/address/0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)            |

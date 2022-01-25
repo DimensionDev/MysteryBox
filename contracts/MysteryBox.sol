@@ -40,6 +40,7 @@ contract MysteryBox is OwnableUpgradeable {
         PaymentInfo[] payment;
 
         uint256[] nft_id_list;
+        // qualification smart contract address
         address qualification;
         mapping(address => uint256[]) purchased_nft;
         // total number of NFT(s)
@@ -49,6 +50,10 @@ contract MysteryBox is OwnableUpgradeable {
         address holder_token_addr;
         // `token holder`
         uint256 holder_min_token_amount;
+
+        // `data` used for qualification
+        // can be `merkle root`, `verifier`, etc
+        bytes32 qualification_data;
     }
 
     event CreationSuccess (
@@ -102,7 +107,8 @@ contract MysteryBox is OwnableUpgradeable {
         uint256[] memory nft_id_list,
         address qualification,
         address holder_token_addr,
-        uint256 holder_min_token_amount
+        uint256 holder_min_token_amount,
+        bytes32 qualification_data
     )
         external
     {
@@ -153,6 +159,7 @@ contract MysteryBox is OwnableUpgradeable {
             box.nft_id_list = nft_id_list;
             box.total = nft_id_list.length;
         }
+        box.qualification_data = qualification_data;
         emit CreationSuccess (
             msg.sender,
             nft_address,
@@ -183,6 +190,17 @@ contract MysteryBox is OwnableUpgradeable {
             box.nft_id_list.push(nft_id_list[i]);
         }
         box.total += nft_id_list.length;
+    }
+
+    function setQualificationData (
+        uint256 box_id,
+        bytes32 qualification_data
+    )
+        external
+    {
+        Box storage box = box_by_id[box_id];
+        require(box.creator == msg.sender, "not box owner");
+        box.qualification_data = qualification_data;
     }
 
     // cancel sale
@@ -224,6 +242,7 @@ contract MysteryBox is OwnableUpgradeable {
         if (box.qualification != address(0)) {
             bool qualified;
             string memory error_msg;
+            proof = abi.encode(proof, box.qualification_data);
             (qualified, error_msg) = IQLF(box.qualification).is_qualified(msg.sender, proof);
             require(qualified, error_msg);
         }
@@ -342,7 +361,8 @@ contract MysteryBox is OwnableUpgradeable {
             uint32 personal_limit,
             address qualification,
             address holder_token_addr,
-            uint256 holder_min_token_amount
+            uint256 holder_min_token_amount,
+            bytes32 qualification_data
         )
     {
         Box storage box = box_by_id[box_id];
@@ -353,6 +373,7 @@ contract MysteryBox is OwnableUpgradeable {
         qualification = box.qualification;
         holder_token_addr = box.holder_token_addr;
         holder_min_token_amount = box.holder_min_token_amount;
+        qualification_data = box.qualification_data;
     }
 
     function getBoxStatus(uint256 box_id)

@@ -46,6 +46,7 @@ const CreateBoxParameters = {
         qualification: ZeroAddress,
         holder_token_addr: ZeroAddress,
         holder_min_token_amount: 0,
+        qualification_data: '0x0000000000000000000000000000000000000000000000000000000000000000',
     },
     rinkeby: {
         nft_address: '0x0c8FB5C985E00fb1D002b6B9700084492Fb4B9A8',
@@ -64,6 +65,7 @@ const CreateBoxParameters = {
         qualification: ZeroAddress,
         holder_token_addr: ZeroAddress,
         holder_min_token_amount: 0,
+        qualification_data: '0x0000000000000000000000000000000000000000000000000000000000000000',
     },
     matic_mainnet: {
         nft_address: '0x49C2a3D93C4B94eAd101d9936f1ebCA634394a78',
@@ -82,6 +84,7 @@ const CreateBoxParameters = {
         qualification: ZeroAddress,
         holder_token_addr: ZeroAddress,
         holder_min_token_amount: 0,
+        qualification_data: '0x0000000000000000000000000000000000000000000000000000000000000000',
     },
 };
 
