@@ -23,6 +23,7 @@ let snapshotId;
 let mbContract;
 let enumerableNftContract;
 let nonEnumerableNftContract;
+let mask721ANFTContract;
 
 let testTokenAContract;
 let testTokenBContract;
@@ -111,6 +112,11 @@ describe('MysteryBox', () => {
             const MerkleProofQlf = await factory.deploy();
             merkleRootQlfContract = await MerkleProofQlf.deployed();
         }
+        {
+            const factory = await ethers.getContractFactory('Mask721A');
+            const Mask721A = await factory.deploy(maskNftPara.name, maskNftPara.symbol, maskNftPara.baseURI);
+            mask721ANFTContract = await Mask721A.deployed();
+        }
         // first is ETH: address(0)
         createBoxPara.payment.push([testTokenAContract.address, createBoxPara.payment[0][1]]);
         createBoxPara.payment.push([testTokenBContract.address, createBoxPara.payment[0][1]]);
@@ -143,6 +149,7 @@ describe('MysteryBox', () => {
         await enumerableNftContract.connect(user_1).mint(50);
         await enumerableNftContract.connect(user_1).mint(50);
         await enumerableNftContract.connect(user_1).setApprovalForAll(mbContract.address, true);
+
         {
             const parameter = JSON.parse(JSON.stringify(createBoxPara));
             parameter.sell_all = true;
@@ -922,7 +929,7 @@ describe('MysteryBox', () => {
             box_id = result.box_id;
         }
 
-        const boxStatus = await mbContract.getBoxStatus(not_sell_all_box_id);
+        const boxStatus = await mbContract.getBoxStatus(box_id);
         expect(boxStatus).to.have.property('remaining');
         expect(total.toString()).to.be.eq(boxStatus.remaining.toString());
         const totalNFT = boxStatus.remaining;
@@ -1013,6 +1020,69 @@ describe('MysteryBox', () => {
             }
         }
         expect((await enumerableNftContract.balanceOf(testAccount.address)).eq(remain)).to.be.true;
+    });
+
+    it('Should 721A NFT work', async () => {
+        let box_id;
+        const contractEthBalanceBeforeOpen = await ethers.provider.getBalance(mbContract.address);
+        const userEthBalanceBeforeOpen = await ethers.provider.getBalance(user_2.address);
+        const batch = await mask721ANFTContract.BATCH_SIZE();
+        await mask721ANFTContract.connect(user_1).mint(batch);
+        const totalNFT = await mask721ANFTContract.balanceOf(user_1.address);
+        expect(totalNFT.eq(batch)).to.be.true;
+        expect((await mask721ANFTContract.balanceOf(signers[5].address)).eq(0)).to.be.true;
+        await mask721ANFTContract.connect(user_1).setApprovalForAll(mbContract.address, true);
+        {
+            const parameter = JSON.parse(JSON.stringify(createBoxPara));
+            parameter.nft_address = mask721ANFTContract.address;
+            parameter.sell_all = true;
+            await mbContract.connect(user_1).createBox(...Object.values(parameter));
+            const logs = await ethers.provider.getLogs(mbContract.filters.CreationSuccess());
+            const parsedLog = interface.parseLog(logs[0]);
+            const result = parsedLog.args;
+            expect(result).to.have.property('creator').that.to.be.eq(user_1.address);
+            expect(result).to.have.property('nft_address').that.to.be.eq(mask721ANFTContract.address);
+            expect(result).to.have.property('name').that.to.be.eq(parameter.name);
+            expect(result).to.have.property('start_time').that.to.be.eq(parameter.start_time);
+            expect(result).to.have.property('end_time').that.to.be.eq(parameter.end_time);
+            expect(result).to.have.property('sell_all').that.to.be.eq(parameter.sell_all);
+            expect(result).to.have.property('box_id');
+            box_id = result.box_id;
+        }
+        const parameters = JSON.parse(JSON.stringify(openBoxParameters));
+        parameters.box_id = box_id;
+        parameters.amount = batch;
+        const tx_parameters = {
+            value: txParameters.value.mul(parameters.amount),
+        };
+        await mbContract.connect(user_2).openBox(...Object.values(parameters), tx_parameters);
+        {
+            const paymentEth = tx_parameters.value;
+            const contractEthBalanceAfterOpen = await ethers.provider.getBalance(mbContract.address);
+            const userEthBalanceAfterOpen = await ethers.provider.getBalance(user_2.address);
+            expect(contractEthBalanceAfterOpen.eq(contractEthBalanceBeforeOpen.add(paymentEth))).to.be.true;
+            expect(userEthBalanceBeforeOpen.gt(userEthBalanceAfterOpen.add(paymentEth))).to.be.true;
+            const user_nft_balance = await mask721ANFTContract.balanceOf(user_2.address);
+            expect(totalNFT.eq(user_nft_balance)).to.be.true;
+            const owner_nft_balance = await mask721ANFTContract.balanceOf(user_1.address);
+            expect(owner_nft_balance.eq(0)).to.be.true;
+        }
+        await expect(
+            mbContract.connect(user_2).openBox(...Object.values(parameters), tx_parameters),
+        ).to.be.rejectedWith('no NFT left');
+        {
+            const boxInfo = await mbContract.getBoxInfo(parameters.box_id);
+            const boxStatus = await mbContract.getBoxStatus(parameters.box_id);
+            expect(boxInfo).to.have.property('creator').that.to.be.eq(user_1.address);
+            expect(boxInfo).to.have.property('nft_address').that.to.be.eq(mask721ANFTContract.address);
+            expect(boxInfo).to.have.property('name').that.to.be.eq(createBoxPara.name);
+            expect(boxStatus).to.have.property('started').that.to.be.eq(true);
+            expect(boxStatus).to.have.property('expired').that.to.be.eq(false);
+            expect(boxStatus).to.have.property('remaining');
+            expect(boxStatus.remaining.eq(0)).to.be.true;
+            expect(boxStatus.total.eq(totalNFT)).to.be.true;
+        }
+
     });
 
     it('Should claimPayment reject invalid parameters', async () => {
