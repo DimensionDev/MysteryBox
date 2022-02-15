@@ -22,7 +22,7 @@ jobs:
       - run: npm run compile
       - run: npm run test
       - run: npm run test:coverage
-      - run: npx prettier --list-different ./test/*.js
+      # - run: npx prettier --list-different ./test/*.js
       - run: npx hardhat check
       # `npx hardhat check` does not return error code, even if there are `lint errors` reported.
       # Using `grep` to expose error code to `github workflows`
