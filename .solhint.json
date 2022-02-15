@@ -1,0 +1,4 @@
+{
+  "extends": "solhint:default",
+  "excludedFiles": "ERC721A.sol"
+}
