@@ -24,9 +24,9 @@ contract MerkleProofQlf {
     {
         uint256 index;
         bytes32[] memory _proof;
-        // solhint-disable-next-line
         bytes32 merkle_root;
         (proof, merkle_root) = abi.decode(proof, (bytes, bytes32));
+        // solhint-disable-next-line
         (index, _proof) = abi.decode(proof, (uint256, bytes32[]));
         // validate whitelist user
         bytes32 leaf = keccak256(abi.encodePacked(index, account));
