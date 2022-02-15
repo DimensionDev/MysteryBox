@@ -1083,7 +1083,6 @@ describe('MysteryBox', () => {
             expect(boxStatus.remaining.eq(0)).to.be.true;
             expect(boxStatus.total.eq(totalNFT)).to.be.true;
         }
-
     });
 
     it('Should claimPayment reject invalid parameters', async () => {
@@ -1355,7 +1354,7 @@ describe('MysteryBox', () => {
                 }
             }
             expect(user_1_index < proofs.leaves.length).to.be.true;
-            const proof = abiCoder.encode(['uint256', 'bytes32[]'], [user_1_index, proofs.leaves[user_1_index].proof]);
+            const proof = abiCoder.encode(['bytes32[]'], [proofs.leaves[user_1_index].proof]);
             open_parameters.proof = proof;
             await mbContract.connect(user_1).openBox(...Object.values(open_parameters), txParameters);
             await expect(
@@ -1371,12 +1370,16 @@ describe('MysteryBox', () => {
             }
             expect(user_2_index < proofs.leaves.length).to.be.true;
 
-            const proof = abiCoder.encode(['uint256', 'bytes32[]'], [user_2_index, proofs.leaves[user_2_index].proof]);
+            const proof = abiCoder.encode(['bytes32[]'], [proofs.leaves[user_2_index].proof]);
             open_parameters.proof = proof;
             await expect(
-                mbContract.connect(user_2).setQualificationData(open_parameters.box_id, createBoxPara.qualification_data),
+                mbContract
+                    .connect(user_2)
+                    .setQualificationData(open_parameters.box_id, createBoxPara.qualification_data),
             ).to.be.rejectedWith('not box owner');
-            await mbContract.connect(user_1).setQualificationData(open_parameters.box_id, createBoxPara.qualification_data);
+            await mbContract
+                .connect(user_1)
+                .setQualificationData(open_parameters.box_id, createBoxPara.qualification_data);
             {
                 const boxInfo = await mbContract.getBoxInfo(open_parameters.box_id);
                 expect(boxInfo).to.have.property('qualification_data').that.to.be.eq(createBoxPara.qualification_data);
