@@ -9,9 +9,7 @@ export function generateMerkleTree(accounts: { address: string }[]): string {
   const leaves = accounts
     .map((v, i) => {
       return {
-        index: String(i),
         buf: Buffer.concat([
-          hex2buf(abiCoder.encode(['uint256'], [i])),
           hex2buf(v.address),
         ]),
         ...v,
@@ -28,7 +26,6 @@ export function generateMerkleTree(accounts: { address: string }[]): string {
     return {
       address: l.address,
       proof: tree.generateProof(buf2hex(l.buf)),
-      index: l.index,
     }
   })
 

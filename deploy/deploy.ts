@@ -111,7 +111,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     }
 
     if (true) {
-        if (true) {
+        if (false) {
             const impl = await ethers.getContractFactory('MysteryBox');
             const proxy = await upgrades.deployProxy(impl, []);
             await proxy.deployed();
@@ -180,6 +180,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
                     address: impl_addr,
                     constructorArguments: [],
                 });
+        }
+        if (true) {
+            const tx = await deploy('MerkleProofQlf', {
+                from: deployer,
+                args: [],
+                log: true,
+            });
+            console.log(tx.address);
         }
     } else {
         if (true) {
