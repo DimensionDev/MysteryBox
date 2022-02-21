@@ -1346,8 +1346,8 @@ describe('MysteryBox', () => {
             expect(boxInfo).to.have.property('qualification').that.to.be.eq(merkleRootQlfContract.address);
             expect(boxInfo).to.have.property('qualification_data').that.to.be.eq(proofs.merkleRoot);
         }
+        let user_1_index = proofs.leaves.length;
         {
-            let user_1_index = proofs.leaves.length;
             for (let i = 0; i < proofs.leaves.length; i++) {
                 if (proofs.leaves[i].address == user_1.address) {
                     user_1_index = i;
@@ -1361,7 +1361,7 @@ describe('MysteryBox', () => {
                 mbContract.connect(user_2).openBox(...Object.values(open_parameters), txParameters),
             ).to.be.rejectedWith('not qualified');
         }
-        {
+        if (false) {
             let user_2_index = proofs.leaves.length;
             for (let i = 0; i < proofs.leaves.length; i++) {
                 if (proofs.leaves[i].address == user_2.address) {
@@ -1393,6 +1393,17 @@ describe('MysteryBox', () => {
                 expect(boxInfo).to.have.property('qualification_data').that.to.be.eq(proofs.merkleRoot);
             }
             await mbContract.connect(user_2).openBox(...Object.values(open_parameters), txParameters);
+        }
+        {
+            const leaves_proof = abiCoder.encode(['bytes32[]'], [proofs.leaves[user_1_index].proof]);
+            const proof = abiCoder.encode(['bytes', 'bytes32'], [leaves_proof, proofs.merkleRoot]);
+            const ret = await merkleRootQlfContract.is_qualified(user_1.address, proof);
+            expect(ret.qualified).to.be.true;
+            expect(ret.error_msg).to.be.eq('');
+
+            const expect_failed_ret = await merkleRootQlfContract.is_qualified(user_2.address, proof);
+            expect(expect_failed_ret.qualified).to.be.false;
+            expect(expect_failed_ret.error_msg).to.be.eq('not qualified');
         }
     });
 
