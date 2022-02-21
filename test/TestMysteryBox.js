@@ -1361,7 +1361,7 @@ describe('MysteryBox', () => {
                 mbContract.connect(user_2).openBox(...Object.values(open_parameters), txParameters),
             ).to.be.rejectedWith('not qualified');
         }
-        if (false) {
+        if (true) {
             let user_2_index = proofs.leaves.length;
             for (let i = 0; i < proofs.leaves.length; i++) {
                 if (proofs.leaves[i].address == user_2.address) {
