@@ -70,6 +70,10 @@ Using the [`helper.js`](helper.js) script to set up the deployed smart contracts
 | Fuse             | [0x5B966f3a32Db9C180843bCb40267A66b73E4f022](https://explorer.fuse.io/address/0x5B966f3a32Db9C180843bCb40267A66b73E4f022/transactions)            |
 | Boba             | [0x5B966f3a32Db9C180843bCb40267A66b73E4f022](https://blockexplorer.boba.network/address/0x5B966f3a32Db9C180843bCb40267A66b73E4f022/transactions)  |
 | Moonriver        | [0x5B966f3a32Db9C180843bCb40267A66b73E4f022](https://moonriver.moonscan.io/address/0x6cc1b1058F9153358278C35E0b2D382f1585854B)                    |
+| CFX_test         | [0x4C64b52476902430f56870d51d18529737aCFa2F](https://evmtestnet.confluxscan.io/address/0x4c64b52476902430f56870d51d18529737acfa2f)                |
+| CFX              | [0x4C64b52476902430f56870d51d18529737aCFa2F](https://evm.confluxscan.io/address/0x4c64b52476902430f56870d51d18529737acfa2f)                       |
+| Harmony_test     | [0x4Fda6d9Bb68Af18E5d686555b18cCeA7C82E0A3F](https://explorer.pops.one/address/0x4fda6d9bb68af18e5d686555b18ccea7c82e0a3f)                     |
+| Harmony          | [0xDc0905F2Dac875E29A36f22F1Ea046e063875D3e](https://explorer.harmony.one/address/0xdc0905f2dac875e29a36f22f1ea046e063875d3e)                     |
 
 ### MaskTestNFT
 
@@ -88,6 +92,10 @@ Using the [`helper.js`](helper.js) script to set up the deployed smart contracts
 | Optimistic       | [0x578a7Fee5f0D8CEc7d00578Bf37374C5b95C4b98](https://optimistic.etherscan.io/address/0x578a7Fee5f0D8CEc7d00578Bf37374C5b95C4b98)        |
 | Aurora           | [0x54a0A221C25Fc0a347EC929cFC5db0be17fA2a2B](https://explorer.mainnet.aurora.dev/address/0x54a0A221C25Fc0a347EC929cFC5db0be17fA2a2B/transactions) |
 | Fuse             | [0x54a0A221C25Fc0a347EC929cFC5db0be17fA2a2B](https://explorer.fuse.io/address/0x54a0A221C25Fc0a347EC929cFC5db0be17fA2a2B/transactions)            |
+| CFX_test         | [0xc29AfD93409226CE9f8A358790F8830371EE33E7](https://evmtestnet.confluxscan.io/address/0xc29afd93409226ce9f8a358790f8830371ee33e7)                |
+| CFX              | [0xc29AfD93409226CE9f8A358790F8830371EE33E7](https://evm.confluxscan.io/address/0xc29afd93409226ce9f8a358790f8830371ee33e7)                    |
+| Harmony_test     | [0xD48Bc506A9Fe6024F6b8a401eF91AE1dB6b83F90](https://explorer.pops.one/address/0xd48bc506a9fe6024f6b8a401ef91ae1db6b83f90)                    |
+| Harmony          | [0x677f7BbA13108649ECFF068E8B3d55631327B83a](https://explorer.harmony.one/address/0x677f7bba13108649ecff068e8b3d55631327b83a)                    |
 
 ### WhitelistQlf
 

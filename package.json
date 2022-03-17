@@ -32,6 +32,10 @@
     "deploy:metis": "hardhat --network metis deploy",
     "deploy:metis_test": "hardhat --network metis_test deploy",
     "deploy:moonriver": "hardhat --network moonriver deploy",
+    "deploy:cfx_test": "hardhat --network conflux_eSpace_test deploy",
+    "deploy:cfx": "hardhat --network conflux_eSpace deploy",
+    "deploy:harmony": "hardhat --network harmony deploy",
+    "deploy:harmony_test": "hardhat --network harmony_test deploy",
     "format": "prettier --write './test/*.js' './deploy/*.ts' './*.js'"
   },
   "repository": {
