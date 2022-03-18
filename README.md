@@ -74,6 +74,8 @@ Using the [`helper.js`](helper.js) script to set up the deployed smart contracts
 | CFX              | [0x4C64b52476902430f56870d51d18529737aCFa2F](https://evm.confluxscan.io/address/0x4c64b52476902430f56870d51d18529737acfa2f)                       |
 | Harmony_test     | [0x4Fda6d9Bb68Af18E5d686555b18cCeA7C82E0A3F](https://explorer.pops.one/address/0x4fda6d9bb68af18e5d686555b18ccea7c82e0a3f)                     |
 | Harmony          | [0xDc0905F2Dac875E29A36f22F1Ea046e063875D3e](https://explorer.harmony.one/address/0xdc0905f2dac875e29a36f22f1ea046e063875d3e)                     |
+| Metis_test       | [0x5B966f3a32Db9C180843bCb40267A66b73E4f022](https://stardust-explorer.metis.io/address/0x5B966f3a32Db9C180843bCb40267A66b73E4f022/transactions)  |
+| Metis            | [0x981be454a930479d92C91a0092D204b64845A5D6](https://andromeda-explorer.metis.io/address/0x981be454a930479d92C91a0092D204b64845A5D6/transactions) |
 
 ### MaskTestNFT
 
@@ -96,6 +98,8 @@ Using the [`helper.js`](helper.js) script to set up the deployed smart contracts
 | CFX              | [0xc29AfD93409226CE9f8A358790F8830371EE33E7](https://evm.confluxscan.io/address/0xc29afd93409226ce9f8a358790f8830371ee33e7)                    |
 | Harmony_test     | [0xD48Bc506A9Fe6024F6b8a401eF91AE1dB6b83F90](https://explorer.pops.one/address/0xd48bc506a9fe6024f6b8a401ef91ae1db6b83f90)                    |
 | Harmony          | [0x677f7BbA13108649ECFF068E8B3d55631327B83a](https://explorer.harmony.one/address/0x677f7bba13108649ecff068e8b3d55631327b83a)                    |
+| Metis_test       | [0x981be454a930479d92C91a0092D204b64845A5D6](https://stardust-explorer.metis.io/address/0x981be454a930479d92C91a0092D204b64845A5D6/transactions)  |
+| Metis            | [0x96c7D011cdFD467f551605f0f5Fce279F86F4186](https://andromeda-explorer.metis.io/address/0x96c7D011cdFD467f551605f0f5Fce279F86F4186/transactions) |
 
 ### WhitelistQlf
 

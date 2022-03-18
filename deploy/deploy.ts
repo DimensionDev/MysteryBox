@@ -110,6 +110,12 @@ const deployedContractAddress: DeployedContractAddress = {
         WhitelistQlf: '0x0000000000000000000000000000000000000000',
         SigVerifyQlf: '0x0000000000000000000000000000000000000000',
     },
+    metis: {
+        MysteryBox: '0x981be454a930479d92C91a0092D204b64845A5D6',
+        MaskEnumerableNFT: '0x96c7D011cdFD467f551605f0f5Fce279F86F4186',
+        WhitelistQlf: '0x0000000000000000000000000000000000000000',
+        SigVerifyQlf: '0x0000000000000000000000000000000000000000',
+    },
 };
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
