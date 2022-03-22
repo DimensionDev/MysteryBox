@@ -16,8 +16,8 @@ async function main() {
   if (!Contracts.includes(contract_name)) throw "Not support contract";
   if (!Object.keys(ChainId).includes(chain_name)) throw "Not support chain";
   const content = await fs.readFile(README_PATH, "utf-8");
-  const old_address_table = find_table(content, contract_name);
-  const new_line = form_new_line();
+  const old_address_table = findTable(content, contract_name);
+  const new_line = formNewLine();
   const new_address_table = old_address_table.concat(new_line);
   const replaced_content = replace(
     content,
@@ -32,7 +32,7 @@ async function main() {
 
 main();
 
-function form_new_line() {
+function formNewLine() {
   const required_chainId = getEnumAsArray(ChainId).get(chain_name);
   const file_name = "unknown-" + required_chainId + ".json";
   const oz_file_path = path.resolve(__dirname,"..", ".openzeppelin", file_name);
@@ -43,7 +43,7 @@ function form_new_line() {
   return new_address_line;
 }
 
-function find_table(content: string, name: string) {
+function findTable(content: string, name: string) {
   const pattern = new RegExp(
     `(<!-- begin ${name} -->)(.+)(<!-- end ${name} -->)`,
     "gs"
