@@ -53,6 +53,7 @@ Using the [`helper.js`](helper.js) script to set up the deployed smart contracts
 
 ### MysteryBox
 
+<!-- begin MysteryBox -->
 | Chain            | Address                                                                                                                                           |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Mainnet          | [0x294428f04b0F9EbC49B7Ad61E2736ebD6808c145](https://etherscan.io/address/0x294428f04b0F9EbC49B7Ad61E2736ebD6808c145)                             |
@@ -76,9 +77,11 @@ Using the [`helper.js`](helper.js) script to set up the deployed smart contracts
 | Harmony          | [0xDc0905F2Dac875E29A36f22F1Ea046e063875D3e](https://explorer.harmony.one/address/0xdc0905f2dac875e29a36f22f1ea046e063875d3e)                     |
 | Metis_test       | [0x5B966f3a32Db9C180843bCb40267A66b73E4f022](https://stardust-explorer.metis.io/address/0x5B966f3a32Db9C180843bCb40267A66b73E4f022/transactions)  |
 | Metis            | [0x981be454a930479d92C91a0092D204b64845A5D6](https://andromeda-explorer.metis.io/address/0x981be454a930479d92C91a0092D204b64845A5D6/transactions) |
+<!-- end MysteryBox -->
 
 ### MaskTestNFT
 
+<!-- begin MaskTestNFT -->
 | Chain            | Address                                                                                                                                 |
 | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | Mainnet          | [0x56136E69A5771436a9598804c5eA792230c21181](https://etherscan.io/address/0x56136E69A5771436a9598804c5eA792230c21181)                   |
@@ -100,9 +103,11 @@ Using the [`helper.js`](helper.js) script to set up the deployed smart contracts
 | Harmony          | [0x677f7BbA13108649ECFF068E8B3d55631327B83a](https://explorer.harmony.one/address/0x677f7bba13108649ecff068e8b3d55631327b83a)                    |
 | Metis_test       | [0x981be454a930479d92C91a0092D204b64845A5D6](https://stardust-explorer.metis.io/address/0x981be454a930479d92C91a0092D204b64845A5D6/transactions)  |
 | Metis            | [0x96c7D011cdFD467f551605f0f5Fce279F86F4186](https://andromeda-explorer.metis.io/address/0x96c7D011cdFD467f551605f0f5Fce279F86F4186/transactions) |
+<!-- end MaskTestNFT -->
 
 ### WhitelistQlf
 
+<!-- begin WhitelistQlf -->
 | Chain            | Address                                                                                                                                 |
 | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | Mainnet          | [0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://etherscan.io/address/0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)                   |
@@ -118,9 +123,11 @@ Using the [`helper.js`](helper.js) script to set up the deployed smart contracts
 | Optimistic       | [0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://optimistic.etherscan.io/address/0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)        |
 | Aurora           | [0x83D6b366f21e413f214EB077D5378478e71a5eD2](https://explorer.mainnet.aurora.dev/address/0x83D6b366f21e413f214EB077D5378478e71a5eD2/transactions) |
 | Fuse             | [0x83D6b366f21e413f214EB077D5378478e71a5eD2](https://explorer.fuse.io/address/0x83D6b366f21e413f214EB077D5378478e71a5eD2/transactions)            |
+<!-- end WhitelistQlf -->
 
 ### SigVerifyQlf
 
+<!-- begin SigVerifyQlf -->
 | Chain            | Address                                                                                                                                 |
 | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | Mainnet          | [0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://etherscan.io/address/0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)                   |
@@ -136,9 +143,11 @@ Using the [`helper.js`](helper.js) script to set up the deployed smart contracts
 | Optimistic       | [0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://optimistic.etherscan.io/address/0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)        |
 | Aurora           | [0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://explorer.mainnet.aurora.dev/address/0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/transactions) |
 | Fuse             | [0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://explorer.fuse.io/address/0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/transactions)            |
+<!-- end SigVerifyQlf -->
 
 ### MaskHolderQlf
 
+<!-- begin MaskHolderQlf -->
 | Chain            | Address                                                                                                                                 |
 | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | Mainnet          | [0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://etherscan.io/address/0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)                   |
@@ -154,9 +163,11 @@ Using the [`helper.js`](helper.js) script to set up the deployed smart contracts
 | Optimistic       | [0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://optimistic.etherscan.io/address/0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)        |
 | Aurora           | [0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://explorer.mainnet.aurora.dev/address/0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/transactions) |
 | Fuse             | [0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://explorer.fuse.io/address/0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/transactions)            |
+<!-- end MaskHolderQlf -->
 
 ### MerkleProofQlf
 
+<!-- begin MerkleProofQlf -->
 | Chain            | Address                                                                                                                                 |
 | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | Mainnet          | [0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://etherscan.io/address/0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)                   |
@@ -172,6 +183,7 @@ Using the [`helper.js`](helper.js) script to set up the deployed smart contracts
 | Optimistic       | [0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://optimistic.etherscan.io/address/0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)        |
 | Aurora           | [0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://explorer.mainnet.aurora.dev/address/0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/transactions) |
 | Fuse             | [0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx](https://explorer.fuse.io/address/0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/transactions)            |
+<!-- end MerkleProofQlf -->
 
 [testnet $MASK token address](https://github.com/DimensionDev/misc_smart_contract#masktoken---testnet-only)
 
