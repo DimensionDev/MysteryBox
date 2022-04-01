@@ -6,11 +6,12 @@ import 'solidity-coverage';
 import 'hardhat-gas-reporter';
 import '@nomiclabs/hardhat-solhint';
 import '@openzeppelin/hardhat-upgrades'
-import "@nomiclabs/hardhat-etherscan";
+import '@nomiclabs/hardhat-etherscan';
 import { task } from "hardhat/config"
 import { generateMerkleTree } from './scripts/generate';
 import { rawData } from './scripts/rawData';
-import { promises as fs } from 'fs'
+import { promises as fs } from 'fs';
+import 'hardhat-abi-exporter';
 
 task("generate_merkle_tree", "Generate MerkleTree", async (taskArguments, hre) => {
   const templateReal = generateMerkleTree(rawData);
@@ -47,4 +48,19 @@ module.exports = {
   },
   etherscan,
   gasReporter,
+  abiExporter: {
+    path: './abi',
+    runOnCompile: true,
+    clear: true,
+    flat: true,
+    only: [
+      'MaskEnumerableNFT',
+      'MaskHolderQlf',
+      'MaskNonEnumerableNFT',
+      'MerkleProofQlf',
+      'MysteryBox',
+      'SigVerifyQlf',
+      'WhitelistQlf'
+    ],
+  },
 };
