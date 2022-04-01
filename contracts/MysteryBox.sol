@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity >= 0.8.0;
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/IERC721EnumerableUpgradeable.sol";
@@ -10,7 +10,7 @@ import "./interfaces/IQLF.sol";
 
 contract MysteryBox is OwnableUpgradeable {
     using SafeMath for uint256;
-    using SafeERC20 for IERC20;
+    using SafeERC20Upgradeable for IERC20Upgradeable;
 
     struct PaymentOption {
         address token_addr;
@@ -121,7 +121,7 @@ contract MysteryBox is OwnableUpgradeable {
         Box storage box = box_by_id[_box_id];
         for (uint256 i = 0; i < payment.length; i++) {
             if (payment[i].token_addr != address(0)) {
-                require(IERC20(payment[i].token_addr).totalSupply() > 0, "Not a valid ERC20 token address");
+                require(IERC20Upgradeable(payment[i].token_addr).totalSupply() > 0, "Not a valid ERC20 token address");
             }
             PaymentInfo memory paymentInfo = PaymentInfo(payment[i].token_addr, payment[i].price, 0);
             box.payment.push(paymentInfo);
@@ -138,7 +138,7 @@ contract MysteryBox is OwnableUpgradeable {
         box.holder_token_addr = holder_token_addr;
         box.holder_min_token_amount = holder_min_token_amount;
         if (holder_token_addr != address(0)) {
-            require(IERC20(holder_token_addr).totalSupply() > 0, "Not a valid ERC20 token address");
+            require(IERC20Upgradeable(holder_token_addr).totalSupply() > 0, "Not a valid ERC20 token address");
         }
 
         if (sell_all) {
@@ -234,7 +234,7 @@ contract MysteryBox is OwnableUpgradeable {
 
         if (box.holder_min_token_amount > 0 && box.holder_token_addr != address(0)) {
             require(
-                IERC20(box.holder_token_addr).balanceOf(msg.sender) >= box.holder_min_token_amount,
+                IERC20Upgradeable(box.holder_token_addr).balanceOf(msg.sender) >= box.holder_min_token_amount,
                 "not holding enough token"
             );
         }
@@ -312,7 +312,7 @@ contract MysteryBox is OwnableUpgradeable {
                 }
             }
             else {
-                IERC20(payment_token_address).safeTransferFrom(msg.sender, address(this), total_payment);
+                IERC20Upgradeable(payment_token_address).safeTransferFrom(msg.sender, address(this), total_payment);
             }
             box.payment[payment_token_index].receivable_amount += total_payment;
         }
@@ -344,7 +344,7 @@ contract MysteryBox is OwnableUpgradeable {
                     addr.transfer(amount);
                 }
                 else {
-                    IERC20(token_address).safeTransfer(msg.sender, amount);
+                    IERC20Upgradeable(token_address).safeTransfer(msg.sender, amount);
                 }
                 emit ClaimPayment(msg.sender, box_ids[asset_index], token_address, amount, block.timestamp);
             }
