@@ -8,6 +8,7 @@ export enum ChainId {
   Fantom = 250,
   Celo = 42220,
   Avalanche = 43114,
+  Kovan_optimistic = 69,
   Optimistic = 10,
   Aurora = 1313161554,
   Fuse = 122,
@@ -36,6 +37,7 @@ export const BlockExplorer: Record<ChainId, (address: string) => string> = {
   [ChainId.Fantom]: makeAddressDetailURL("ftmscan.com"),
   [ChainId.Celo]: makeAddressDetailURL("explorer.celo.org"),
   [ChainId.Avalanche]: makeAddressDetailURL("snowtrace.io"),
+  [ChainId.Kovan_optimistic]: makeAddressDetailURL("kovan-optimistic.etherscan.io"),
   [ChainId.Optimistic]: makeAddressDetailURL("optimistic.etherscan.io"),
   [ChainId.Aurora]: makeAddressDetailURL("explorer.mainnet.aurora.dev"),
   [ChainId.Fuse]: makeAddressDetailURL("explorer.fuse.io"),
@@ -59,3 +61,13 @@ export const Contracts: Array<string> = [
   "MaskHolderQlf",
   "MerkleProofQlf"
 ]
+
+export type AddressTable = {
+  Chain: string,
+  MysteryBox: string,
+  MaskTestNFT: string,
+  WhitelistQlf: string,
+  SigVerifyQlf: string,
+  MaskHolderQlf: string,
+  MerkleProofQlf: string,
+}
