@@ -62,7 +62,7 @@ export const Contracts: Array<string> = [
   "MerkleProofQlf"
 ]
 
-export type AddressTable = {
+export type DeployedAddressRow = {
   Chain: string,
   MysteryBox: string,
   MaskTestNFT: string,

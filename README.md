@@ -126,27 +126,11 @@ Using the [`helper.js`](helper.js) script to set up the deployed smart contracts
 
 | Chain            | WhitelistQlf               | SigVerifyQlf               | MaskHolderQlf              | MerkleProofQlf             |
 | ---------------- | -------------------------- | -------------------------- | -------------------------- | -------------------------- |
-| Mainnet          |                            |                            |                            |                            |
 | Ropsten          | [`0x3011dF5b`][wl-ropsten] |                            |                            |                            |
 | Rinkeby          | [`0x50eCEebb`][wl-rinkeby] | [`0x9a656528`][sv-rinkeby] | [`0x26c3DE14`][mh-rinkeby] | [`0x450A1185`][mp-rinkeby] |
-| BSC              |                            |                            |                            |                            |
-| Matic            |                            |                            |                            |                            |
 | Goerli           | [`0xfE14631D`][wl-goerli]  |                            |                            |                            |
-| Fantom           |                            |                            |                            |                            |
-| Celo             |                            |                            |                            |                            |
-| Avalanche        |                            |                            |                            |                            |
-| Kovan_optimistic |                            |                            |                            |                            |
-| Optimistic       |                            |                            |                            |                            |
 | Aurora           | [`0x83D6b366`][wl-aurora]  |                            |                            |                            |
 | Fuse             | [`0x83D6b366`][wl-fuse]    |                            |                            |                            |
-| Boba             |                            |                            |                            |                            |
-| Moonriver        |                            |                            |                            |                            |
-| Conflux_test     |                            |                            |                            |                            |
-| Conflux          |                            |                            |                            |                            |
-| Harmony_test     |                            |                            |                            |                            |
-| Harmony          |                            |                            |                            |                            |
-| Metis_test       |                            |                            |                            |                            |
-| Metis            |                            |                            |                            |                            |
 
 [wl-ropsten]: https://ropsten.etherscan.io/address/0x3011dF5b0Be18A56693cC062Cb61a160dca571C3
 [wl-rinkeby]: https://rinkeby.etherscan.io/address/0x50eCEebb7360Efb93094dDEA692e04274E548b1d

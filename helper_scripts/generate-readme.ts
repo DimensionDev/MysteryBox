@@ -1,7 +1,7 @@
 import path from "path";
 import fs from "fs/promises";
 import { format } from "prettier";
-import { ChainId, BlockExplorer, AddressTable } from './types';
+import { ChainId, BlockExplorer, DeployedAddressRow } from './types';
 import { parse } from "csv-parse/sync";
 
 const README_PATH = path.resolve(__dirname, "..", "README.md");
@@ -9,17 +9,16 @@ const ADDRESS_TABLE_PATH = path.resolve(__dirname, "contract-addresses.csv");
 
 async function main() {
   const content = await fs.readFile(README_PATH, "utf-8");
-  const addressData = await fs.readFile(ADDRESS_TABLE_PATH, "utf-8");
-  const addresses: Array<AddressTable> = scanTable(addressData);
+  const rows: DeployedAddressRow[] = await loadDeployedAddressRows();
   const mainReplaced = replace(
     content,
     "main",
-    Array.from(makeMainTable(addresses)).join("\n")
+    Array.from(makeMainTable(rows)).join("\n")
   );
   const qlfReplaced = replace(
     mainReplaced,
     "Qualification",
-    Array.from(makeQlfTable(addresses)).join("\n")
+    Array.from(makeQlfTable(rows)).join("\n")
   );
   const formatted = format(qlfReplaced, {
     parser: "markdown",
@@ -30,60 +29,54 @@ async function main() {
 
 main();
 
-function* makeMainTable(addressTable: Array<AddressTable>) {
+function* makeMainTable(rows: DeployedAddressRow[]) {
   yield "| Chain | MysteryBox | MaskTestNFT |";
   yield "| - | - | - |";
-  for (let i = 0; i < addressTable.length; i++) {
-    const chain = addressTable[i].Chain;
-    const mbElement = formElement(addressTable[i].MysteryBox, `mb-${chain}`);
-    const nftElement = formElement(addressTable[i].MaskTestNFT, `nft-${chain}`);
-    yield `| ${chain} | ${mbElement} | ${nftElement} |`;
+  for (const { Chain, MysteryBox, MaskTestNFT } of rows) {
+    const mbElement = formElement(MysteryBox, `mb-${Chain}`);
+    const nftElement = formElement(MaskTestNFT, `nft-${Chain}`);
+    yield `| ${Chain} | ${mbElement} | ${nftElement} |`;
   }
   yield "";
-  for (let i = 0; i < addressTable.length; i++) {
-    const link = formLink(addressTable[i].MysteryBox, addressTable[i].Chain, "mb");
+  for (const { Chain, MysteryBox} of rows) {
+    const link = formLink(MysteryBox, Chain, "mb");
     if (link == null) continue;
     yield link;
   }
-  for (let i = 0; i < addressTable.length; i++) {
-    const link = formLink(addressTable[i].MaskTestNFT, addressTable[i].Chain, "nft");
+  for (const { Chain, MaskTestNFT } of rows) {
+    const link = formLink(MaskTestNFT, Chain, "nft");
     if (link == null) continue;
     yield link;
   }
 }
 
-function* makeQlfTable(addressTable: Array<AddressTable>) {
+function* makeQlfTable(rows: DeployedAddressRow[]) {
   yield "| Chain | WhitelistQlf | SigVerifyQlf | MaskHolderQlf | MerkleProofQlf |";
   yield "| - | - | - | - | - |";
-  for (let i = 0; i < addressTable.length; i++) {
-    const chain = addressTable[i].Chain;
-    const wlElement = formElement(addressTable[i].WhitelistQlf, `wl-${chain}`);
-    const svElement = formElement(addressTable[i].SigVerifyQlf, `sv-${chain}`);
-    const mhElement = formElement(addressTable[i].MaskHolderQlf, `mh-${chain}`);
-    const mpElement = formElement(addressTable[i].MerkleProofQlf, `mp-${chain}`);
-    yield `| ${chain} | ${wlElement} | ${svElement} | ${mhElement} | ${mpElement} |`;
+  for (const { Chain, WhitelistQlf, SigVerifyQlf, MaskHolderQlf, MerkleProofQlf } of rows) {
+    const wlElement = formElement(WhitelistQlf, `wl-${Chain}`);
+    const svElement = formElement(SigVerifyQlf, `sv-${Chain}`);
+    const mhElement = formElement(MaskHolderQlf, `mh-${Chain}`);
+    const mpElement = formElement(MerkleProofQlf, `mp-${Chain}`);
+    yield `| ${Chain} | ${wlElement} | ${svElement} | ${mhElement} | ${mpElement} |`;
   }
   yield "";
-  for (let i = 0; i < addressTable.length; i++) {
-    const wlLink = formLink(addressTable[i].WhitelistQlf, addressTable[i].Chain, "wl");
+  for (const { Chain, WhitelistQlf, SigVerifyQlf, MaskHolderQlf, MerkleProofQlf } of rows) {
+    const wlLink = formLink(WhitelistQlf, Chain, "wl");
     if (wlLink != null) yield wlLink;
-    const svLink = formLink(addressTable[i].SigVerifyQlf, addressTable[i].Chain, "sv");
+    const svLink = formLink(SigVerifyQlf, Chain, "sv");
     if (svLink != null) yield svLink;
-    const mhLink = formLink(addressTable[i].MaskHolderQlf, addressTable[i].Chain, "mh");
+    const mhLink = formLink(MaskHolderQlf, Chain, "mh");
     if (mhLink != null) yield mhLink;
-    const mpLink = formLink(addressTable[i].MerkleProofQlf, addressTable[i].Chain, "mp");
+    const mpLink = formLink(MerkleProofQlf, Chain, "mp");
     if (mpLink != null) yield mpLink;
   }
 }
 
-function scanTable(addressData: string) {
+async function loadDeployedAddressRows(): Promise<DeployedAddressRow[]> {
+  const data = await fs.readFile(ADDRESS_TABLE_PATH, "utf-8")
   const headers = ['Chain', 'MysteryBox', 'MaskTestNFT', 'WhitelistQlf', 'SigVerifyQlf', 'MaskHolderQlf', 'MerkleProofQlf']
-  const result: Array<AddressTable> = parse(addressData, {
-    delimiter: ',',
-    columns: headers,
-    from: 2
-  });
-  return result;
+  return parse(data, { delimiter: ',', columns: headers, from: 2 });
 }
 
 function formElement(address: string, linkTag: string) {
