@@ -78,8 +78,8 @@ function formLink(address: string, chain: string, contract: string) {
   if (address == '') {
     return null;
   }
-  const requiredChainId: ChainId = getEnumAsArray(ChainId).get(chain);
-  const browserPath = BlockExplorer[requiredChainId](address);
+  const requiredChainId = getEnumAsMap(ChainId).get(chain);
+  const browserPath = BlockExplorer[requiredChainId as ChainId](address);
   return `[${contract}-${chain}]: ${browserPath}`;
 }
 
@@ -92,7 +92,7 @@ function replace(content: string, name: string, replace: string) {
 }
 
 function getEnumAsMap<T extends object>(enumObject: T) {
-  const pairs = new Map<keyof T>();
+  const pairs = new Map<string, T[keyof T]>();
   for (const key of Object.keys(enumObject)) {
     if (Number.isNaN(Number.parseInt(key))) {
       pairs.set(key, enumObject[key as keyof T]);
