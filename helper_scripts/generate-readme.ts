@@ -8,19 +8,19 @@ const README_PATH = path.resolve(__dirname, "..", "README.md");
 const ADDRESS_TABLE_PATH = path.resolve(__dirname, "contract-addresses.csv");
 
 async function main() {
-  const content = await fs.readFile(README_PATH, "utf-8");
+  let content = await fs.readFile(README_PATH, "utf-8");
   const rows: DeployedAddressRow[] = await loadDeployedAddressRows();
-  const mainReplaced = replace(
+  content = replace(
     content,
     "main",
-    Array.from(makeMainTable(rows)).join("\n")
+    Array.from(makeMainTable(rows)).filter(Boolean).join("\n")
   );
-  const qlfReplaced = replace(
-    mainReplaced,
+  content = replace(
+    content,
     "Qualification",
-    Array.from(makeQlfTable(rows)).join("\n")
+    Array.from(makeQlfTable(rows)).filter(Boolean).join("\n")
   );
-  const formatted = format(qlfReplaced, {
+  const formatted = format(content, {
     parser: "markdown",
     printWidth: 160,
   });
@@ -38,16 +38,8 @@ function* makeMainTable(rows: DeployedAddressRow[]) {
     yield `| ${Chain} | ${mbElement} | ${nftElement} |`;
   }
   yield "";
-  for (const { Chain, MysteryBox} of rows) {
-    const link = formLink(MysteryBox, Chain, "mb");
-    if (link == null) continue;
-    yield link;
-  }
-  for (const { Chain, MaskTestNFT } of rows) {
-    const link = formLink(MaskTestNFT, Chain, "nft");
-    if (link == null) continue;
-    yield link;
-  }
+  yield* rows.map(({ Chain, MysteryBox }) => formLink(MysteryBox, Chain, "mb"))
+  yield* rows.map(({ Chain, MaskTestNFT }) => formLink(MaskTestNFT, Chain, "nft"))
 }
 
 function* makeQlfTable(rows: DeployedAddressRow[]) {
@@ -62,28 +54,24 @@ function* makeQlfTable(rows: DeployedAddressRow[]) {
   }
   yield "";
   for (const { Chain, WhitelistQlf, SigVerifyQlf, MaskHolderQlf, MerkleProofQlf } of rows) {
-    const wlLink = formLink(WhitelistQlf, Chain, "wl");
-    if (wlLink != null) yield wlLink;
-    const svLink = formLink(SigVerifyQlf, Chain, "sv");
-    if (svLink != null) yield svLink;
-    const mhLink = formLink(MaskHolderQlf, Chain, "mh");
-    if (mhLink != null) yield mhLink;
-    const mpLink = formLink(MerkleProofQlf, Chain, "mp");
-    if (mpLink != null) yield mpLink;
+    yield formLink(WhitelistQlf, Chain, "wl");
+    yield formLink(SigVerifyQlf, Chain, "sv");
+    yield formLink(MaskHolderQlf, Chain, "mh");
+    yield formLink(MerkleProofQlf, Chain, "mp");
   }
 }
 
 async function loadDeployedAddressRows(): Promise<DeployedAddressRow[]> {
   const data = await fs.readFile(ADDRESS_TABLE_PATH, "utf-8")
-  const headers = ['Chain', 'MysteryBox', 'MaskTestNFT', 'WhitelistQlf', 'SigVerifyQlf', 'MaskHolderQlf', 'MerkleProofQlf']
-  return parse(data, { delimiter: ',', columns: headers, from: 2 });
+  const columns = ['Chain', 'MysteryBox', 'MaskTestNFT', 'WhitelistQlf', 'SigVerifyQlf', 'MaskHolderQlf', 'MerkleProofQlf']
+  return parse(data, { delimiter: ',', columns, from: 2 });
 }
 
 function formElement(address: string, linkTag: string) {
   if (address == '') {
     return ''
   }
-  return `[\`${address.substr(0, 10)}\`][${linkTag}]`;
+  return `[\`${address.slice(0, 10)}\`][${linkTag}]`;
 }
 
 function formLink(address: string, chain: string, contract: string) {
