@@ -53,7 +53,7 @@ export const BlockExplorer: Record<ChainId, (address: string) => string> = {
   [ChainId.Arbiturm]: makeAddressDetailURL("explorer.arbitrum.io"),
 }
 
-export const Contracts: Array<string> = [
+export const Contracts: string[] = [
   "MysteryBox",
   "MaskTestNFT",
   "WhitelistQlf",

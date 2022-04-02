@@ -91,11 +91,12 @@ function replace(content: string, name: string, replace: string) {
   return content.replace(pattern, `$1\n${replace}\n$3`);
 }
 
-function getEnumAsArray<T extends object>(enumObject: T) {
-  const keys = Object.keys(enumObject).filter((x) => Number.isNaN(Number.parseInt(x)));
-  const map = new Map();
-  for (let i = 0; i < keys.length; i++) {
-    map.set(keys[i], enumObject[keys[i] as keyof T]);
+function getEnumAsMap<T extends object>(enumObject: T) {
+  const pairs = new Map<keyof T>();
+  for (const key of Object.keys(enumObject)) {
+    if (Number.isNaN(Number.parseInt(key))) {
+      pairs.set(key, enumObject[key as keyof T]);
+    }
   }
-  return map;
+  return pairs;
 }
