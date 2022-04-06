@@ -98,6 +98,24 @@ const deployedContractAddress: DeployedContractAddress = {
         WhitelistQlf: '0x83D6b366f21e413f214EB077D5378478e71a5eD2',
         SigVerifyQlf: '0x0000000000000000000000000000000000000000',
     },
+    conflux_eSpace: {
+        MysteryBox: '0x4C64b52476902430f56870d51d18529737aCFa2F',
+        MaskEnumerableNFT: '0xc29AfD93409226CE9f8A358790F8830371EE33E7',
+        WhitelistQlf: '0x0000000000000000000000000000000000000000',
+        SigVerifyQlf: '0x0000000000000000000000000000000000000000',
+    },
+    harmony: {
+        MysteryBox: '0xDc0905F2Dac875E29A36f22F1Ea046e063875D3e',
+        MaskEnumerableNFT: '0x677f7BbA13108649ECFF068E8B3d55631327B83a',
+        WhitelistQlf: '0x0000000000000000000000000000000000000000',
+        SigVerifyQlf: '0x0000000000000000000000000000000000000000',
+    },
+    metis: {
+        MysteryBox: '0x981be454a930479d92C91a0092D204b64845A5D6',
+        MaskEnumerableNFT: '0x96c7D011cdFD467f551605f0f5Fce279F86F4186',
+        WhitelistQlf: '0x0000000000000000000000000000000000000000',
+        SigVerifyQlf: '0x0000000000000000000000000000000000000000',
+    },
 };
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
@@ -119,6 +137,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
             const admin = await upgrades.admin.getInstance();
             const impl_addr = await admin.getProxyImplementation(proxy.address);
+            console.log("Implementation address: ", impl_addr);
             if (false)
                 await hre.run('verify:verify', {
                     address: impl_addr,
@@ -133,6 +152,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
             const admin = await upgrades.admin.getInstance();
             const impl_addr = await admin.getProxyImplementation(proxy.address);
+            console.log("Implementation address: ", impl_addr);
             if (false)
                 await hre.run('verify:verify', {
                     address: impl_addr,

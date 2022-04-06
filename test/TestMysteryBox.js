@@ -588,9 +588,11 @@ describe('MysteryBox', () => {
         {
             const parameters = JSON.parse(JSON.stringify(openBoxParameters));
             parameters.payment_token_index = 1;
+            await testTokenAContract.connect(user_3).approve(mbContract.address, transferAmount);
             await expect(mbContract.connect(user_3).openBox(...Object.values(parameters))).to.be.rejectedWith(
                 'ERC20: transfer amount exceeds balance',
             );
+            await testTokenAContract.connect(user_3).approve(mbContract.address, 0);
             await testTokenAContract.transfer(user_3.address, transferAmount);
             await expect(mbContract.connect(user_3).openBox(...Object.values(parameters))).to.be.rejectedWith(
                 'ERC20: transfer amount exceeds allowance',
