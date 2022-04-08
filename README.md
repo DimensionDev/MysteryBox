@@ -77,6 +77,7 @@ Using the [`helper.js`](helper.js) script to set up the deployed smart contracts
 | Harmony          | [`0xDc0905F2`][mb-harmony]          | [`0x677f7bba`][nft-harmony]          |
 | Metis_test       | [`0x5B966f3a`][mb-metis_test]       | [`0x981be454`][nft-metis_test]       |
 | Metis            | [`0x981be454`][mb-metis]            | [`0x96c7D011`][nft-metis]            |
+| Kardia           | [`0xbC7d9898`][mb-kardia]           | [`0x8D03d9b4`][nft-kardia]           |
 
 [mb-mainnet]: https://etherscan.io/address/0x294428f04b0F9EbC49B7Ad61E2736ebD6808c145
 [mb-ropsten]: https://ropsten.etherscan.io/address/0xc7387b6Ac310ae15576451d2d37058711331105c
@@ -98,6 +99,7 @@ Using the [`helper.js`](helper.js) script to set up the deployed smart contracts
 [mb-harmony]: https://explorer.harmony.one/address/0xDc0905F2Dac875E29A36f22F1Ea046e063875D3e
 [mb-metis_test]: https://stardust-explorer.metis.io/address/0x5B966f3a32Db9C180843bCb40267A66b73E4f022
 [mb-metis]: https://andromeda-explorer.metis.io/address/0x981be454a930479d92C91a0092D204b64845A5D6
+[mb-kardia]: https://explorer.kardiachain.io/address/0xbC7d98985966f56A66B0cB5F23d865676dc2ac84
 [nft-mainnet]: https://etherscan.io/address/0x56136E69A5771436a9598804c5eA792230c21181
 [nft-ropsten]: https://ropsten.etherscan.io/address/0x4c73F4DC55Ef094259570892F52717cF19c62283
 [nft-rinkeby]: https://rinkeby.etherscan.io/address/0x0c8FB5C985E00fb1D002b6B9700084492Fb4B9A8
@@ -117,6 +119,7 @@ Using the [`helper.js`](helper.js) script to set up the deployed smart contracts
 [nft-harmony]: https://explorer.harmony.one/address/0x677f7bba13108649ecff068e8b3d55631327b83a
 [nft-metis_test]: https://stardust-explorer.metis.io/address/0x981be454a930479d92C91a0092D204b64845A5D6
 [nft-metis]: https://andromeda-explorer.metis.io/address/0x96c7D011cdFD467f551605f0f5Fce279F86F4186
+[nft-kardia]: https://explorer.kardiachain.io/address/0x8D03d9b43e98Cc2f790Be4E96503fD0CcFd04a2D
 
 <!-- end main -->
 

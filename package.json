@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "hardhat.config.ts",
+  "private": true,
   "scripts": {
     "compile": "hardhat compile",
     "test": "npx hardhat test",
@@ -36,6 +37,7 @@
     "deploy:cfx": "hardhat --network conflux_eSpace deploy",
     "deploy:harmony": "hardhat --network harmony deploy",
     "deploy:harmony_test": "hardhat --network harmony_test deploy",
+    "deploy:kardia": "hardhat --network kardia deploy",
     "prettier:solidity": "./node_modules/.bin/prettier --write contracts/**/*.sol",
     "format": "prettier --write './test/*.js' './deploy/*.ts' './*.js'"
   },
@@ -53,7 +55,7 @@
     "@nomiclabs/hardhat-etherscan": "^3.0.3",
     "@openzeppelin/contracts": "^4.1.0",
     "@openzeppelin/contracts-upgradeable": "^4.2.0",
-    "@openzeppelin/hardhat-upgrades": "^1.9.0",
+    "@openzeppelin/hardhat-upgrades": "^1.17.0",
     "csv-parse": "^5.0.4"
   },
   "devDependencies": {
