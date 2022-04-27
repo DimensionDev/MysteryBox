@@ -78,6 +78,7 @@ Using the [`helper.js`](helper.js) script to set up the deployed smart contracts
 | Metis_test          | [`0x5B966f3a`][mb-metis_test]          | [`0x981be454`][nft-metis_test]          |
 | Metis               | [`0x981be454`][mb-metis]               | [`0x96c7D011`][nft-metis]               |
 | Kardia              | [`0xbC7d9898`][mb-kardia]              | [`0x8D03d9b4`][nft-kardia]              |
+| Astar               | [`0x041Bdc5b`][mb-astar]               | [`0x7E0aa694`][nft-astar]               |
 
 [mb-mainnet]: https://etherscan.io/address/0x294428f04b0F9EbC49B7Ad61E2736ebD6808c145
 [mb-ropsten]: https://ropsten.etherscan.io/address/0xc7387b6Ac310ae15576451d2d37058711331105c
@@ -100,6 +101,7 @@ Using the [`helper.js`](helper.js) script to set up the deployed smart contracts
 [mb-metis_test]: https://stardust-explorer.metis.io/address/0x5B966f3a32Db9C180843bCb40267A66b73E4f022
 [mb-metis]: https://andromeda-explorer.metis.io/address/0x981be454a930479d92C91a0092D204b64845A5D6
 [mb-kardia]: https://explorer.kardiachain.io/address/0xbC7d98985966f56A66B0cB5F23d865676dc2ac84
+[mb-astar]: https://blockscout.com/astar/address/0x041Bdc5b713aFc3AA06b9511E1e55552138b139A
 [nft-mainnet]: https://etherscan.io/address/0x56136E69A5771436a9598804c5eA792230c21181
 [nft-ropsten]: https://ropsten.etherscan.io/address/0x4c73F4DC55Ef094259570892F52717cF19c62283
 [nft-rinkeby]: https://rinkeby.etherscan.io/address/0x0c8FB5C985E00fb1D002b6B9700084492Fb4B9A8
@@ -120,6 +122,7 @@ Using the [`helper.js`](helper.js) script to set up the deployed smart contracts
 [nft-metis_test]: https://stardust-explorer.metis.io/address/0x981be454a930479d92C91a0092D204b64845A5D6
 [nft-metis]: https://andromeda-explorer.metis.io/address/0x96c7D011cdFD467f551605f0f5Fce279F86F4186
 [nft-kardia]: https://explorer.kardiachain.io/address/0x8D03d9b43e98Cc2f790Be4E96503fD0CcFd04a2D
+[nft-astar]: https://blockscout.com/astar/address/0x7E0aa694E51551Bcc0e669180123AAcB1debC5fd
 
 <!-- end main -->
 

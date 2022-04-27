@@ -23,6 +23,7 @@ export enum ChainId {
   xDai = 100,
   Arbiturm = 42161,
   Kardia = 24,
+  Astar = 592,
 }
 function makeAddressDetailURL(domain: string) {
   return (address: string) => `https://${domain}/address/${address}`
@@ -52,7 +53,8 @@ export const BlockExplorer: Record<ChainId, (address: string) => string> = {
   [ChainId.Metis_test]: makeAddressDetailURL("stardust-explorer.metis.io"),
   [ChainId.xDai]: (address) => `https://blockscout.com/xdai/mainnet/address/${address}`,
   [ChainId.Arbiturm]: makeAddressDetailURL("explorer.arbitrum.io"),
-  [ChainId.Kardia]: makeAddressDetailURL("explorer.kardiachain.io")
+  [ChainId.Kardia]: makeAddressDetailURL("explorer.kardiachain.io"),
+  [ChainId.Astar]: makeAddressDetailURL('blockscout.com/astar'),
 }
 
 export const Contracts: string[] = [
