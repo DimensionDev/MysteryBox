@@ -19,16 +19,15 @@ task("generate_merkle_tree", "Generate MerkleTree", async (taskArguments, hre) =
   console.log('test/merkle_tree.js generated')
 })
 
-const {
-  HardhatNetworkConfig,
+import {
+  getHardhatNetworkConfig,
   HardhatSolidityConfig,
   HardhatGasReporterConfig,
   EtherscanConfig,
-} = require('./SmartContractProjectConfig/config.js');
+} from "./SmartContractProjectConfig/config";
 
-const networks = HardhatNetworkConfig;
-var solidity = HardhatSolidityConfig;
-HardhatSolidityConfig.version = "0.8.2";
+const networks = getHardhatNetworkConfig();
+const solidity = HardhatSolidityConfig;
 const gasReporter = HardhatGasReporterConfig;
 const etherscan = EtherscanConfig;
 
@@ -36,7 +35,9 @@ const etherscan = EtherscanConfig;
  * @type import('hardhat/config').HardhatUserConfig
  */
 module.exports = {
-  networks,
+  networks: {
+    'hardhat': {},
+  },
   mocha: {
     timeout: 1000000,
   },

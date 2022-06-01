@@ -1,14 +1,16 @@
-import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { DeployFunction } from 'hardhat-deploy/types';
-import { ethers, upgrades } from 'hardhat';
+import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { DeployFunction } from "hardhat-deploy/types";
+import { ethers, upgrades } from "hardhat";
 import fs from "fs/promises";
 import path from "path";
 import { parse } from "csv-parse/sync";
+import { config as envConfig } from "dotenv";
 
 const { MaskNFTInitParameters, holderMinAmount } = require('../test/constants.js');
 
 const { ContractAddressConfig } = require('../SmartContractProjectConfig/config.js');
-const ADDRESS_TABLE_PATH = path.resolve(__dirname,"..","helper_scripts", "contract-addresses.csv");
+const ADDRESS_TABLE_PATH = path.resolve(__dirname, "..", "contract-addresses.csv");
+envConfig({ path: path.resolve(__dirname, "./.env") });
 
 interface IDeployedContractAddress {
   MaskEnumerableNFT: string;
@@ -18,8 +20,8 @@ interface IDeployedContractAddress {
 }
 type DeployedContractAddress = Record<string, IDeployedContractAddress>;
 
-const func: DeployFunction = async function(hre: HardhatRuntimeEnvironment) {
-  const network: string = hre.hardhatArguments.network ? hre.hardhatArguments.network : 'rinkeby';
+const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
+  const network = hre.hardhatArguments.network ?? "ropsten";
   const { deployments, getNamedAccounts } = hre;
   const { deploy } = deployments;
   const { deployer } = await getNamedAccounts();
@@ -160,12 +162,12 @@ const func: DeployFunction = async function(hre: HardhatRuntimeEnvironment) {
   }
 };
 
-async function loadDeployedAddress(): Promise<DeployedContractAddress>{
+async function loadDeployedAddress(): Promise<DeployedContractAddress> {
   const data = await fs.readFile(ADDRESS_TABLE_PATH, "utf-8");
   const columns = ['Chain', 'MysteryBox', 'MaskTestNFT', 'WhitelistQlf', 'SigVerifyQlf', 'MaskHolderQlf', 'MerkleProofQlf']
   const records = parse(data, { delimiter: ',', columns, from: 2 });
   let deployedContract: DeployedContractAddress = {};
-  for (const {Chain, MysteryBox, MaskTestNFT, WhitelistQlf, SigVerifyQlf} of records) {
+  for (const { Chain, MysteryBox, MaskTestNFT, WhitelistQlf, SigVerifyQlf } of records) {
     let contractInfo = {
       MysteryBox,
       MaskEnumerableNFT: MaskTestNFT,

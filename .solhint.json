@@ -1,16 +1,16 @@
 {
-  "extends": "solhint:recommended",
-  "excludedFiles": "ERC721A.sol",
-  "rules": {
-    "avoid-throw": false,
-    "compiler-version": [
-      "error",
-      "^0.8.0"
-    ],
-    "avoid-suicide": "error",
-    "avoid-sha3": "warn"
-  },
-  "plugins": [
-    "prettier"
-  ]
+    "extends": "solhint:recommended",
+    "excludedFiles": "ERC721A.sol",
+    "rules": {
+        "avoid-throw": false,
+        "compiler-version": [
+            "error",
+            "^0.8.0"
+        ],
+        "avoid-suicide": "error",
+        "avoid-sha3": "warn"
+    },
+    "plugins": [
+        "prettier"
+    ]
 }

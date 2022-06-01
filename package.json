@@ -38,6 +38,7 @@
     "@types/prettier": "^2.4.4",
     "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
+    "dotenv": "^16.0.1",
     "ethers": "^5.6.2",
     "hardhat": "^2.9.2",
     "hardhat-abi-exporter": "^2.8.0",

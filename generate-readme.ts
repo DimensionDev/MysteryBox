@@ -1,14 +1,22 @@
 import path from "path";
 import fs from "fs/promises";
 import { format } from "prettier";
-import { ChainId, BlockExplorer, DeployedAddressRow } from './types';
+// import { ChainId, BlockExplorer, DeployedAddressRow } from './helper_scripts/types';
+import { getAllBrowserPath } from "./SmartContractProjectConfig/chains";
 import { parse } from "csv-parse/sync";
 
-const README_PATH = path.resolve(__dirname, "..", "README.md");
+const README_PATH = path.resolve(__dirname, "README.md");
 const ADDRESS_TABLE_PATH = path.resolve(__dirname, "contract-addresses.csv");
+let contractPath: Record<string, string>;
+type DeployedAddressRow = {
+  Chain: string;
+  HappyRedPacket: string;
+  HappyRedPacket_ERC721: string;
+};
 
 async function main() {
   let content = await fs.readFile(README_PATH, "utf-8");
+  contractPath = await getAllBrowserPath("address");
   const rows: DeployedAddressRow[] = await loadDeployedAddressRows();
   content = replace(
     content,
