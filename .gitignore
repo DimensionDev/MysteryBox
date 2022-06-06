@@ -12,3 +12,4 @@ artifacts
 deployments
 .openzeppelin
 .vscode
+types/

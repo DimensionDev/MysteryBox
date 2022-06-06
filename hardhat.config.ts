@@ -1,5 +1,6 @@
 import 'hardhat-deploy';
 import 'hardhat-deploy-ethers';
+import '@typechain/hardhat'
 import '@nomiclabs/hardhat-waffle';
 import '@nomiclabs/hardhat-ethers';
 import 'solidity-coverage';
@@ -63,5 +64,10 @@ module.exports = {
       'SigVerifyQlf',
       'WhitelistQlf'
     ],
+  },
+  typechain: {
+    outDir: "types",
+    target: "ethers-v5",
+    alwaysGenerateOverloads: false,
   },
 };

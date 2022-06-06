@@ -34,7 +34,7 @@ To run unit test:
 npm run test
 ```
 
-To deploy the smart contract on Ethereum `rinkeby` testnet:
+To deploy the smart contract on Ethereum `ropsten` testnet:
 
 ```bash
 npm run deploy rinkeby

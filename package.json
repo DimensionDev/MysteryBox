@@ -10,6 +10,7 @@
     "test:coverage": "hardhat coverage",
     "lint": "hardhat check",
     "generate_merkle_tree": "hardhat generate_merkle_tree",
+    "generateReadme": "ts-node ./generate-readme.ts",
     "deploy": "hardhat deploy --network",
     "prettier:solidity": "prettier --write contracts/**/*.sol",
     "format": "prettier --write './test/*.js' './deploy/*.ts' './*.js'"
@@ -35,6 +36,12 @@
     "@nomiclabs/hardhat-ethers": "^2.0.5",
     "@nomiclabs/hardhat-solhint": "^2.0.0",
     "@nomiclabs/hardhat-waffle": "^2.0.3",
+    "@typechain/ethers-v5": "^10.0.0",
+    "@typechain/hardhat": "^6.0.0",
+    "@types/chai": "^4.3.1",
+    "@types/chai-as-promised": "^7.1.5",
+    "@types/mocha": "^9.1.1",
+    "@types/node": "^17.0.39",
     "@types/prettier": "^2.4.4",
     "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
@@ -53,6 +60,7 @@
     "solhint-plugin-prettier": "0.0.5",
     "solidity-coverage": "^0.7.20",
     "ts-node": "^10.7.0",
+    "typechain": "^8.0.0",
     "typescript": "^4.6.3"
   }
 }
