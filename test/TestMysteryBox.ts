@@ -1,13 +1,12 @@
 import { ethers, waffle, upgrades } from "hardhat";
-import { Signer, BigNumber, Contract } from "ethers";
+import { Signer, BigNumber, Contract, utils } from "ethers";
 import MockDate from 'mockdate'
 import { use } from "chai";
 import chaiAsPromised from "chai-as-promised";
 const { expect } = use(chaiAsPromised);
-const { deployContract } = waffle;
 
 
-import { advanceTime, advanceBlock, advanceTimeAndBlock, takeSnapshot, revertToSnapShot } from "./helper";
+import { advanceBlock, advanceTimeAndBlock, takeSnapshot, revertToSnapShot } from "./helper";
 import {
   MaskNFTInitParameters,
   CreateBoxParameters,
@@ -23,7 +22,7 @@ const maskNftPara = MaskNFTInitParameters[network];
 const createBoxPara = CreateBoxParameters[network];
 let sell_all_box_id;
 let not_sell_all_box_id;
-let not_sell_all_nft_id_list : string[];
+let not_sell_all_nft_id_list : string[] = [];
 const proofs = require('../dist/proofs.json');
 
 const txParameters = {
@@ -41,8 +40,6 @@ const nonEnumerableNftTokenABI = require('../artifacts/contracts/test/MaskNonEnu
 
 
 describe('MysteryBox', () => {
-
-
   let signers: Signer[];
   let signerAddresses: string[];
   let contractCreator: Signer;
@@ -53,7 +50,7 @@ describe('MysteryBox', () => {
   let user_2 : Signer;
   let user_3 : Signer;
   let verifier : Signer;
-
+  let abiCoder : utils.AbiCoder;
 
   let testTokenAContract : Contract;
   let testTokenBContract : Contract;
@@ -61,7 +58,6 @@ describe('MysteryBox', () => {
   let testMaskTokenContract : Contract;
 
   const qlfWhiltelistJsonABI = require('../artifacts/contracts/WhitelistQlf.sol/WhitelistQlf.json');
-  const qlfSigVerifyJsonABI = require('../artifacts/contracts/SigVerifyQlf.sol/SigVerifyQlf.json');
   const qlfMaskHolderJsonABI = require('../artifacts/contracts/MaskHolderQlf.sol/MaskHolderQlf.json');
   let whitelistQlfContract : Contract;
   let sigVerifyQlfContract : Contract;
@@ -84,6 +80,7 @@ describe('MysteryBox', () => {
         user_2 = signers[2];
         user_3 = signers[3];
         verifier = signers[4];
+        abiCoder = new utils.AbiCoder;
 
         const TestTokenContract = await ethers.getContractFactory('TestToken');
         const testTokenA = await TestTokenContract.deploy("TestTokenA", "TESTA",testTokenMintAmount);
@@ -1311,7 +1308,7 @@ describe('MysteryBox', () => {
             parameter.sell_all = true;
             parameter.qualification = sigVerifyQlfContract.address;
             // convert address to bytes32
-            const qualification_data = web3.utils.padLeft(await verifier.getAddress().toString(), 64);
+            const qualification_data = utils.hexZeroPad((await verifier.getAddress()).toString(), 32);
             parameter.qualification_data = qualification_data;
 
             await mbContract.connect(user_1).createBox(...Object.values(parameter));
@@ -1321,7 +1318,7 @@ describe('MysteryBox', () => {
             open_parameters.box_id = result.box_id;
         }
         {
-            const msg_hash = soliditySha3(await user_1.getAddress());
+            const msg_hash = utils.keccak256(await user_1.getAddress());
             const signature = await verifier.signMessage(ethers.utils.arrayify(msg_hash));
             open_parameters.proof = signature;
             await mbContract.connect(user_1).openBox(...Object.values(open_parameters), txParameters);
