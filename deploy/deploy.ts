@@ -21,7 +21,7 @@ interface IDeployedContractAddress {
 type DeployedContractAddress = Record<string, IDeployedContractAddress>;
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const network = hre.hardhatArguments.network ?? "ropsten";
+  const network = hre.hardhatArguments.network ?? "rinkeby";
   const { deployments, getNamedAccounts } = hre;
   const { deploy } = deployments;
   const { deployer } = await getNamedAccounts();

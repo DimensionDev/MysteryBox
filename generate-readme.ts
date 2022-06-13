@@ -1,7 +1,6 @@
 import path from "path";
 import fs from "fs/promises";
 import { format } from "prettier";
-// import { ChainId, BlockExplorer, DeployedAddressRow } from './helper_scripts/types';
 import { getAllBrowserPath } from "./SmartContractProjectConfig/chains";
 import { parse } from "csv-parse/sync";
 
@@ -10,8 +9,12 @@ const ADDRESS_TABLE_PATH = path.resolve(__dirname, "contract-addresses.csv");
 let contractPath: Record<string, string>;
 type DeployedAddressRow = {
   Chain: string;
-  HappyRedPacket: string;
-  HappyRedPacket_ERC721: string;
+  MysteryBox: string;
+  MaskTestNFT: string;
+  WhitelistQlf: string,
+  SigVerifyQlf: string,
+  MaskHolderQlf: string,
+  MerkleProofQlf: string,
 };
 
 async function main() {
@@ -86,8 +89,7 @@ function formLink(address: string, chain: string, contract: string) {
   if (address == '') {
     return null;
   }
-  const requiredChainId = getEnumAsMap(ChainId).get(chain);
-  const browserPath = BlockExplorer[requiredChainId as ChainId](address);
+  const browserPath = contractPath[chain] + address;
   return `[${contract}-${chain}]: ${browserPath}`;
 }
 

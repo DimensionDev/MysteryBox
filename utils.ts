@@ -1,5 +1,5 @@
-const axios = require('axios');
-const { parseUnits, formatUnits } = require('ethers').utils;
+import axios from "axios";
+import { utils } from "ethers";
 
 function notUndefined(para) {
     if (typeof para === 'undefined') {
@@ -62,10 +62,10 @@ async function getGasPrice(debug) {
     const defaultGasPrice = {
         code: 200,
         data: {
-            rapid: parseUnits('122', 'gwei'),
-            fast: parseUnits('116', 'gwei'),
-            standard: parseUnits('100', 'gwei'),
-            slow: parseUnits('93', 'gwei'),
+            rapid: utils.parseUnits('122', 'gwei'),
+            fast: utils.parseUnits('116', 'gwei'),
+            standard: utils.parseUnits('100', 'gwei'),
+            slow: utils.parseUnits('93', 'gwei'),
             timestamp: new Date('2021-04-15T00:59:04.593Z').getTime(),
         },
     };
@@ -80,16 +80,16 @@ async function getGasPrice(debug) {
     // console.log(priceList);
     if (debug) {
         console.log('gas price', {
-            rapid: formatUnits(priceList.rapid, 'gwei'),
-            fast: formatUnits(priceList.fast, 'gwei'),
-            standard: formatUnits(priceList.standard, 'gwei'),
-            slow: formatUnits(priceList.slow, 'gwei'),
+            rapid: utils.formatUnits(priceList.rapid, 'gwei'),
+            fast: utils.formatUnits(priceList.fast, 'gwei'),
+            standard: utils.formatUnits(priceList.standard, 'gwei'),
+            slow: utils.formatUnits(priceList.slow, 'gwei'),
         });
     }
     return priceList;
 }
 
-module.exports = {
+export {
     notUndefined,
     sleepMs,
     getUrlRequest,

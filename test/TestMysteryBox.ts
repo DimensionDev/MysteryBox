@@ -1,10 +1,11 @@
 import { ethers, waffle, upgrades } from "hardhat";
-import { Signer, BigNumber, Contract, utils } from "ethers";
+import { Signer, Contract, utils } from "ethers";
 import MockDate from 'mockdate'
 import { use } from "chai";
 import chaiAsPromised from "chai-as-promised";
 const { expect } = use(chaiAsPromised);
-
+const { deployContract } = waffle;
+import proofs from "../dist/proofs.json";
 
 import { advanceBlock, advanceTimeAndBlock, takeSnapshot, revertToSnapShot } from "./helper";
 import {
@@ -12,7 +13,6 @@ import {
   CreateBoxParameters,
   openBoxParameters,
   MaxNumberOfNFT,
-  qualification_project_name,
   seconds_in_a_day,
   holderMinAmount,
 }  from './constants';
@@ -20,30 +20,28 @@ import {
 const network = 'mainnet';
 const maskNftPara = MaskNFTInitParameters[network];
 const createBoxPara = CreateBoxParameters[network];
-let sell_all_box_id;
-let not_sell_all_box_id;
-let not_sell_all_nft_id_list : string[] = [];
-const proofs = require('../dist/proofs.json');
+let sell_all_box_id : number;
+let not_sell_all_box_id : number;
+let not_sell_all_nft_id_list : number[] = [];
 
 const txParameters = {
     gasLimit: 6000000,
     value: createBoxPara.payment[0][1],
 };
 
-
 const jsonABI = require('../artifacts/contracts/MysteryBox.sol/MysteryBox.json');
 const interfaceABI = new ethers.utils.Interface(jsonABI.abi);
-
 const EnumerableNftTokenABI = require('../artifacts/contracts/test/MaskEnumerableNFT.sol/MaskEnumerableNFT.json');
 const EnumerableNftInterface = new ethers.utils.Interface(EnumerableNftTokenABI.abi);
 const nonEnumerableNftTokenABI = require('../artifacts/contracts/test/MaskNonEnumerableNFT.sol/MaskNonEnumerableNFT.json');
 
+import TestTokenArtifact from "../artifacts/contracts/test/test_token.sol/TestToken.json";
+import { TestToken } from "../types/contracts/test/test_token.sol/TestToken";
+
 
 describe('MysteryBox', () => {
   let signers: Signer[];
-  let signerAddresses: string[];
   let contractCreator: Signer;
-  let packetCreator: Signer;
   let snapshotId: string;
 
   let user_1 : Signer;
@@ -52,7 +50,7 @@ describe('MysteryBox', () => {
   let verifier : Signer;
   let abiCoder : utils.AbiCoder;
 
-  let testTokenAContract : Contract;
+  let testTokenAContract : TestToken;
   let testTokenBContract : Contract;
   let testTokenCContract : Contract;
   let testMaskTokenContract : Contract;
@@ -82,18 +80,24 @@ describe('MysteryBox', () => {
         verifier = signers[4];
         abiCoder = new utils.AbiCoder;
 
-        const TestTokenContract = await ethers.getContractFactory('TestToken');
-        const testTokenA = await TestTokenContract.deploy("TestTokenA", "TESTA",testTokenMintAmount);
-        testTokenAContract = await testTokenA.deployed();
+        // const TestTokenContract = await ethers.getContractFactory('TestToken');
+        // const testTokenA = (await TestTokenContract.deploy("TestTokenA", "TESTA",testTokenMintAmount)) as TestToken;
+        // testTokenAContract = await testTokenA.deployed();
 
-        const testTokenB = await TestTokenContract.deploy("TestTokenB", "TESTB",testTokenMintAmount);
-        testTokenBContract = await testTokenB.deployed();
+        // const testTokenB = await TestTokenContract.deploy("TestTokenB", "TESTB",testTokenMintAmount);
+        // testTokenBContract = await testTokenB.deployed();
 
-        const testTokenC = await TestTokenContract.deploy("TestTokenC", "TESTC",testTokenMintAmount);
-        testTokenCContract = await testTokenC.deployed();
+        // const testTokenC = await TestTokenContract.deploy("TestTokenC", "TESTC",testTokenMintAmount);
+        // testTokenCContract = await testTokenC.deployed();
 
-        const maskToken = await TestTokenContract.deploy("MaskToken", "MASK",testTokenMintAmount);
-        testMaskTokenContract = await maskToken.deployed();
+        // const maskToken = await TestTokenContract.deploy("MaskToken", "MASK",testTokenMintAmount);
+        // testMaskTokenContract = await maskToken.deployed();
+
+        testTokenAContract = (await deployContract(contractCreator, TestTokenArtifact, ["TestTokenA", "TESTA",testTokenMintAmount])) as TestToken;
+        testTokenBContract = (await deployContract(contractCreator, TestTokenArtifact, ["TestTokenB", "TESTB",testTokenMintAmount])) as TestToken;
+        testTokenCContract = (await deployContract(contractCreator, TestTokenArtifact, ["TestTokenC", "TESTC",testTokenMintAmount])) as TestToken;
+        testMaskTokenContract = (await deployContract(contractCreator, TestTokenArtifact, ["MaskToken", "MASK",testTokenMintAmount])) as TestToken;
+
         {
             const factory = await ethers.getContractFactory('WhitelistQlf');
             const proxy = await upgrades.deployProxy(factory, []);
