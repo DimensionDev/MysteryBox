@@ -1,16 +1,16 @@
 {
-    "trailingComma": "all",
-    "printWidth": 120,
-    "semi": true,
-    "singleQuote": true,
-    "jsxBracketSameLine": true,
-    "tabWidth": 4,
-    "overrides": [
-        {
-            "files": "*.md",
-            "options": {
-                "tabWidth": 2
-            }
-        }
-    ]
+  "trailingComma": "all",
+  "printWidth": 120,
+  "semi": true,
+  "singleQuote": false,
+  "jsxBracketSameLine": true,
+  "tabWidth": 2,
+  "overrides": [
+    {
+      "files": "*.md",
+      "options": {
+        "tabWidth": 2
+      }
+    }
+  ]
 }

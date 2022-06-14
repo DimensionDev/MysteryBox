@@ -11,26 +11,18 @@ type DeployedAddressRow = {
   Chain: string;
   MysteryBox: string;
   MaskTestNFT: string;
-  WhitelistQlf: string,
-  SigVerifyQlf: string,
-  MaskHolderQlf: string,
-  MerkleProofQlf: string,
+  WhitelistQlf: string;
+  SigVerifyQlf: string;
+  MaskHolderQlf: string;
+  MerkleProofQlf: string;
 };
 
 async function main() {
   let content = await fs.readFile(README_PATH, "utf-8");
   contractPath = await getAllBrowserPath("address");
   const rows: DeployedAddressRow[] = await loadDeployedAddressRows();
-  content = replace(
-    content,
-    "main",
-    Array.from(makeMainTable(rows)).filter(Boolean).join("\n")
-  );
-  content = replace(
-    content,
-    "Qualification",
-    Array.from(makeQlfTable(rows)).filter(Boolean).join("\n")
-  );
+  content = replace(content, "main", Array.from(makeMainTable(rows)).filter(Boolean).join("\n"));
+  content = replace(content, "Qualification", Array.from(makeQlfTable(rows)).filter(Boolean).join("\n"));
   const formatted = format(content, {
     parser: "markdown",
     printWidth: 160,
@@ -49,8 +41,8 @@ function* makeMainTable(rows: DeployedAddressRow[]) {
     yield `| ${Chain} | ${mbElement} | ${nftElement} |`;
   }
   yield "";
-  yield* rows.map(({ Chain, MysteryBox }) => formLink(MysteryBox, Chain, "mb"))
-  yield* rows.map(({ Chain, MaskTestNFT }) => formLink(MaskTestNFT, Chain, "nft"))
+  yield* rows.map(({ Chain, MysteryBox }) => formLink(MysteryBox, Chain, "mb"));
+  yield* rows.map(({ Chain, MaskTestNFT }) => formLink(MaskTestNFT, Chain, "nft"));
 }
 
 function* makeQlfTable(rows: DeployedAddressRow[]) {
@@ -73,20 +65,28 @@ function* makeQlfTable(rows: DeployedAddressRow[]) {
 }
 
 async function loadDeployedAddressRows(): Promise<DeployedAddressRow[]> {
-  const data = await fs.readFile(ADDRESS_TABLE_PATH, "utf-8")
-  const columns = ['Chain', 'MysteryBox', 'MaskTestNFT', 'WhitelistQlf', 'SigVerifyQlf', 'MaskHolderQlf', 'MerkleProofQlf']
-  return parse(data, { delimiter: ',', columns, from: 2 });
+  const data = await fs.readFile(ADDRESS_TABLE_PATH, "utf-8");
+  const columns = [
+    "Chain",
+    "MysteryBox",
+    "MaskTestNFT",
+    "WhitelistQlf",
+    "SigVerifyQlf",
+    "MaskHolderQlf",
+    "MerkleProofQlf",
+  ];
+  return parse(data, { delimiter: ",", columns, from: 2 });
 }
 
 function formElement(address: string, linkTag: string) {
-  if (address == '') {
-    return ''
+  if (address == "") {
+    return "";
   }
   return `[\`${address.slice(0, 10)}\`][${linkTag}]`;
 }
 
 function formLink(address: string, chain: string, contract: string) {
-  if (address == '') {
+  if (address == "") {
     return null;
   }
   const browserPath = contractPath[chain] + address;
@@ -94,10 +94,7 @@ function formLink(address: string, chain: string, contract: string) {
 }
 
 function replace(content: string, name: string, replace: string) {
-  const pattern = new RegExp(
-    `(<!-- begin ${name} -->)(.+)(<!-- end ${name} -->)`,
-    "gs"
-  );
+  const pattern = new RegExp(`(<!-- begin ${name} -->)(.+)(<!-- end ${name} -->)`, "gs");
   return content.replace(pattern, `$1\n${replace}\n$3`);
 }
 

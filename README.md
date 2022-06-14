@@ -40,7 +40,7 @@ To deploy the smart contract on Ethereum `rinkeby` testnet:
 npm run deploy rinkeby
 ```
 
-Using the [`helper.js`](helper.js) script to set up the deployed smart contracts.
+Using the [`helper.ts`](helper.ts) script to set up the deployed smart contracts.
 
 ### Troubleshoot & Tips
 

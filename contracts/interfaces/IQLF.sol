@@ -4,7 +4,7 @@ pragma solidity >= 0.8.0;
 
 abstract
 contract IQLF {
-    function version() virtual external view returns (uint32);
+    function version() external virtual view returns (uint32);
 
     /**
      * @dev Check if the given address is qualified, implemented on demand.
@@ -20,5 +20,5 @@ contract IQLF {
      * - `bool` whether the account is qualified for ITO
      * - `string` if not qualified, it contains the error message(reason)
      */
-    function is_qualified(address account, bytes memory proof) virtual external view returns (bool, string memory);
+    function is_qualified(address account, bytes memory proof) external virtual view returns (bool, string memory);
 }
