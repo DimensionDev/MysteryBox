@@ -1,5 +1,5 @@
 import { ethers, waffle, upgrades } from "hardhat";
-import { Signer, Contract, utils } from "ethers";
+import { Signer, utils } from "ethers";
 import MockDate from "mockdate";
 import { use } from "chai";
 import chaiAsPromised from "chai-as-promised";
@@ -7,29 +7,34 @@ const { expect } = use(chaiAsPromised);
 const { deployContract } = waffle;
 import proofs from "../dist/proofs.json";
 
-import { advanceBlock, advanceTimeAndBlock, takeSnapshot, revertToSnapShot } from "./helper";
+import { advanceBlock, takeSnapshot, revertToSnapShot } from "./helper";
 import {
   MaskNFTInitParameters,
   openBoxParameters,
-  MaxNumberOfNFT,
-  seconds_in_a_day,
   holderMinAmount,
   generateCreateBoxPara,
+  addTxParameters,
 } from "./constants";
 
-import jsonABI from "../artifacts/contracts/MysteryBox.sol/MysteryBox.json";
-const interfaceABI = new ethers.utils.Interface(jsonABI.abi);
-import EnumerableNftTokenABI from "../artifacts/contracts/test/MaskEnumerableNFT.sol/MaskEnumerableNFT.json";
-const EnumerableNftInterface = new ethers.utils.Interface(EnumerableNftTokenABI.abi);
-import nonEnumerableNftTokenABI from "../artifacts/contracts/test/MaskNonEnumerableNFT.sol/MaskNonEnumerableNFT.json";
+import {
+  TestToken,
+  MysteryBox,
+  MaskEnumerableNFT,
+  WhitelistQlf,
+  SigVerifyQlf,
+  MaskHolderQlf,
+  MerkleProofQlf,
+} from "../types";
 
 import TestTokenArtifact from "../artifacts/contracts/test/test_token.sol/TestToken.json";
-import qlfWhitelistJsonABI from "../artifacts/contracts/WhitelistQlf.sol/WhitelistQlf.json";
+import MysteryBoxArtifact from "../artifacts/contracts/MysteryBox.sol/MysteryBox.json";
+import EnumerableNftTokenABI from "../artifacts/contracts/test/MaskEnumerableNFT.sol/MaskEnumerableNFT.json";
 import qlfMaskHolderJsonABI from "../artifacts/contracts/MaskHolderQlf.sol/MaskHolderQlf.json";
+import qlfWhitelistJsonABI from "../artifacts/contracts/WhitelistQlf.sol/WhitelistQlf.json";
 
-import { TestToken } from "../types/contracts/test/test_token.sol/TestToken";
+const interfaceABI = new ethers.utils.Interface(MysteryBoxArtifact.abi);
 
-describe("MysteryBoxAdmin", () => {
+describe("MysteryBoxQualificationS", () => {
   const network = "mainnet";
   const maskNftPara = MaskNFTInitParameters[network];
   const createBoxPara = generateCreateBoxPara(network);
@@ -52,17 +57,15 @@ describe("MysteryBoxAdmin", () => {
   let verifier: Signer;
   let abiCoder: utils.AbiCoder;
 
-  let testTokenAContract: TestToken;
+  let testTokenContract: TestToken;
   let testMaskTokenContract: TestToken;
 
-  let whitelistQlfContract: Contract;
-  let sigVerifyQlfContract: Contract;
-  let maskHolderQlfContract: Contract;
-  let merkleRootQlfContract: Contract;
-  let mask721ANFTContract: Contract;
-  let mbContract: Contract;
-  let enumerableNftContract: Contract;
-  let nonEnumerableNftContract: Contract;
+  let mbContract: MysteryBox;
+  let whitelistQlfContract: WhitelistQlf;
+  let sigVerifyQlfContract: SigVerifyQlf;
+  let maskHolderQlfContract: MaskHolderQlf;
+  let merkleRootQlfContract: MerkleProofQlf;
+  let enumerableNftContract: MaskEnumerableNFT;
 
   // 1 billion tokens, typical decimal 18
   const testTokenMintAmount = ethers.utils.parseUnits("1000000000", 18).toString();
@@ -78,9 +81,9 @@ describe("MysteryBoxAdmin", () => {
     verifier = signers[4];
     abiCoder = new utils.AbiCoder();
 
-    testTokenAContract = (await deployContract(contractCreator, TestTokenArtifact, [
-      "TestTokenA",
-      "TESTA",
+    testTokenContract = (await deployContract(contractCreator, TestTokenArtifact, [
+      "TestToken",
+      "TEST",
       testTokenMintAmount,
     ])) as TestToken;
     testMaskTokenContract = (await deployContract(contractCreator, TestTokenArtifact, [
@@ -92,48 +95,50 @@ describe("MysteryBoxAdmin", () => {
     {
       const factory = await ethers.getContractFactory("WhitelistQlf");
       const proxy = await upgrades.deployProxy(factory, []);
-      whitelistQlfContract = new ethers.Contract(proxy.address, qlfWhitelistJsonABI.abi, contractCreator);
+      whitelistQlfContract = new ethers.Contract(
+        proxy.address,
+        qlfWhitelistJsonABI.abi,
+        contractCreator,
+      ) as WhitelistQlf;
     }
     {
       const factory = await ethers.getContractFactory("SigVerifyQlf");
       const SigVerifyQlf = await factory.deploy();
-      sigVerifyQlfContract = await SigVerifyQlf.deployed();
+      sigVerifyQlfContract = (await SigVerifyQlf.deployed()) as SigVerifyQlf;
     }
     {
       const factory = await ethers.getContractFactory("MaskHolderQlf");
       const proxy = await upgrades.deployProxy(factory, [testMaskTokenContract.address, holderMinAmount]);
-      maskHolderQlfContract = new ethers.Contract(proxy.address, qlfMaskHolderJsonABI.abi, contractCreator);
+      maskHolderQlfContract = new ethers.Contract(
+        proxy.address,
+        qlfMaskHolderJsonABI.abi,
+        contractCreator,
+      ) as MaskHolderQlf;
     }
     {
       const factory = await ethers.getContractFactory("MerkleProofQlf");
       const MerkleProofQlf = await factory.deploy();
-      merkleRootQlfContract = await MerkleProofQlf.deployed();
-    }
-    {
-      const factory = await ethers.getContractFactory("Mask721A");
-      const Mask721A = await factory.deploy(maskNftPara.name, maskNftPara.symbol, maskNftPara.baseURI);
-      mask721ANFTContract = await Mask721A.deployed();
+      merkleRootQlfContract = (await MerkleProofQlf.deployed()) as MerkleProofQlf;
     }
     // first is ETH: address(0)
-    createBoxPara.payment.push([testTokenAContract.address, createBoxPara.payment[0][1]]);
+    createBoxPara.payment.push([testTokenContract.address, createBoxPara.payment[0][1]]);
     {
       const factory = await ethers.getContractFactory("MaskEnumerableNFT");
       const proxy = await upgrades.deployProxy(factory, [...Object.values(maskNftPara)]);
-      enumerableNftContract = new ethers.Contract(proxy.address, EnumerableNftTokenABI.abi, contractCreator);
-    }
-    {
-      const factory = await ethers.getContractFactory("MaskNonEnumerableNFT");
-      const proxy = await upgrades.deployProxy(factory, [...Object.values(maskNftPara)]);
-      nonEnumerableNftContract = new ethers.Contract(proxy.address, nonEnumerableNftTokenABI.abi, contractCreator);
+      enumerableNftContract = new ethers.Contract(
+        proxy.address,
+        EnumerableNftTokenABI.abi,
+        contractCreator,
+      ) as MaskEnumerableNFT;
     }
     {
       const factory = await ethers.getContractFactory("MysteryBox");
       const proxy = await upgrades.deployProxy(factory, []);
-      mbContract = new ethers.Contract(proxy.address, jsonABI.abi, contractCreator);
+      mbContract = new ethers.Contract(proxy.address, MysteryBoxArtifact.abi, contractCreator) as MysteryBox;
     }
     await mbContract.addWhitelist([await user_1.getAddress(), await user_2.getAddress(), await user_3.getAddress()]);
-    await testTokenAContract.transfer(await user_2.getAddress(), transferAmount);
-    await testTokenAContract.connect(user_2).approve(mbContract.address, transferAmount);
+    await testTokenContract.transfer(await user_2.getAddress(), transferAmount);
+    await testTokenContract.connect(user_2).approve(mbContract.address, transferAmount);
 
     createBoxPara.nft_address = enumerableNftContract.address;
     // mint 100 NFT for testing
@@ -144,7 +149,7 @@ describe("MysteryBoxAdmin", () => {
     {
       const parameter = JSON.parse(JSON.stringify(createBoxPara));
       parameter.sell_all = true;
-      await mbContract.connect(user_1).createBox(...Object.values(parameter));
+      await mbContract.connect(user_1).createBox.apply(null, Object.values(parameter));
       const logs = await ethers.provider.getLogs(mbContract.filters.CreationSuccess());
       const parsedLog = interfaceABI.parseLog(logs[0]);
       const result = parsedLog.args;
@@ -165,12 +170,12 @@ describe("MysteryBoxAdmin", () => {
       parameter.sell_all = false;
       const nftBalance = await enumerableNftContract.balanceOf(await user_1.getAddress());
       // half of the NFT ids owned
-      for (let i = 0; i < nftBalance; i += 2) {
+      for (let i = 0; i < nftBalance.toNumber(); i += 2) {
         const nftId = await enumerableNftContract.tokenOfOwnerByIndex(await user_1.getAddress(), i);
-        not_sell_all_nft_id_list.push(nftId);
+        not_sell_all_nft_id_list.push(nftId.toNumber());
       }
       parameter.nft_id_list = not_sell_all_nft_id_list;
-      await mbContract.connect(user_1).createBox(...Object.values(parameter));
+      await mbContract.connect(user_1).createBox.apply(null, Object.values(parameter));
       const logs = await ethers.provider.getLogs(mbContract.filters.CreationSuccess());
       const parsedLog = interfaceABI.parseLog(logs[0]);
       const result = parsedLog.args;
@@ -225,7 +230,7 @@ describe("MysteryBoxAdmin", () => {
     await expect(mbContract.connect(user_1).addWhitelist([await user_test.getAddress()])).to.be.rejectedWith(
       "not admin",
     );
-    await expect(mbContract.connect(user_test).createBox(...Object.values(parameter))).to.be.rejectedWith(
+    await expect(mbContract.connect(user_test).createBox.apply(null, Object.values(parameter))).to.be.rejectedWith(
       "not whitelisted",
     );
     expect(await mbContract.whitelist(await user_test.getAddress())).to.be.eq(false);
@@ -237,14 +242,14 @@ describe("MysteryBoxAdmin", () => {
     await expect(mbContract.connect(user_1).addAdmin([await user_test.getAddress()])).to.be.rejectedWith(
       "Ownable: caller is not the owner",
     );
-    await mbContract.connect(user_test).createBox(...Object.values(parameter));
+    await mbContract.connect(user_test).createBox.apply(null, Object.values(parameter));
 
     await expect(mbContract.connect(user_test).removeWhitelist([await user_test.getAddress()])).to.be.rejectedWith(
       "not admin",
     );
     await mbContract.connect(user_1).removeWhitelist([await user_test.getAddress()]);
     expect(await mbContract.whitelist(await user_test.getAddress())).to.be.eq(false);
-    await expect(mbContract.connect(user_test).createBox(...Object.values(parameter))).to.be.rejectedWith(
+    await expect(mbContract.connect(user_test).createBox.apply(null, Object.values(parameter))).to.be.rejectedWith(
       "not whitelisted",
     );
 
@@ -261,16 +266,16 @@ describe("MysteryBoxAdmin", () => {
       const parameter = JSON.parse(JSON.stringify(createBoxPara));
       parameter.sell_all = true;
       parameter.qualification = whitelistQlfContract.address;
-      await mbContract.connect(user_1).createBox(...Object.values(parameter));
+      await mbContract.connect(user_1).createBox.apply(null, Object.values(parameter));
       const logs = await ethers.provider.getLogs(mbContract.filters.CreationSuccess());
       const parsedLog = interfaceABI.parseLog(logs[0]);
       const result = parsedLog.args;
       open_parameters.box_id = result.box_id;
     }
     await whitelistQlfContract.addWhitelist([await user_1.getAddress()]);
-    await mbContract.connect(user_1).openBox(...Object.values(open_parameters), txParameters);
+    await mbContract.connect(user_1).openBox.apply(null, addTxParameters(open_parameters, txParameters));
     await expect(
-      mbContract.connect(user_2).openBox(...Object.values(open_parameters), txParameters),
+      mbContract.connect(user_2).openBox.apply(null, addTxParameters(open_parameters, txParameters)),
     ).to.be.rejectedWith("not whitelisted");
 
     const boxInfo = await mbContract.getBoxInfo(open_parameters.box_id);
@@ -287,7 +292,7 @@ describe("MysteryBoxAdmin", () => {
       const qualification_data = utils.hexZeroPad(await verifier.getAddress(), 32);
       parameter.qualification_data = qualification_data;
 
-      await mbContract.connect(user_1).createBox(...Object.values(parameter));
+      await mbContract.connect(user_1).createBox.apply(null, Object.values(parameter));
       const logs = await ethers.provider.getLogs(mbContract.filters.CreationSuccess());
       const parsedLog = interfaceABI.parseLog(logs[0]);
       const result = parsedLog.args;
@@ -297,9 +302,9 @@ describe("MysteryBoxAdmin", () => {
       const msg_hash = utils.keccak256(await user_1.getAddress());
       const signature = await verifier.signMessage(ethers.utils.arrayify(msg_hash));
       open_parameters.proof = signature;
-      await mbContract.connect(user_1).openBox(...Object.values(open_parameters), txParameters);
+      await mbContract.connect(user_1).openBox.apply(null, addTxParameters(open_parameters, txParameters));
       await expect(
-        mbContract.connect(user_2).openBox(...Object.values(open_parameters), txParameters),
+        mbContract.connect(user_2).openBox.apply(null, addTxParameters(open_parameters, txParameters)),
       ).to.be.rejectedWith("not qualified");
     }
     const boxInfo = await mbContract.getBoxInfo(open_parameters.box_id);
@@ -314,7 +319,7 @@ describe("MysteryBoxAdmin", () => {
       parameter.qualification = merkleRootQlfContract.address;
       parameter.qualification_data = proofs.merkleRoot;
 
-      await mbContract.connect(user_1).createBox(...Object.values(parameter));
+      await mbContract.connect(user_1).createBox.apply(null, Object.values(parameter));
       const logs = await ethers.provider.getLogs(mbContract.filters.CreationSuccess());
       const parsedLog = interfaceABI.parseLog(logs[0]);
       const result = parsedLog.args;
@@ -335,9 +340,9 @@ describe("MysteryBoxAdmin", () => {
       expect(user_1_index < proofs.leaves.length).to.be.true;
       const proof = abiCoder.encode(["bytes32[]"], [proofs.leaves[user_1_index].proof]);
       open_parameters.proof = proof;
-      await mbContract.connect(user_1).openBox(...Object.values(open_parameters), txParameters);
+      await mbContract.connect(user_1).openBox.apply(null, addTxParameters(open_parameters, txParameters));
       await expect(
-        mbContract.connect(user_2).openBox(...Object.values(open_parameters), txParameters),
+        mbContract.connect(user_2).openBox.apply(null, addTxParameters(open_parameters, txParameters)),
       ).to.be.rejectedWith("not qualified");
     }
     {
@@ -360,14 +365,14 @@ describe("MysteryBoxAdmin", () => {
         expect(boxInfo).to.have.property("qualification_data").that.to.be.eq(createBoxPara.qualification_data);
       }
       await expect(
-        mbContract.connect(user_2).openBox(...Object.values(open_parameters), txParameters),
+        mbContract.connect(user_2).openBox.apply(null, addTxParameters(open_parameters, txParameters)),
       ).to.be.rejectedWith("not qualified");
       await mbContract.connect(user_1).setQualificationData(open_parameters.box_id, proofs.merkleRoot);
       {
         const boxInfo = await mbContract.getBoxInfo(open_parameters.box_id);
         expect(boxInfo).to.have.property("qualification_data").that.to.be.eq(proofs.merkleRoot);
       }
-      await mbContract.connect(user_2).openBox(...Object.values(open_parameters), txParameters);
+      await mbContract.connect(user_2).openBox.apply(null, addTxParameters(open_parameters, txParameters));
     }
   });
 
@@ -380,19 +385,19 @@ describe("MysteryBoxAdmin", () => {
       const parameter = JSON.parse(JSON.stringify(createBoxPara));
       parameter.sell_all = true;
       parameter.qualification = maskHolderQlfContract.address;
-      await mbContract.connect(user_1).createBox(...Object.values(parameter));
+      await mbContract.connect(user_1).createBox.apply(null, Object.values(parameter));
       const logs = await ethers.provider.getLogs(mbContract.filters.CreationSuccess());
       const parsedLog = interfaceABI.parseLog(logs[0]);
       const result = parsedLog.args;
       open_parameters.box_id = result.box_id;
     }
     await expect(
-      mbContract.connect(user_1).openBox(...Object.values(open_parameters), txParameters),
+      mbContract.connect(user_1).openBox.apply(null, addTxParameters(open_parameters, txParameters)),
     ).to.be.rejectedWith("not holding enough token");
 
     // transfer
     await testMaskTokenContract.transfer(await user_1.getAddress(), holderMinAmount);
-    await mbContract.connect(user_1).openBox(...Object.values(open_parameters), txParameters);
+    await mbContract.connect(user_1).openBox.apply(null, addTxParameters(open_parameters, txParameters));
 
     const boxInfo = await mbContract.getBoxInfo(open_parameters.box_id);
     expect(boxInfo).to.have.property("qualification").that.to.be.eq(maskHolderQlfContract.address);

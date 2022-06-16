@@ -56,6 +56,12 @@ function generateCreateBoxPara(network) {
   return para;
 }
 
+function addTxParameters(para: object, txPara: object) {
+  let paraValue = Object.values(para);
+  paraValue.push(txPara);
+  return paraValue;
+}
+
 const openBoxParameters = {
   box_id: 1,
   amount: 1,
@@ -77,4 +83,5 @@ export {
   seconds_in_a_day,
   holderMinAmount,
   generateCreateBoxPara,
+  addTxParameters,
 };
