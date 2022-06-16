@@ -36,9 +36,7 @@ const etherscan = EtherscanConfig;
  * @type import('hardhat/config').HardhatUserConfig
  */
 module.exports = {
-  networks: {
-    hardhat: {},
-  },
+  networks,
   mocha: {
     timeout: 1000000,
   },

@@ -5,7 +5,7 @@ pragma solidity >= 0.8.0;
 import "./interfaces/IQLF.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-// whilte list qualification
+// whitelist qualification
 contract WhitelistQlf is OwnableUpgradeable {
     uint32 public version;
     mapping(address => bool) public white_list;

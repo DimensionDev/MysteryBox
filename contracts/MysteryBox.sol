@@ -18,14 +18,14 @@ contract MysteryBox is OwnableUpgradeable {
     struct PaymentInfo {
         // A token address for payment:
         // 1. ERC-20 token address
-        // 2. adderss(0) for ETH
+        // 2. address(0) for ETHaddress
         address token_addr;
         uint256 price;
         uint256 receivable_amount;
     }
 
     struct Box {
-        // maxmimum number of NFT(s) user can buy
+        // maximum number of NFT(s) user can buy
         uint32 personal_limit;
         uint32 start_time;
         uint32 end_time;
@@ -115,7 +115,6 @@ contract MysteryBox is OwnableUpgradeable {
         require(IERC721(nft_address).isApprovedForAll(msg.sender, address(this)), "not ApprovedForAll");
         require(payment.length > 0, "invalid payment");
         require(whitelist[msg.sender] || admin[msg.sender], "not whitelisted");
-
         Box storage box = box_by_id[_box_id];
         for (uint256 i = 0; i < payment.length; i++) {
             if (payment[i].token_addr != address(0)) {
@@ -271,7 +270,7 @@ contract MysteryBox is OwnableUpgradeable {
             }
         }
         else {
-            uint8 nft_transfered;
+            uint8 nft_transferred;
             // pick NFT(s) from nft-id list
             for (uint256 i = 0; i < amount; i++) {
                 uint256 token_index = rand % total;
@@ -280,10 +279,10 @@ contract MysteryBox is OwnableUpgradeable {
                     // transfer NFT
                     IERC721(nft_address).safeTransferFrom(creator, msg.sender, token_id);
                     box.purchased_nft[msg.sender].push(token_id);
-                    nft_transfered++;
+                    nft_transferred++;
                 }
                 else {
-                    // TODO: owner transfered this NFT elsewhere, do we need to keep searching?
+                    // TODO: owner transferred this NFT elsewhere, do we need to keep searching?
                     // If we do, validate `remaining gas`, to make sure we can finish the tx successfully
                     // Otherwise, this collection will go to a dead-loop state.
                     // if (gasleft() <= REMAINING_GAS_PROTECTION) {
@@ -294,8 +293,8 @@ contract MysteryBox is OwnableUpgradeable {
                 rand = uint256(keccak256(abi.encodePacked(rand, i)));
                 total--;
             }
-            // update NFT transfered `amount`, which will be used for `payment`
-            amount = nft_transfered;
+            // update NFT transferred `amount`, which will be used for `payment`
+            amount = nft_transferred;
         }
         {
             uint256 total_payment = box.payment[payment_token_index].price;

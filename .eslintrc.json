@@ -5,15 +5,9 @@
     "sourceType": "module",
     "project": "./tsconfig.json"
   },
-  "plugins": [
-    "@dimensiondev",
-    "@typescript-eslint"
-  ],
+  "plugins": ["@dimensiondev", "@typescript-eslint"],
   "rules": {
-    "eqeqeq": [
-      "error",
-      "smart"
-    ],
+    "eqeqeq": ["error", "smart"],
     "no-unsafe-negation": "error",
     "no-unsafe-optional-chaining": "error",
     "no-irregular-whitespace": [

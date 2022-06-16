@@ -13,7 +13,7 @@ contract IQLF {
      *
      * - `account` account to be checked
      * - `data`  data to prove if a user is qualified.
-     *           For instance, it can be a MerkelProof to prove if a user is in a whitelist
+     *           For instance, it can be a MerkleProof to prove if a user is in a whitelist
      *
      * Return:
      *

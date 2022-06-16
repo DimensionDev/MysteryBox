@@ -5,7 +5,7 @@ pragma solidity >= 0.8.0;
 import "./interfaces/IQLF.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
-// whilte list qualification
+// whitelist qualification
 contract SigVerifyQlf {
     uint32 constant public version = 4;
 

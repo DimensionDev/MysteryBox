@@ -5,7 +5,7 @@ pragma solidity >= 0.8.0;
 import "./interfaces/IQLF.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
-// merkel proof qualification
+// merkle proof qualification
 contract MerkleProofQlf {
     uint32 constant public version = 4;
 
