@@ -13,7 +13,7 @@
     "generateReadme": "ts-node ./generate-readme.ts",
     "deploy": "hardhat deploy --network",
     "prettier:solidity": "prettier --write contracts/**/*.sol",
-    "format": "prettier --write './test/*.js' './deploy/*.ts' './*.js'"
+    "format": "prettier --write './test/*.ts' './deploy/*.ts' './*.ts'"
   },
   "repository": {
     "type": "git",
