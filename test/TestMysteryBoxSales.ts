@@ -16,6 +16,7 @@ import {
   holderMinAmount,
   generateCreateBoxPara,
   addTxParameters,
+  TxParameter,
 } from "./constants";
 
 import { TestToken, MysteryBox, MaskEnumerableNFT, MaskNonEnumerableNFT, Mask721A } from "../types";
@@ -34,8 +35,8 @@ describe("MysteryBoxSales", () => {
   let not_sell_all_box_id: BigNumber;
   let not_sell_all_nft_id_list: BigNumber[] = [];
 
-  const txParameters = {
-    gasLimit: 6000000,
+  const txParameters: TxParameter = {
+    gasLimit: BigNumber.from(6000000),
     value: createBoxPara.payment[0][1],
   };
 
@@ -198,7 +199,7 @@ describe("MysteryBoxSales", () => {
       const tx_parameters = {
         value: txParameters.value.mul(parameters.amount),
       };
-      await mbContract.connect(user_2).openBox.apply(null, addTxParameters(parameters, tx_parameters));
+      await mbContract.connect(user_2).openBox.apply(null, Object.values(addTxParameters(parameters, tx_parameters)));
     }
     const newNftList = await mbContract.getNftListForSale(sell_all_box_id, 0, nftBalance);
     expect(newNftList.length).to.be.eq(nftList.length - MaxNumberOfNFT);
@@ -233,14 +234,20 @@ describe("MysteryBoxSales", () => {
         value: txParameters.value.mul(open_parameters.amount),
       };
       for (let i = 5; i <= 8; ++i) {
-        await mbContract.connect(signers[i]).openBox.apply(null, addTxParameters(open_parameters, tx_parameters));
+        await mbContract
+          .connect(signers[i])
+          .openBox.apply(null, Object.values(addTxParameters(open_parameters, tx_parameters)));
       }
       await expect(mbContract.connect(user_1).claimPayment([open_parameters.box_id])).to.be.revertedWith(
         "not expired/sold-out",
       );
-      await mbContract.connect(signers[9]).openBox.apply(null, addTxParameters(open_parameters, tx_parameters));
+      await mbContract
+        .connect(signers[9])
+        .openBox.apply(null, Object.values(addTxParameters(open_parameters, tx_parameters)));
       await expect(
-        mbContract.connect(signers[10]).openBox.apply(null, addTxParameters(open_parameters, tx_parameters)),
+        mbContract
+          .connect(signers[10])
+          .openBox.apply(null, Object.values(addTxParameters(open_parameters, tx_parameters))),
       ).to.be.revertedWith("no NFT left");
       for (let i = 5; i <= 8; ++i) {
         expect((await enumerableNftContract.balanceOf(await signers[i].getAddress())).eq(MaxNumberOfNFT)).to.be.true;
@@ -377,7 +384,7 @@ describe("MysteryBoxSales", () => {
       const tx_parameters = {
         value: txParameters.value.mul(parameters.amount),
       };
-      await mbContract.connect(user_2).openBox.apply(null, addTxParameters(parameters, tx_parameters));
+      await mbContract.connect(user_2).openBox.apply(null, Object.values(addTxParameters(parameters, tx_parameters)));
       const user_2_balance = await enumerableNftContract.balanceOf(await user_2.getAddress());
       const nftBalance_after = await enumerableNftContract.balanceOf(await user_1.getAddress());
 
@@ -569,11 +576,11 @@ describe("MysteryBoxSales", () => {
       expect(result).to.have.property("box_id");
       box_id = result.box_id;
     }
-    const parameters = { ...openBoxParameters, box_id: box_id, amount: batch };
+    const parameters = { ...openBoxParameters, box_id: box_id, amount: batch.toNumber() };
     const tx_parameters = {
       value: txParameters.value.mul(parameters.amount),
     };
-    await mbContract.connect(user_2).openBox.apply(null, addTxParameters(parameters, tx_parameters));
+    await mbContract.connect(user_2).openBox.apply(null, Object.values(addTxParameters(parameters, tx_parameters)));
     {
       const paymentEth = tx_parameters.value;
       const contractEthBalanceAfterOpen = await ethers.provider.getBalance(mbContract.address);
@@ -586,7 +593,7 @@ describe("MysteryBoxSales", () => {
       expect(owner_nft_balance.eq(0)).to.be.true;
     }
     await expect(
-      mbContract.connect(user_2).openBox.apply(null, addTxParameters(parameters, tx_parameters)),
+      mbContract.connect(user_2).openBox.apply(null, Object.values(addTxParameters(parameters, tx_parameters))),
     ).to.be.revertedWith("no NFT left");
     {
       const boxInfo = await mbContract.getBoxInfo(parameters.box_id);
@@ -618,7 +625,9 @@ describe("MysteryBoxSales", () => {
       value: txParameters.value,
     };
     const open_parameters = { ...openBoxParameters, box_id: not_sell_all_box_id };
-    await mbContract.connect(user_2).openBox.apply(null, addTxParameters(open_parameters, tx_parameters));
+    await mbContract
+      .connect(user_2)
+      .openBox.apply(null, Object.values(addTxParameters(open_parameters, tx_parameters)));
     const paymentEthAmount = createBoxPara.payment[0][1];
     const paymentTokenAAmount = createBoxPara.payment[1][1];
     {
@@ -639,7 +648,9 @@ describe("MysteryBoxSales", () => {
     }
     {
       const sell_all_open_parameters = { ...openBoxParameters, box_id: sell_all_box_id };
-      await mbContract.connect(user_2).openBox.apply(null, addTxParameters(sell_all_open_parameters, tx_parameters));
+      await mbContract
+        .connect(user_2)
+        .openBox.apply(null, Object.values(addTxParameters(sell_all_open_parameters, tx_parameters)));
       {
         const boxStatus = await mbContract.getBoxStatus(not_sell_all_box_id);
         expect(boxStatus.payment.map((info) => info.receivable_amount.toString())).to.eql([
@@ -728,12 +739,12 @@ describe("MysteryBoxSales", () => {
       open_parameters.box_id = result.box_id;
     }
     await expect(
-      mbContract.connect(user_1).openBox.apply(null, addTxParameters(open_parameters, txParameters)),
+      mbContract.connect(user_1).openBox.apply(null, Object.values(addTxParameters(open_parameters, txParameters))),
     ).to.be.revertedWith("not holding enough token");
 
     // transfer
     await testMaskTokenContract.transfer(await user_1.getAddress(), holderMinAmount);
-    await mbContract.connect(user_1).openBox.apply(null, addTxParameters(open_parameters, txParameters));
+    await mbContract.connect(user_1).openBox.apply(null, Object.values(addTxParameters(open_parameters, txParameters)));
 
     const boxInfo = await mbContract.getBoxInfo(open_parameters.box_id);
     expect(boxInfo).to.have.property("holder_min_token_amount");

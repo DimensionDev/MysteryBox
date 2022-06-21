@@ -15,6 +15,7 @@ import {
   seconds_in_a_day,
   generateCreateBoxPara,
   addTxParameters,
+  TxParameter,
 } from "./constants";
 
 import { TestToken, MysteryBox, MaskEnumerableNFT, MaskNonEnumerableNFT } from "../types";
@@ -33,8 +34,8 @@ describe("MysteryBoxBasicInteractions", () => {
   let not_sell_all_box_id: BigNumber;
   let not_sell_all_nft_id_list: BigNumber[] = [];
 
-  const txParameters = {
-    gasLimit: 6000000,
+  const txParameters: TxParameter = {
+    gasLimit: BigNumber.from(6000000),
     value: createBoxPara.payment[0][1],
   };
 
@@ -306,7 +307,7 @@ describe("MysteryBoxBasicInteractions", () => {
       }
       await advanceTimeAndBlock(seconds_in_a_day);
       await expect(
-        mbContract.connect(user_2).openBox.apply(null, addTxParameters(open_parameter, txParameters)),
+        mbContract.connect(user_2).openBox.apply(null, Object.values(addTxParameters(open_parameter, txParameters))),
       ).to.be.revertedWith("sale canceled");
     }
   });
@@ -324,7 +325,7 @@ describe("MysteryBoxBasicInteractions", () => {
       expect(boxStatus).to.have.property("started").that.to.be.eq(false);
     }
     await expect(
-      mbContract.connect(user_2).openBox.apply(null, addTxParameters(open_parameter, txParameters)),
+      mbContract.connect(user_2).openBox.apply(null, Object.values(addTxParameters(open_parameter, txParameters))),
     ).to.be.revertedWith("not started");
   });
 
@@ -366,7 +367,9 @@ describe("MysteryBoxBasicInteractions", () => {
     const tx_parameters = {
       value: txParameters.value,
     };
-    await mbContract.connect(user_2).openBox.apply(null, addTxParameters(openBoxParameters, tx_parameters));
+    await mbContract
+      .connect(user_2)
+      .openBox.apply(null, Object.values(addTxParameters(openBoxParameters, tx_parameters)));
     {
       const newUserNftBalance = await enumerableNftContract.balanceOf(await user_2.getAddress());
       expect(newUserNftBalance.eq(userNftBalance.add(1))).to.be.true;
@@ -443,7 +446,7 @@ describe("MysteryBoxBasicInteractions", () => {
     const open_parameter = { ...openBoxParameters, box_id: result.box_id };
     await advanceTimeAndBlock(seconds_in_a_day);
     await expect(
-      mbContract.connect(user_2).openBox.apply(null, addTxParameters(open_parameter, txParameters)),
+      mbContract.connect(user_2).openBox.apply(null, Object.values(addTxParameters(open_parameter, txParameters))),
     ).to.be.revertedWith("expired");
     {
       const boxStatus = await mbContract.getBoxStatus(open_parameter.box_id);
@@ -544,11 +547,13 @@ describe("MysteryBoxBasicInteractions", () => {
       );
     }
     {
-      const tx_parameters = {
-        value: 0,
+      const tx_parameters: TxParameter = {
+        value: BigNumber.from(0),
       };
       await expect(
-        mbContract.connect(user_3).openBox.apply(null, addTxParameters(openBoxParameters, tx_parameters)),
+        mbContract
+          .connect(user_3)
+          .openBox.apply(null, Object.values(addTxParameters(openBoxParameters, tx_parameters))),
       ).to.be.revertedWith("not enough ETH");
     }
   });
@@ -558,10 +563,10 @@ describe("MysteryBoxBasicInteractions", () => {
     const contractEthBalanceBeforeOpen = await ethers.provider.getBalance(mbContract.address);
     const userEthBalanceBeforeOpen = await ethers.provider.getBalance(await user_2.getAddress());
     const parameters = { ...openBoxParameters, amount: MaxNumberOfNFT / 2 };
-    const tx_parameters = {
+    const tx_parameters: TxParameter = {
       value: txParameters.value.mul(parameters.amount),
     };
-    await mbContract.connect(user_2).openBox.apply(null, addTxParameters(parameters, tx_parameters));
+    await mbContract.connect(user_2).openBox.apply(null, Object.values(addTxParameters(parameters, tx_parameters)));
     {
       const paymentEth = tx_parameters.value;
       const contractEthBalanceAfterOpen = await ethers.provider.getBalance(mbContract.address);
@@ -569,7 +574,7 @@ describe("MysteryBoxBasicInteractions", () => {
       expect(contractEthBalanceAfterOpen.eq(contractEthBalanceBeforeOpen.add(paymentEth))).to.be.true;
       expect(userEthBalanceBeforeOpen.gt(userEthBalanceAfterOpen.add(paymentEth))).to.be.true;
     }
-    await mbContract.connect(user_2).openBox.apply(null, addTxParameters(parameters, tx_parameters));
+    await mbContract.connect(user_2).openBox.apply(null, Object.values(addTxParameters(parameters, tx_parameters)));
     {
       const paymentEth = tx_parameters.value.mul(2);
       const contractEthBalanceAfterOpen = await ethers.provider.getBalance(mbContract.address);
@@ -578,7 +583,7 @@ describe("MysteryBoxBasicInteractions", () => {
       expect(userEthBalanceBeforeOpen.gt(userEthBalanceAfterOpen.add(paymentEth))).to.be.true;
     }
     await expect(
-      mbContract.connect(user_2).openBox.apply(null, addTxParameters(parameters, tx_parameters)),
+      mbContract.connect(user_2).openBox.apply(null, Object.values(addTxParameters(parameters, tx_parameters))),
     ).to.be.revertedWith("exceeds personal limit");
     {
       const boxInfo = await mbContract.getBoxInfo(parameters.box_id);

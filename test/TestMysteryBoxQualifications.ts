@@ -15,6 +15,7 @@ import {
   holderMinAmount,
   generateCreateBoxPara,
   addTxParameters,
+  TxParameter,
 } from "./constants";
 
 import {
@@ -43,8 +44,8 @@ describe("MysteryBoxQualifications", () => {
   let not_sell_all_box_id: BigNumber;
   let not_sell_all_nft_id_list: BigNumber[] = [];
 
-  const txParameters = {
-    gasLimit: 6000000,
+  const txParameters: TxParameter = {
+    gasLimit: BigNumber.from(6000000),
     value: createBoxPara.payment[0][1],
   };
 
@@ -262,9 +263,9 @@ describe("MysteryBoxQualifications", () => {
     const result = last(logs)!.args;
     const open_parameters = { ...openBoxParameters, box_id: result.box_id };
     await whitelistQlfContract.addWhitelist([await user_1.getAddress()]);
-    await mbContract.connect(user_1).openBox.apply(null, addTxParameters(open_parameters, txParameters));
+    await mbContract.connect(user_1).openBox.apply(null, Object.values(addTxParameters(open_parameters, txParameters)));
     await expect(
-      mbContract.connect(user_2).openBox.apply(null, addTxParameters(open_parameters, txParameters)),
+      mbContract.connect(user_2).openBox.apply(null, Object.values(addTxParameters(open_parameters, txParameters))),
     ).to.be.revertedWith("not whitelisted");
     const boxInfo = await mbContract.getBoxInfo(open_parameters.box_id);
     expect(boxInfo).to.have.property("qualification").that.to.be.eq(whitelistQlfContract.address);
@@ -288,9 +289,11 @@ describe("MysteryBoxQualifications", () => {
       const msg_hash = utils.keccak256(await user_1.getAddress());
       const signature = await verifier.signMessage(ethers.utils.arrayify(msg_hash));
       open_parameters.proof = signature;
-      await mbContract.connect(user_1).openBox.apply(null, addTxParameters(open_parameters, txParameters));
+      await mbContract
+        .connect(user_1)
+        .openBox.apply(null, Object.values(addTxParameters(open_parameters, txParameters)));
       await expect(
-        mbContract.connect(user_2).openBox.apply(null, addTxParameters(open_parameters, txParameters)),
+        mbContract.connect(user_2).openBox.apply(null, Object.values(addTxParameters(open_parameters, txParameters))),
       ).to.be.revertedWith("not qualified");
     }
     const boxInfo = await mbContract.getBoxInfo(open_parameters.box_id);
@@ -324,9 +327,11 @@ describe("MysteryBoxQualifications", () => {
       expect(user_1_index < proofs.leaves.length).to.be.true;
       const proof = abiCoder.encode(["bytes32[]"], [proofs.leaves[user_1_index].proof]);
       open_parameters.proof = proof;
-      await mbContract.connect(user_1).openBox.apply(null, addTxParameters(open_parameters, txParameters));
+      await mbContract
+        .connect(user_1)
+        .openBox.apply(null, Object.values(addTxParameters(open_parameters, txParameters)));
       await expect(
-        mbContract.connect(user_2).openBox.apply(null, addTxParameters(open_parameters, txParameters)),
+        mbContract.connect(user_2).openBox.apply(null, Object.values(addTxParameters(open_parameters, txParameters))),
       ).to.be.revertedWith("not qualified");
     }
     {
@@ -349,14 +354,16 @@ describe("MysteryBoxQualifications", () => {
         expect(boxInfo).to.have.property("qualification_data").that.to.be.eq(createBoxPara.qualification_data);
       }
       await expect(
-        mbContract.connect(user_2).openBox.apply(null, addTxParameters(open_parameters, txParameters)),
+        mbContract.connect(user_2).openBox.apply(null, Object.values(addTxParameters(open_parameters, txParameters))),
       ).to.be.revertedWith("not qualified");
       await mbContract.connect(user_1).setQualificationData(open_parameters.box_id, proofs.merkleRoot);
       {
         const boxInfo = await mbContract.getBoxInfo(open_parameters.box_id);
         expect(boxInfo).to.have.property("qualification_data").that.to.be.eq(proofs.merkleRoot);
       }
-      await mbContract.connect(user_2).openBox.apply(null, addTxParameters(open_parameters, txParameters));
+      await mbContract
+        .connect(user_2)
+        .openBox.apply(null, Object.values(addTxParameters(open_parameters, txParameters)));
     }
   });
 
@@ -370,12 +377,12 @@ describe("MysteryBoxQualifications", () => {
     const result = last(logs)!.args;
     const open_parameters = { ...openBoxParameters, box_id: result.box_id };
     await expect(
-      mbContract.connect(user_1).openBox.apply(null, addTxParameters(open_parameters, txParameters)),
+      mbContract.connect(user_1).openBox.apply(null, Object.values(addTxParameters(open_parameters, txParameters))),
     ).to.be.revertedWith("not holding enough token");
 
     // transfer
     await testMaskTokenContract.transfer(await user_1.getAddress(), holderMinAmount);
-    await mbContract.connect(user_1).openBox.apply(null, addTxParameters(open_parameters, txParameters));
+    await mbContract.connect(user_1).openBox.apply(null, Object.values(addTxParameters(open_parameters, txParameters)));
 
     const boxInfo = await mbContract.getBoxInfo(open_parameters.box_id);
     expect(boxInfo).to.have.property("qualification").that.to.be.eq(maskHolderQlfContract.address);

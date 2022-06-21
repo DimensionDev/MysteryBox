@@ -31,6 +31,11 @@ export const MaskNFTInitParameters = {
   },
 };
 
+export interface TxParameter {
+  gasLimit?: BigNumber;
+  value: BigNumber;
+}
+
 type Payment = [string, BigNumber];
 
 interface BoxCreationParam {
@@ -46,6 +51,7 @@ interface BoxCreationParam {
   holder_token_addr: string;
   holder_min_token_amount: BigNumber;
   qualification_data: string;
+  txParam?: TxParameter;
 }
 
 export function generateCreateBoxPara(network: string): BoxCreationParam {
@@ -72,22 +78,27 @@ export function generateCreateBoxPara(network: string): BoxCreationParam {
   return para;
 }
 
-export function addTxParameters(para: object, txPara: object): any[] {
-  let paraValue = Object.values(para);
-  paraValue.push(txPara);
-  return paraValue;
-}
-
-type openBoxPara = {
+interface OpenBoxPara {
   box_id: BigNumber;
   amount: number;
   payment_token_index: number;
   proof: string;
-};
+  txParam?: TxParameter;
+}
 
-export const openBoxParameters: openBoxPara = {
+export const openBoxParameters: OpenBoxPara = {
   box_id: BigNumber.from(1),
   amount: 1,
   payment_token_index: 0,
   proof: "0x",
 };
+
+export function addTxParameters(
+  para: BoxCreationParam | OpenBoxPara,
+  txParam: TxParameter,
+): BoxCreationParam | OpenBoxPara {
+  return {
+    ...para,
+    txParam,
+  };
+}
