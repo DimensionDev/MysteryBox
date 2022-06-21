@@ -1,8 +1,9 @@
 import { ethers, waffle, upgrades } from "hardhat";
-import { Signer } from "ethers";
+import { BigNumber, Signer } from "ethers";
 import MockDate from "mockdate";
 import { use } from "chai";
 import chaiAsPromised from "chai-as-promised";
+import { last } from "lodash";
 const { expect } = use(chaiAsPromised);
 const { deployContract } = waffle;
 
@@ -23,16 +24,14 @@ import MysteryBoxArtifact from "../artifacts/contracts/MysteryBox.sol/MysteryBox
 import EnumerableNftTokenABI from "../artifacts/contracts/test/MaskEnumerableNFT.sol/MaskEnumerableNFT.json";
 import nonEnumerableNftTokenABI from "../artifacts/contracts/test/MaskNonEnumerableNFT.sol/MaskNonEnumerableNFT.json";
 
-const interfaceABI = new ethers.utils.Interface(MysteryBoxArtifact.abi);
-const EnumerableNftInterface = new ethers.utils.Interface(EnumerableNftTokenABI.abi);
-
 describe("MysteryBoxBasicInteractions", () => {
   const network = "mainnet";
   const maskNftPara = MaskNFTInitParameters[network];
   const createBoxPara = generateCreateBoxPara(network);
-  let sell_all_box_id: number;
-  let not_sell_all_box_id: number;
-  let not_sell_all_nft_id_list: number[] = [];
+
+  let sell_all_box_id: BigNumber;
+  let not_sell_all_box_id: BigNumber;
+  let not_sell_all_nft_id_list: BigNumber[] = [];
 
   const txParameters = {
     gasLimit: 6000000,
@@ -121,12 +120,10 @@ describe("MysteryBoxBasicInteractions", () => {
     await enumerableNftContract.connect(user_1).setApprovalForAll(mbContract.address, true);
 
     {
-      const parameter = JSON.parse(JSON.stringify(createBoxPara));
-      parameter.sell_all = true;
+      const parameter = { ...createBoxPara, sell_all: true };
       await mbContract.connect(user_1).createBox.apply(null, Object.values(parameter));
-      const logs = await ethers.provider.getLogs(mbContract.filters.CreationSuccess());
-      const parsedLog = interfaceABI.parseLog(logs[0]);
-      const result = parsedLog.args;
+      const logs = await mbContract.queryFilter(mbContract.filters.CreationSuccess());
+      const result = last(logs)!.args;
       expect(result)
         .to.have.property("creator")
         .that.to.be.eq(await user_1.getAddress());
@@ -140,19 +137,16 @@ describe("MysteryBoxBasicInteractions", () => {
     }
     openBoxParameters.box_id = sell_all_box_id;
     {
-      const parameter = JSON.parse(JSON.stringify(createBoxPara));
-      parameter.sell_all = false;
       const nftBalance = await enumerableNftContract.balanceOf(await user_1.getAddress());
       // half of the NFT ids owned
       for (let i = 0; i < nftBalance.toNumber(); i += 2) {
         const nftId = await enumerableNftContract.tokenOfOwnerByIndex(await user_1.getAddress(), i);
-        not_sell_all_nft_id_list.push(nftId.toNumber());
+        not_sell_all_nft_id_list.push(nftId);
       }
-      parameter.nft_id_list = not_sell_all_nft_id_list;
+      const parameter = { ...createBoxPara, sell_all: false, nft_id_list: not_sell_all_nft_id_list };
       await mbContract.connect(user_1).createBox.apply(null, Object.values(parameter));
-      const logs = await ethers.provider.getLogs(mbContract.filters.CreationSuccess());
-      const parsedLog = interfaceABI.parseLog(logs[0]);
-      const result = parsedLog.args;
+      const logs = await mbContract.queryFilter(mbContract.filters.CreationSuccess());
+      const result = last(logs)!.args;
       expect(result)
         .to.have.property("creator")
         .that.to.be.eq(await user_1.getAddress());
@@ -195,9 +189,15 @@ describe("MysteryBoxBasicInteractions", () => {
   });
 
   it("Should not be able to call initialize", async () => {
-    await expect(mbContract.connect(contractCreator).initialize()).to.be.rejectedWith(Error);
-    await expect(mbContract.connect(user_1).initialize()).to.be.rejectedWith(Error);
-    await expect(mbContract.connect(user_2).initialize()).to.be.rejectedWith(Error);
+    await expect(mbContract.connect(contractCreator).initialize()).to.be.revertedWith(
+      "Initializable: contract is already initialized",
+    );
+    await expect(mbContract.connect(user_1).initialize()).to.be.revertedWith(
+      "Initializable: contract is already initialized",
+    );
+    await expect(mbContract.connect(user_2).initialize()).to.be.revertedWith(
+      "Initializable: contract is already initialized",
+    );
   });
 
   it("Should addNftIntoBox work", async () => {
@@ -208,21 +208,19 @@ describe("MysteryBoxBasicInteractions", () => {
     const nftBalance = await enumerableNftContract.balanceOf(await user_2.getAddress());
     expect(nftBalance.eq(mintNftAmount)).to.be.true;
 
-    let nft_id_list: number[] = [];
+    let nft_id_list: BigNumber[] = [];
     // half of the NFT ids owned
     for (let i = 0; i < mintNftAmount / 2; i++) {
       const nftId = await enumerableNftContract.tokenOfOwnerByIndex(await user_2.getAddress(), i);
-      nft_id_list.push(nftId.toNumber());
+      nft_id_list.push(nftId);
     }
     let box_id;
     {
-      const parameter = JSON.parse(JSON.stringify(createBoxPara));
-      parameter.sell_all = false;
-      parameter.nft_id_list = nft_id_list;
+      const parameter = { ...createBoxPara, sell_all: false, nft_id_list: nft_id_list };
       await mbContract.connect(user_2).createBox.apply(null, Object.values(parameter));
-      const logs = await ethers.provider.getLogs(mbContract.filters.CreationSuccess());
-      const parsedLog = interfaceABI.parseLog(logs[0]);
-      const result = parsedLog.args;
+      const logs = await mbContract.queryFilter(mbContract.filters.CreationSuccess());
+
+      const result = last(logs)!.args;
       expect(result).to.have.property("box_id");
       box_id = result.box_id;
     }
@@ -237,27 +235,27 @@ describe("MysteryBoxBasicInteractions", () => {
       expect(boxStatus).to.have.property("canceled").that.to.be.eq(false);
     }
 
-    let append_nft_id_list: number[] = [];
+    let append_nft_id_list: BigNumber[] = [];
     for (let i = mintNftAmount / 2; i < mintNftAmount; i++) {
       const nftId = await enumerableNftContract.tokenOfOwnerByIndex(await user_2.getAddress(), i);
-      append_nft_id_list.push(nftId.toNumber());
+      append_nft_id_list.push(nftId);
     }
-    await expect(mbContract.connect(user_2).addNftIntoBox(sell_all_box_id, [])).to.be.rejectedWith("not box owner");
-    await expect(mbContract.connect(user_1).addNftIntoBox(sell_all_box_id, [])).to.be.rejectedWith(
+    await expect(mbContract.connect(user_2).addNftIntoBox(sell_all_box_id, [])).to.be.revertedWith("not box owner");
+    await expect(mbContract.connect(user_1).addNftIntoBox(sell_all_box_id, [])).to.be.revertedWith(
       "can not add for sell_all",
     );
-    await expect(mbContract.connect(user_1).addNftIntoBox(box_id, append_nft_id_list)).to.be.rejectedWith(
+    await expect(mbContract.connect(user_1).addNftIntoBox(box_id, append_nft_id_list)).to.be.revertedWith(
       "not box owner",
     );
 
     {
       // try adding 'NFT id' he/she does not own
-      let invalid_nft_id: number[] = [];
+      let invalid_nft_id: BigNumber[] = [];
       const nftBalance = await enumerableNftContract.balanceOf(await user_1.getAddress());
       expect(nftBalance.gt(0)).to.be.true;
       const nftId = await enumerableNftContract.tokenOfOwnerByIndex(await user_1.getAddress(), 0);
-      invalid_nft_id.push(nftId.toNumber());
-      await expect(mbContract.connect(user_2).addNftIntoBox(box_id, invalid_nft_id)).to.be.rejectedWith(
+      invalid_nft_id.push(nftId);
+      await expect(mbContract.connect(user_2).addNftIntoBox(box_id, invalid_nft_id)).to.be.revertedWith(
         "not nft owner",
       );
     }
@@ -279,27 +277,26 @@ describe("MysteryBoxBasicInteractions", () => {
       const boxStatus = await mbContract.getBoxStatus(sell_all_box_id);
       expect(boxStatus).to.have.property("started").that.to.be.eq(true);
       expect(boxStatus).to.have.property("canceled").that.to.be.eq(false);
-      await expect(mbContract.connect(user_2).cancelBox(sell_all_box_id)).to.be.rejectedWith("not box owner");
-      await expect(mbContract.connect(user_1).cancelBox(sell_all_box_id)).to.be.rejectedWith("sale started");
+      await expect(mbContract.connect(user_2).cancelBox(sell_all_box_id)).to.be.revertedWith("not box owner");
+      await expect(mbContract.connect(user_1).cancelBox(sell_all_box_id)).to.be.revertedWith("sale started");
     }
     {
-      const open_parameter = JSON.parse(JSON.stringify(openBoxParameters));
       const now = Math.floor(new Date().getTime() / 1000);
-      const parameter = JSON.parse(JSON.stringify(createBoxPara));
-      parameter.start_time = now + seconds_in_a_day;
+      const parameter = { ...createBoxPara, start_time: now + seconds_in_a_day };
       await mbContract.connect(user_1).createBox.apply(null, Object.values(parameter));
-      const logs = await ethers.provider.getLogs(mbContract.filters.CreationSuccess());
-      const parsedLog = interfaceABI.parseLog(logs[0]);
-      const result = parsedLog.args;
-      open_parameter.box_id = result.box_id;
+      const logs = await mbContract.queryFilter(mbContract.filters.CreationSuccess());
+
+      const result = last(logs)!.args;
+
+      const open_parameter = { ...openBoxParameters, box_id: result.box_id };
       {
         const boxStatus = await mbContract.getBoxStatus(open_parameter.box_id);
         expect(boxStatus).to.have.property("started").that.to.be.eq(false);
         expect(boxStatus).to.have.property("canceled").that.to.be.eq(false);
       }
-      await expect(mbContract.connect(user_2).cancelBox(open_parameter.box_id)).to.be.rejectedWith("not box owner");
+      await expect(mbContract.connect(user_2).cancelBox(open_parameter.box_id)).to.be.revertedWith("not box owner");
       await mbContract.connect(user_1).cancelBox(open_parameter.box_id);
-      await expect(mbContract.connect(user_1).cancelBox(open_parameter.box_id)).to.be.rejectedWith(
+      await expect(mbContract.connect(user_1).cancelBox(open_parameter.box_id)).to.be.revertedWith(
         "sale canceled already",
       );
       {
@@ -308,32 +305,27 @@ describe("MysteryBoxBasicInteractions", () => {
         expect(boxStatus).to.have.property("canceled").that.to.be.eq(true);
       }
       await advanceTimeAndBlock(seconds_in_a_day);
-      let temp = Object.values(open_parameter);
       await expect(
         mbContract.connect(user_2).openBox.apply(null, addTxParameters(open_parameter, txParameters)),
-      ).to.be.rejectedWith("sale canceled");
+      ).to.be.revertedWith("sale canceled");
     }
   });
 
   it("Should not be able to openBox if not-started", async () => {
-    const open_parameter = JSON.parse(JSON.stringify(openBoxParameters));
-    {
-      const now = Math.floor(new Date().getTime() / 1000);
-      const parameter = JSON.parse(JSON.stringify(createBoxPara));
-      parameter.start_time = now + seconds_in_a_day;
-      await mbContract.connect(user_1).createBox.apply(null, Object.values(parameter));
-      const logs = await ethers.provider.getLogs(mbContract.filters.CreationSuccess());
-      const parsedLog = interfaceABI.parseLog(logs[0]);
-      const result = parsedLog.args;
-      open_parameter.box_id = result.box_id;
-    }
+    const now = Math.floor(new Date().getTime() / 1000);
+    const parameter = { ...createBoxPara, start_time: now + seconds_in_a_day };
+    await mbContract.connect(user_1).createBox.apply(null, Object.values(parameter));
+    const logs = await mbContract.queryFilter(mbContract.filters.CreationSuccess());
+
+    const result = last(logs)!.args;
+    const open_parameter = { ...openBoxParameters, box_id: result.box_id };
     {
       const boxStatus = await mbContract.getBoxStatus(open_parameter.box_id);
       expect(boxStatus).to.have.property("started").that.to.be.eq(false);
     }
     await expect(
       mbContract.connect(user_2).openBox.apply(null, addTxParameters(open_parameter, txParameters)),
-    ).to.be.rejectedWith("not started");
+    ).to.be.revertedWith("not started");
   });
 
   it("Should openBox & getBoxInfo work", async () => {
@@ -352,11 +344,11 @@ describe("MysteryBoxBasicInteractions", () => {
 
       const boxStatus = await mbContract.getBoxStatus(sell_all_box_id);
       expect(boxStatus).to.have.property("payment");
-      expect(boxStatus.payment.map((info) => info.token_addr.toString())).to.eql([
-        createBoxPara.payment[0][0].toString(),
-        createBoxPara.payment[1][0].toString(),
-        createBoxPara.payment[2][0].toString(),
-        createBoxPara.payment[3][0].toString(),
+      expect(boxStatus.payment.map((info) => info.token_addr)).to.eql([
+        createBoxPara.payment[0][0],
+        createBoxPara.payment[1][0],
+        createBoxPara.payment[2][0],
+        createBoxPara.payment[3][0],
       ]);
       expect(boxStatus.payment.map((info) => info.price.toString())).to.eql([
         createBoxPara.payment[0][1].toString(),
@@ -379,9 +371,8 @@ describe("MysteryBoxBasicInteractions", () => {
       const newUserNftBalance = await enumerableNftContract.balanceOf(await user_2.getAddress());
       expect(newUserNftBalance.eq(userNftBalance.add(1))).to.be.true;
       {
-        const logs = await ethers.provider.getLogs(enumerableNftContract.filters.Transfer());
-        const parsedLog = EnumerableNftInterface.parseLog(logs[0]);
-        const result = parsedLog.args;
+        const logs = await enumerableNftContract.queryFilter(enumerableNftContract.filters.Transfer());
+        const result = last(logs)!.args;
         expect(result)
           .to.have.property("from")
           .that.to.be.eq(await user_1.getAddress());
@@ -391,9 +382,8 @@ describe("MysteryBoxBasicInteractions", () => {
         expect(result).to.have.property("tokenId");
       }
       {
-        const logs = await ethers.provider.getLogs(mbContract.filters.OpenSuccess());
-        const parsedLog = interfaceABI.parseLog(logs[0]);
-        const result = parsedLog.args;
+        const logs = await mbContract.queryFilter(mbContract.filters.OpenSuccess());
+        const result = last(logs)!.args;
         expect(result).to.have.property("box_id");
         expect(result.box_id.eq(openBoxParameters.box_id)).to.be.true;
         expect(result)
@@ -415,11 +405,11 @@ describe("MysteryBoxBasicInteractions", () => {
       expect(boxInfo).to.have.property("personal_limit").that.to.be.eq(createBoxPara.personal_limit);
 
       expect(boxStatus).to.have.property("payment");
-      expect(boxStatus.payment.map((info) => info.token_addr.toString())).to.eql([
-        createBoxPara.payment[0][0].toString(),
-        createBoxPara.payment[1][0].toString(),
-        createBoxPara.payment[2][0].toString(),
-        createBoxPara.payment[3][0].toString(),
+      expect(boxStatus.payment.map((info) => info.token_addr)).to.eql([
+        createBoxPara.payment[0][0],
+        createBoxPara.payment[1][0],
+        createBoxPara.payment[2][0],
+        createBoxPara.payment[3][0],
       ]);
       expect(boxStatus.payment.map((info) => info.price.toString())).to.eql([
         createBoxPara.payment[0][1].toString(),
@@ -442,22 +432,19 @@ describe("MysteryBoxBasicInteractions", () => {
   });
 
   it("Should not openBox expired boxes", async () => {
-    const open_parameter = JSON.parse(JSON.stringify(openBoxParameters));
-    {
-      const now = Math.floor(new Date().getTime() / 1000);
-      const parameter = JSON.parse(JSON.stringify(createBoxPara));
-      // to pass `createBox` validation
-      parameter.end_time = now + seconds_in_a_day / 2;
-      await mbContract.connect(user_1).createBox.apply(null, Object.values(parameter));
-      const logs = await ethers.provider.getLogs(mbContract.filters.CreationSuccess());
-      const parsedLog = interfaceABI.parseLog(logs[0]);
-      const result = parsedLog.args;
-      open_parameter.box_id = result.box_id;
-    }
+    const now = Math.floor(new Date().getTime() / 1000);
+    const parameter = { ...createBoxPara, end_time: now + seconds_in_a_day / 2 };
+    // to pass `createBox` validation
+    await mbContract.connect(user_1).createBox.apply(null, Object.values(parameter));
+    const logs = await mbContract.queryFilter(mbContract.filters.CreationSuccess());
+
+    const result = last(logs)!.args;
+
+    const open_parameter = { ...openBoxParameters, box_id: result.box_id };
     await advanceTimeAndBlock(seconds_in_a_day);
     await expect(
       mbContract.connect(user_2).openBox.apply(null, addTxParameters(open_parameter, txParameters)),
-    ).to.be.rejectedWith("expired");
+    ).to.be.revertedWith("expired");
     {
       const boxStatus = await mbContract.getBoxStatus(open_parameter.box_id);
       expect(boxStatus).to.have.property("expired").that.to.be.eq(true);
@@ -466,102 +453,93 @@ describe("MysteryBoxBasicInteractions", () => {
 
   it("Should createBox reject invalid parameters", async () => {
     {
-      const parameter = JSON.parse(JSON.stringify(createBoxPara));
-      parameter.end_time = 0;
-      await expect(mbContract.connect(user_1).createBox.apply(null, Object.values(parameter))).to.be.rejectedWith(
-        "invalid end time",
-      );
+      const invalidParameter = { ...createBoxPara, end_time: 0 };
+      await expect(
+        mbContract.connect(user_1).createBox.apply(null, Object.values(invalidParameter)),
+      ).to.be.revertedWith("invalid end time");
     }
     {
-      const parameter = JSON.parse(JSON.stringify(createBoxPara));
-      parameter.payment = [];
-      await expect(mbContract.connect(user_1).createBox.apply(null, Object.values(parameter))).to.be.rejectedWith(
-        "invalid payment",
-      );
-    }
-    {
-      const parameter = JSON.parse(JSON.stringify(createBoxPara));
-      parameter.payment.push([await user_2.getAddress(), createBoxPara.payment[0][1]]);
-      await expect(mbContract.connect(user_1).createBox.apply(null, Object.values(parameter))).to.be.rejectedWith(
-        Error,
-      );
+      const invalidParameter = { ...createBoxPara, payment: [] };
+      await expect(
+        mbContract.connect(user_1).createBox.apply(null, Object.values(invalidParameter)),
+      ).to.be.revertedWith("invalid payment");
     }
     {
       await nonEnumerableNftContract.connect(user_1).mint(50);
       await nonEnumerableNftContract.connect(user_1).setApprovalForAll(mbContract.address, true);
-      const parameter = JSON.parse(JSON.stringify(createBoxPara));
-      parameter.nft_address = nonEnumerableNftContract.address;
-      parameter.sell_all = true;
-      await expect(mbContract.connect(user_1).createBox.apply(null, Object.values(parameter))).to.be.rejectedWith(
-        "not enumerable nft",
-      );
+      const invalidParameter = { ...createBoxPara, nft_address: nonEnumerableNftContract.address, sell_all: true };
+      await expect(
+        mbContract.connect(user_1).createBox.apply(null, Object.values(invalidParameter)),
+      ).to.be.revertedWith("not enumerable nft");
     }
     {
-      const parameter = JSON.parse(JSON.stringify(createBoxPara));
-      parameter.sell_all = false;
-      parameter.nft_id_list = [];
-      await expect(mbContract.connect(user_1).createBox.apply(null, Object.values(parameter))).to.be.rejectedWith(
-        "empty nft list",
-      );
+      const invalidParameter = { ...createBoxPara, sell_all: false, nft_id_list: [] };
+      await expect(
+        mbContract.connect(user_1).createBox.apply(null, Object.values(invalidParameter)),
+      ).to.be.revertedWith("empty nft list");
     }
     {
       await enumerableNftContract.connect(user_2).mint(50);
-      const parameter = JSON.parse(JSON.stringify(createBoxPara));
-      parameter.sell_all = true;
-      await expect(mbContract.connect(user_2).createBox.apply(null, Object.values(parameter))).to.be.rejectedWith(
-        "not ApprovedForAll",
-      );
+      const invalidParameter = { ...createBoxPara, sell_all: true };
+      await expect(
+        mbContract.connect(user_2).createBox.apply(null, Object.values(invalidParameter)),
+      ).to.be.revertedWith("not ApprovedForAll");
     }
     {
-      const parameter = JSON.parse(JSON.stringify(createBoxPara));
+      const invalidParameter = { ...createBoxPara, sell_all: true };
       await enumerableNftContract.connect(user_3).setApprovalForAll(mbContract.address, true);
-      parameter.sell_all = true;
-      await expect(mbContract.connect(user_3).createBox.apply(null, Object.values(parameter))).to.be.rejectedWith(
-        "no nft owned",
-      );
+      await expect(
+        mbContract.connect(user_3).createBox.apply(null, Object.values(invalidParameter)),
+      ).to.be.revertedWith("no nft owned");
     }
     {
       const user_0_NftBalance = await enumerableNftContract.balanceOf(await user_1.getAddress());
       expect(user_0_NftBalance.gt(0)).to.be.true;
       const user_1_NftBalance = await enumerableNftContract.balanceOf(await user_2.getAddress());
       expect(user_1_NftBalance.gt(0)).to.be.true;
-      let nft_id_list: number[] = [];
-      nft_id_list.push((await enumerableNftContract.tokenOfOwnerByIndex(await user_1.getAddress(), 0)).toNumber());
-      nft_id_list.push((await enumerableNftContract.tokenOfOwnerByIndex(await user_2.getAddress(), 0)).toNumber());
-      const parameter = JSON.parse(JSON.stringify(createBoxPara));
-      parameter.sell_all = false;
-      parameter.nft_id_list = nft_id_list;
-      await expect(mbContract.connect(user_1).createBox.apply(null, Object.values(parameter))).to.be.rejectedWith(
-        "now owner",
-      );
+      let nft_id_list: BigNumber[] = [];
+      nft_id_list.push(await enumerableNftContract.tokenOfOwnerByIndex(await user_1.getAddress(), 0));
+      nft_id_list.push(await enumerableNftContract.tokenOfOwnerByIndex(await user_2.getAddress(), 0));
+      const invalidParameter = { ...createBoxPara, sell_all: false, nft_id_list: nft_id_list };
+      await expect(
+        mbContract.connect(user_1).createBox.apply(null, Object.values(invalidParameter)),
+      ).to.be.revertedWith("now owner");
+    }
+    {
+      let payment = createBoxPara.payment;
+      payment.push([await user_2.getAddress(), createBoxPara.payment[0][1]]);
+      const invalidParameter = {
+        ...createBoxPara,
+        payment: payment,
+      };
+      await expect(
+        mbContract.connect(user_1).createBox.apply(null, Object.values(invalidParameter)),
+      ).to.be.rejectedWith(Error);
     }
   });
 
   it("Should openBox reject invalid parameters", async () => {
     {
-      const parameters = JSON.parse(JSON.stringify(openBoxParameters));
-      parameters.payment_token_index = 1;
+      const invalidParameter = { ...openBoxParameters, payment_token_index: 1 };
       await testTokenAContract.connect(user_3).approve(mbContract.address, transferAmount);
-      await expect(mbContract.connect(user_3).openBox.apply(null, Object.values(parameters))).to.be.rejectedWith(
+      await expect(mbContract.connect(user_3).openBox.apply(null, Object.values(invalidParameter))).to.be.revertedWith(
         "ERC20: transfer amount exceeds balance",
       );
       await testTokenAContract.connect(user_3).approve(mbContract.address, 0);
       await testTokenAContract.transfer(await user_3.getAddress(), transferAmount);
-      await expect(mbContract.connect(user_3).openBox.apply(null, Object.values(parameters))).to.be.rejectedWith(
+      await expect(mbContract.connect(user_3).openBox.apply(null, Object.values(invalidParameter))).to.be.revertedWith(
         "ERC20: insufficient allowance",
       );
     }
     {
-      const parameters = JSON.parse(JSON.stringify(openBoxParameters));
-      parameters.amount = MaxNumberOfNFT + 1;
-      await expect(mbContract.connect(user_3).openBox.apply(null, Object.values(parameters))).to.be.rejectedWith(
+      const invalidParameter = { ...openBoxParameters, amount: MaxNumberOfNFT + 1 };
+      await expect(mbContract.connect(user_3).openBox.apply(null, Object.values(invalidParameter))).to.be.revertedWith(
         "exceeds personal limit",
       );
     }
     {
-      const parameters = JSON.parse(JSON.stringify(openBoxParameters));
-      parameters.payment_token_index = createBoxPara.payment.length;
-      await expect(mbContract.connect(user_3).openBox.apply(null, Object.values(parameters))).to.be.rejectedWith(
+      const invalidParameter = { ...openBoxParameters, payment_token_index: createBoxPara.payment.length };
+      await expect(mbContract.connect(user_3).openBox.apply(null, Object.values(invalidParameter))).to.be.revertedWith(
         "invalid payment token",
       );
     }
@@ -571,7 +549,7 @@ describe("MysteryBoxBasicInteractions", () => {
       };
       await expect(
         mbContract.connect(user_3).openBox.apply(null, addTxParameters(openBoxParameters, tx_parameters)),
-      ).to.be.rejectedWith("not enough ETH");
+      ).to.be.revertedWith("not enough ETH");
     }
   });
 
@@ -579,8 +557,7 @@ describe("MysteryBoxBasicInteractions", () => {
     const nftBalance = await enumerableNftContract.balanceOf(await user_1.getAddress());
     const contractEthBalanceBeforeOpen = await ethers.provider.getBalance(mbContract.address);
     const userEthBalanceBeforeOpen = await ethers.provider.getBalance(await user_2.getAddress());
-    const parameters = JSON.parse(JSON.stringify(openBoxParameters));
-    parameters.amount = MaxNumberOfNFT / 2;
+    const parameters = { ...openBoxParameters, amount: MaxNumberOfNFT / 2 };
     const tx_parameters = {
       value: txParameters.value.mul(parameters.amount),
     };
@@ -602,7 +579,7 @@ describe("MysteryBoxBasicInteractions", () => {
     }
     await expect(
       mbContract.connect(user_2).openBox.apply(null, addTxParameters(parameters, tx_parameters)),
-    ).to.be.rejectedWith("exceeds personal limit");
+    ).to.be.revertedWith("exceeds personal limit");
     {
       const boxInfo = await mbContract.getBoxInfo(parameters.box_id);
       const boxStatus = await mbContract.getBoxStatus(parameters.box_id);

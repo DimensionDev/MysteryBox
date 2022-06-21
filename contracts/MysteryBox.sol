@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity >= 0.8.0;
+pragma solidity >=0.8.0;
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/IERC721EnumerableUpgradeable.sol";
@@ -36,25 +36,22 @@ contract MysteryBox is OwnableUpgradeable {
         address nft_address;
         string name;
         PaymentInfo[] payment;
-
         uint256[] nft_id_list;
         // qualification smart contract address
         address qualification;
         mapping(address => uint256[]) purchased_nft;
         // total number of NFT(s)
         uint256 total;
-
         // `token address`
         address holder_token_addr;
         // `token holder`
         uint256 holder_min_token_amount;
-
         // `data` used for qualification
         // can be `merkle root`, `verifier`, etc
         bytes32 qualification_data;
     }
 
-    event CreationSuccess (
+    event CreationSuccess(
         address indexed creator,
         address indexed nft_address,
         uint256 box_id,
@@ -71,12 +68,9 @@ contract MysteryBox is OwnableUpgradeable {
         uint256 amount
     );
 
-    event CancelSuccess(
-        uint256 indexed box_id,
-        address indexed creator
-    );
+    event CancelSuccess(uint256 indexed box_id, address indexed creator);
 
-    event ClaimPayment (
+    event ClaimPayment(
         address indexed creator,
         uint256 indexed box_id,
         address token_address,
@@ -94,7 +88,7 @@ contract MysteryBox is OwnableUpgradeable {
         __Ownable_init();
     }
 
-    function createBox (
+    function createBox(
         address nft_address,
         string memory name,
         PaymentOption[] memory payment,
@@ -107,20 +101,28 @@ contract MysteryBox is OwnableUpgradeable {
         address holder_token_addr,
         uint256 holder_min_token_amount,
         bytes32 qualification_data
-    )
-        external
-    {
+    ) external {
         _box_id++;
         require(end_time > block.timestamp, "invalid end time");
-        require(IERC721(nft_address).isApprovedForAll(msg.sender, address(this)), "not ApprovedForAll");
+        require(
+            IERC721(nft_address).isApprovedForAll(msg.sender, address(this)),
+            "not ApprovedForAll"
+        );
         require(payment.length > 0, "invalid payment");
         require(whitelist[msg.sender] || admin[msg.sender], "not whitelisted");
         Box storage box = box_by_id[_box_id];
         for (uint256 i = 0; i < payment.length; i++) {
             if (payment[i].token_addr != address(0)) {
-                require(IERC20Upgradeable(payment[i].token_addr).totalSupply() > 0, "Not a valid ERC20 token address");
+                require(
+                    IERC20Upgradeable(payment[i].token_addr).totalSupply() > 0,
+                    "Not a valid ERC20 token address"
+                );
             }
-            PaymentInfo memory paymentInfo = PaymentInfo(payment[i].token_addr, payment[i].price, 0);
+            PaymentInfo memory paymentInfo = PaymentInfo(
+                payment[i].token_addr,
+                payment[i].price,
+                0
+            );
             box.payment.push(paymentInfo);
         }
 
@@ -135,29 +137,34 @@ contract MysteryBox is OwnableUpgradeable {
         box.holder_token_addr = holder_token_addr;
         box.holder_min_token_amount = holder_min_token_amount;
         if (holder_token_addr != address(0)) {
-            require(IERC20Upgradeable(holder_token_addr).totalSupply() > 0, "Not a valid ERC20 token address");
+            require(
+                IERC20Upgradeable(holder_token_addr).totalSupply() > 0,
+                "Not a valid ERC20 token address"
+            );
         }
 
         if (sell_all) {
             // validate it is an `Enumerable` NFT
             /* solhint-disable */
             require(
-                IERC721(nft_address).supportsInterface(type(IERC721EnumerableUpgradeable).interfaceId),
-                "not enumerable nft");
+                IERC721(nft_address).supportsInterface(
+                    type(IERC721EnumerableUpgradeable).interfaceId
+                ),
+                "not enumerable nft"
+            );
             /* solhint-enable */
             uint256 nftBalance = IERC721(nft_address).balanceOf(msg.sender);
             require(nftBalance > 0, "no nft owned");
             box.sell_all = true;
             box.total = nftBalance;
-        }
-        else {
+        } else {
             require(nft_id_list.length > 0, "empty nft list");
             require(_check_ownership(nft_id_list, nft_address), "now owner");
             box.nft_id_list = nft_id_list;
             box.total = nft_id_list.length;
         }
         box.qualification_data = qualification_data;
-        emit CreationSuccess (
+        emit CreationSuccess(
             msg.sender,
             nft_address,
             _box_id,
@@ -169,10 +176,7 @@ contract MysteryBox is OwnableUpgradeable {
     }
 
     // Add more NFT for sale
-    function addNftIntoBox (
-        uint256 box_id,
-        uint256[] calldata nft_id_list
-    )
+    function addNftIntoBox(uint256 box_id, uint256[] calldata nft_id_list)
         external
     {
         Box storage box = box_by_id[box_id];
@@ -189,10 +193,7 @@ contract MysteryBox is OwnableUpgradeable {
         box.total += nft_id_list.length;
     }
 
-    function setQualificationData (
-        uint256 box_id,
-        bytes32 qualification_data
-    )
+    function setQualificationData(uint256 box_id, bytes32 qualification_data)
         external
     {
         Box storage box = box_by_id[box_id];
@@ -201,9 +202,7 @@ contract MysteryBox is OwnableUpgradeable {
     }
 
     // cancel sale
-    function cancelBox (uint256 box_id)
-        external
-    {
+    function cancelBox(uint256 box_id) external {
         Box storage box = box_by_id[box_id];
         require(box.creator == msg.sender, "not box owner");
         require(block.timestamp <= box.start_time, "sale started");
@@ -217,21 +216,30 @@ contract MysteryBox is OwnableUpgradeable {
         uint8 amount,
         uint8 payment_token_index,
         bytes memory proof
-    )
-        external
-        payable
-    {
+    ) external payable {
         require(tx.origin == msg.sender, "no contracts");
         Box storage box = box_by_id[box_id];
         require(block.timestamp > box.start_time, "not started");
         require(box.end_time > block.timestamp, "expired");
-        require(payment_token_index < box.payment.length, "invalid payment token");
-        require((box.purchased_nft[msg.sender].length + amount) <= box.personal_limit, "exceeds personal limit");
+        require(
+            payment_token_index < box.payment.length,
+            "invalid payment token"
+        );
+        require(
+            (box.purchased_nft[msg.sender].length + amount) <=
+                box.personal_limit,
+            "exceeds personal limit"
+        );
         require(!(box.canceled), "sale canceled");
 
-        if (box.holder_min_token_amount > 0 && box.holder_token_addr != address(0)) {
+        if (
+            box.holder_min_token_amount > 0 &&
+            box.holder_token_addr != address(0)
+        ) {
             require(
-                IERC20Upgradeable(box.holder_token_addr).balanceOf(msg.sender) >= box.holder_min_token_amount,
+                IERC20Upgradeable(box.holder_token_addr).balanceOf(
+                    msg.sender
+                ) >= box.holder_min_token_amount,
                 "not holding enough token"
             );
         }
@@ -240,7 +248,10 @@ contract MysteryBox is OwnableUpgradeable {
             bool qualified;
             string memory error_msg;
             proof = abi.encode(proof, box.qualification_data);
-            (qualified, error_msg) = IQLF(box.qualification).is_qualified(msg.sender, proof);
+            (qualified, error_msg) = IQLF(box.qualification).is_qualified(
+                msg.sender,
+                proof
+            );
             require(qualified, error_msg);
         }
 
@@ -249,8 +260,7 @@ contract MysteryBox is OwnableUpgradeable {
         uint256 total;
         if (box.sell_all) {
             total = IERC721(nft_address).balanceOf(creator);
-        }
-        else {
+        } else {
             total = box.nft_id_list.length;
         }
         require(total > 0, "no NFT left");
@@ -262,14 +272,18 @@ contract MysteryBox is OwnableUpgradeable {
         if (box.sell_all) {
             for (uint256 i = 0; i < amount; i++) {
                 uint256 token_index = rand % total;
-                uint256 token_id = IERC721Enumerable(nft_address).tokenOfOwnerByIndex(creator, token_index);
-                IERC721(nft_address).safeTransferFrom(creator, msg.sender, token_id);
+                uint256 token_id = IERC721Enumerable(nft_address)
+                    .tokenOfOwnerByIndex(creator, token_index);
+                IERC721(nft_address).safeTransferFrom(
+                    creator,
+                    msg.sender,
+                    token_id
+                );
                 box.purchased_nft[msg.sender].push(token_id);
                 rand = uint256(keccak256(abi.encodePacked(rand, i)));
                 total--;
             }
-        }
-        else {
+        } else {
             uint8 nft_transferred;
             // pick NFT(s) from nft-id list
             for (uint256 i = 0; i < amount; i++) {
@@ -277,11 +291,14 @@ contract MysteryBox is OwnableUpgradeable {
                 uint256 token_id = box.nft_id_list[token_index];
                 if (creator == IERC721(nft_address).ownerOf(token_id)) {
                     // transfer NFT
-                    IERC721(nft_address).safeTransferFrom(creator, msg.sender, token_id);
+                    IERC721(nft_address).safeTransferFrom(
+                        creator,
+                        msg.sender,
+                        token_id
+                    );
                     box.purchased_nft[msg.sender].push(token_id);
                     nft_transferred++;
-                }
-                else {
+                } else {
                     // TODO: owner transferred this NFT elsewhere, do we need to keep searching?
                     // If we do, validate `remaining gas`, to make sure we can finish the tx successfully
                     // Otherwise, this collection will go to a dead-loop state.
@@ -299,7 +316,9 @@ contract MysteryBox is OwnableUpgradeable {
         {
             uint256 total_payment = box.payment[payment_token_index].price;
             total_payment = total_payment * amount;
-            address payment_token_address = box.payment[payment_token_index].token_addr;
+            address payment_token_address = box
+                .payment[payment_token_index]
+                .token_addr;
             if (payment_token_address == address(0)) {
                 require(msg.value >= total_payment, "not enough ETH");
                 uint256 eth_to_refund = msg.value - total_payment;
@@ -307,9 +326,12 @@ contract MysteryBox is OwnableUpgradeable {
                     address payable addr = payable(msg.sender);
                     addr.transfer(eth_to_refund);
                 }
-            }
-            else {
-                IERC20Upgradeable(payment_token_address).safeTransferFrom(msg.sender, address(this), total_payment);
+            } else {
+                IERC20Upgradeable(payment_token_address).safeTransferFrom(
+                    msg.sender,
+                    address(this),
+                    total_payment
+                );
             }
             box.payment[payment_token_index].receivable_amount += total_payment;
         }
@@ -317,19 +339,29 @@ contract MysteryBox is OwnableUpgradeable {
     }
 
     function claimPayment(uint256[] calldata box_ids) external {
-        for (uint256 asset_index = 0; asset_index < box_ids.length; asset_index++) {
+        for (
+            uint256 asset_index = 0;
+            asset_index < box_ids.length;
+            asset_index++
+        ) {
             Box storage box = box_by_id[box_ids[asset_index]];
             require(box.creator == msg.sender, "not owner");
             uint256 total;
             if (box.sell_all) {
                 total = IERC721(box.nft_address).balanceOf(msg.sender);
-            }
-            else {
+            } else {
                 total = box.nft_id_list.length;
             }
-            require(box.end_time <= block.timestamp || total == 0, "not expired/sold-out");
+            require(
+                box.end_time <= block.timestamp || total == 0,
+                "not expired/sold-out"
+            );
 
-            for (uint256 token_index = 0; token_index < box.payment.length; token_index++) {
+            for (
+                uint256 token_index = 0;
+                token_index < box.payment.length;
+                token_index++
+            ) {
                 address token_address = box.payment[token_index].token_addr;
                 uint256 amount = box.payment[token_index].receivable_amount;
                 if (amount == 0) {
@@ -339,11 +371,19 @@ contract MysteryBox is OwnableUpgradeable {
                 if (token_address == address(0)) {
                     address payable addr = payable(msg.sender);
                     addr.transfer(amount);
+                } else {
+                    IERC20Upgradeable(token_address).safeTransfer(
+                        msg.sender,
+                        amount
+                    );
                 }
-                else {
-                    IERC20Upgradeable(token_address).safeTransfer(msg.sender, amount);
-                }
-                emit ClaimPayment(msg.sender, box_ids[asset_index], token_address, amount, block.timestamp);
+                emit ClaimPayment(
+                    msg.sender,
+                    box_ids[asset_index],
+                    token_address,
+                    amount,
+                    block.timestamp
+                );
             }
         }
     }
@@ -393,8 +433,7 @@ contract MysteryBox is OwnableUpgradeable {
 
         if (box.sell_all) {
             remaining = IERC721(box.nft_address).balanceOf(box.creator);
-        }
-        else {
+        } else {
             remaining = box.nft_id_list.length;
         }
         total = box.total;
@@ -403,25 +442,24 @@ contract MysteryBox is OwnableUpgradeable {
     function getPurchasedNft(uint256 box_id, address customer)
         external
         view
-        returns(uint256[] memory nft_id_list)
+        returns (uint256[] memory nft_id_list)
     {
         Box storage box = box_by_id[box_id];
         nft_id_list = box.purchased_nft[customer];
     }
 
-    function getNftListForSale(uint256 box_id, uint256 cursor, uint256 amount)
-        external
-        view
-        returns(uint256[] memory nft_id_list)
-    {
+    function getNftListForSale(
+        uint256 box_id,
+        uint256 cursor,
+        uint256 amount
+    ) external view returns (uint256[] memory nft_id_list) {
         Box storage box = box_by_id[box_id];
         address nft_address = box.nft_address;
         address creator = box.creator;
         uint256 total;
         if (box.sell_all) {
             total = IERC721(nft_address).balanceOf(creator);
-        }
-        else {
+        } else {
             total = box.nft_id_list.length;
         }
         if (cursor >= total) {
@@ -430,15 +468,15 @@ contract MysteryBox is OwnableUpgradeable {
         if (amount > (total - cursor)) {
             amount = total - cursor;
         }
-        nft_id_list = new uint[](amount);
+        nft_id_list = new uint256[](amount);
 
         if (box.sell_all) {
             for (uint256 i = 0; i < amount; i++) {
                 uint256 token_index = i + cursor;
-                nft_id_list[i] = IERC721Enumerable(nft_address).tokenOfOwnerByIndex(creator, token_index);
+                nft_id_list[i] = IERC721Enumerable(nft_address)
+                    .tokenOfOwnerByIndex(creator, token_index);
             }
-        }
-        else {
+        } else {
             for (uint256 i = 0; i < amount; i++) {
                 uint256 token_index = i + cursor;
                 nft_id_list[i] = box.nft_id_list[token_index];
@@ -474,23 +512,30 @@ contract MysteryBox is OwnableUpgradeable {
 
     function _random() internal view returns (uint256 rand) {
         uint256 blocknumber = block.number;
-        uint256 random_gap = uint256(keccak256(abi.encodePacked(blockhash(blocknumber-1), msg.sender))) % 255;
+        uint256 random_gap = uint256(
+            keccak256(abi.encodePacked(blockhash(blocknumber - 1), msg.sender))
+        ) % 255;
         uint256 random_block = blocknumber - 1 - random_gap;
-        bytes32 sha = keccak256(abi.encodePacked(blockhash(random_block),
-                                                msg.sender,
-                                                block.coinbase,
-                                                block.difficulty));
+        bytes32 sha = keccak256(
+            abi.encodePacked(
+                blockhash(random_block),
+                msg.sender,
+                block.coinbase,
+                block.difficulty
+            )
+        );
         return uint256(sha);
     }
 
-    function _check_ownership(uint256[] memory nft_token_id_list, address nft_address)
-        internal
-        view
-        returns(bool)
-    {
+    function _check_ownership(
+        uint256[] memory nft_token_id_list,
+        address nft_address
+    ) internal view returns (bool) {
         for (uint256 i = 0; i < nft_token_id_list.length; i++) {
-            address nft_owner = IERC721(nft_address).ownerOf(nft_token_id_list[i]);
-            if (nft_owner != msg.sender){
+            address nft_owner = IERC721(nft_address).ownerOf(
+                nft_token_id_list[i]
+            );
+            if (nft_owner != msg.sender) {
                 return false;
             }
         }

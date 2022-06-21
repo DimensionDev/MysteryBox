@@ -1,8 +1,9 @@
 import { ethers, waffle, upgrades } from "hardhat";
-import { Signer } from "ethers";
+import { BigNumber, Signer } from "ethers";
 import MockDate from "mockdate";
 import { use } from "chai";
 import chaiAsPromised from "chai-as-promised";
+import { last } from "lodash";
 const { expect } = use(chaiAsPromised);
 const { deployContract } = waffle;
 
@@ -29,9 +30,9 @@ describe("MysteryBoxSales", () => {
   const network = "mainnet";
   const maskNftPara = MaskNFTInitParameters[network];
   const createBoxPara = generateCreateBoxPara(network);
-  let sell_all_box_id: number;
-  let not_sell_all_box_id: number;
-  let not_sell_all_nft_id_list: number[] = [];
+  let sell_all_box_id: BigNumber;
+  let not_sell_all_box_id: BigNumber;
+  let not_sell_all_nft_id_list: BigNumber[] = [];
 
   const txParameters = {
     gasLimit: 6000000,
@@ -118,12 +119,10 @@ describe("MysteryBoxSales", () => {
     await enumerableNftContract.connect(user_1).setApprovalForAll(mbContract.address, true);
 
     {
-      const parameter = JSON.parse(JSON.stringify(createBoxPara));
-      parameter.sell_all = true;
+      const parameter = { ...createBoxPara, sell_all: true };
       await mbContract.connect(user_1).createBox.apply(null, Object.values(parameter));
-      const logs = await ethers.provider.getLogs(mbContract.filters.CreationSuccess());
-      const parsedLog = interfaceABI.parseLog(logs[0]);
-      const result = parsedLog.args;
+      const logs = await mbContract.queryFilter(mbContract.filters.CreationSuccess());
+      const result = last(logs)!.args;
       expect(result)
         .to.have.property("creator")
         .that.to.be.eq(await user_1.getAddress());
@@ -137,19 +136,16 @@ describe("MysteryBoxSales", () => {
     }
     openBoxParameters.box_id = sell_all_box_id;
     {
-      const parameter = JSON.parse(JSON.stringify(createBoxPara));
-      parameter.sell_all = false;
       const nftBalance = await enumerableNftContract.balanceOf(await user_1.getAddress());
       // half of the NFT ids owned
       for (let i = 0; i < nftBalance.toNumber(); i += 2) {
         const nftId = await enumerableNftContract.tokenOfOwnerByIndex(await user_1.getAddress(), i);
-        not_sell_all_nft_id_list.push(nftId.toNumber());
+        not_sell_all_nft_id_list.push(nftId);
       }
-      parameter.nft_id_list = not_sell_all_nft_id_list;
+      const parameter = { ...createBoxPara, sell_all: false, nft_id_list: not_sell_all_nft_id_list };
       await mbContract.connect(user_1).createBox.apply(null, Object.values(parameter));
-      const logs = await ethers.provider.getLogs(mbContract.filters.CreationSuccess());
-      const parsedLog = interfaceABI.parseLog(logs[0]);
-      const result = parsedLog.args;
+      const logs = await mbContract.queryFilter(mbContract.filters.CreationSuccess());
+      const result = last(logs)!.args;
       expect(result)
         .to.have.property("creator")
         .that.to.be.eq(await user_1.getAddress());
@@ -187,19 +183,18 @@ describe("MysteryBoxSales", () => {
   });
 
   it("Should getNftListForSale work", async () => {
-    let nft_id_list: number[] = [];
+    let nft_id_list: BigNumber[] = [];
     const nftBalance = await enumerableNftContract.balanceOf(await user_1.getAddress());
     // half of the NFT ids owned
     for (let i = 0; i < nftBalance.toNumber(); i++) {
       const nftId = await enumerableNftContract.tokenOfOwnerByIndex(await user_1.getAddress(), i);
-      nft_id_list.push(nftId.toNumber());
+      nft_id_list.push(nftId);
     }
     const nftList = await mbContract.getNftListForSale(sell_all_box_id, 0, nftBalance);
     expect(nftList.map((id) => id.toString())).to.eql(nft_id_list.map((id) => id.toString()));
     {
       // buy some NFT(s)
-      const parameters = JSON.parse(JSON.stringify(openBoxParameters));
-      parameters.amount = MaxNumberOfNFT;
+      const parameters = { ...openBoxParameters, amount: MaxNumberOfNFT };
       const tx_parameters = {
         value: txParameters.value.mul(parameters.amount),
       };
@@ -215,7 +210,7 @@ describe("MysteryBoxSales", () => {
       const newNftListStr = newNftList.map((id) => id.toString());
       const purchaseListStr = purchaseList.map((id) => id.toString());
       const mergedList = newNftListStr.concat(purchaseListStr);
-      expect(nftListStr.sort()).to.eql(mergedList.sort());
+      expect(nftListStr.sort((a, b) => a.localeCompare(b))).to.eql(mergedList.sort((a, b) => a.localeCompare(b)));
     }
     {
       const emptyNftList = await mbContract.getNftListForSale(sell_all_box_id, nftBalance, nftBalance);
@@ -225,36 +220,31 @@ describe("MysteryBoxSales", () => {
 
   it('Should sell "sell_all_box_id" NFT work', async () => {
     const totalNFT = await enumerableNftContract.balanceOf(await user_1.getAddress());
-    expect((await enumerableNftContract.balanceOf(await signers[5].getAddress())).eq(0)).to.be.true;
-    expect((await enumerableNftContract.balanceOf(await signers[6].getAddress())).eq(0)).to.be.true;
-    expect((await enumerableNftContract.balanceOf(await signers[7].getAddress())).eq(0)).to.be.true;
-    expect((await enumerableNftContract.balanceOf(await signers[8].getAddress())).eq(0)).to.be.true;
-    expect((await enumerableNftContract.balanceOf(await signers[9].getAddress())).eq(0)).to.be.true;
-
+    for (let i = 5; i <= 9; ++i) {
+      expect((await enumerableNftContract.balanceOf(await signers[i].getAddress())).eq(0)).to.be.true;
+    }
     const contractEthBalanceBeforeOpen = await ethers.provider.getBalance(mbContract.address);
     const user_8_EthBalance = await ethers.provider.getBalance(await signers[8].getAddress());
     const user_9_EthBalance = await ethers.provider.getBalance(await signers[9].getAddress());
-    const open_parameters = JSON.parse(JSON.stringify(openBoxParameters));
+    const open_parameters = { ...openBoxParameters };
     {
       open_parameters.amount = MaxNumberOfNFT;
       const tx_parameters = {
         value: txParameters.value.mul(open_parameters.amount),
       };
-      await mbContract.connect(signers[5]).openBox.apply(null, addTxParameters(open_parameters, tx_parameters));
-      await mbContract.connect(signers[6]).openBox.apply(null, addTxParameters(open_parameters, tx_parameters));
-      await mbContract.connect(signers[7]).openBox.apply(null, addTxParameters(open_parameters, tx_parameters));
-      await mbContract.connect(signers[8]).openBox.apply(null, addTxParameters(open_parameters, tx_parameters));
-      await expect(mbContract.connect(user_1).claimPayment([open_parameters.box_id])).to.be.rejectedWith(
+      for (let i = 5; i <= 8; ++i) {
+        await mbContract.connect(signers[i]).openBox.apply(null, addTxParameters(open_parameters, tx_parameters));
+      }
+      await expect(mbContract.connect(user_1).claimPayment([open_parameters.box_id])).to.be.revertedWith(
         "not expired/sold-out",
       );
       await mbContract.connect(signers[9]).openBox.apply(null, addTxParameters(open_parameters, tx_parameters));
       await expect(
         mbContract.connect(signers[10]).openBox.apply(null, addTxParameters(open_parameters, tx_parameters)),
-      ).to.be.rejectedWith("no NFT left");
-      expect((await enumerableNftContract.balanceOf(await signers[5].getAddress())).eq(MaxNumberOfNFT)).to.be.true;
-      expect((await enumerableNftContract.balanceOf(await signers[6].getAddress())).eq(MaxNumberOfNFT)).to.be.true;
-      expect((await enumerableNftContract.balanceOf(await signers[7].getAddress())).eq(MaxNumberOfNFT)).to.be.true;
-      expect((await enumerableNftContract.balanceOf(await signers[8].getAddress())).eq(MaxNumberOfNFT)).to.be.true;
+      ).to.be.revertedWith("no NFT left");
+      for (let i = 5; i <= 8; ++i) {
+        expect((await enumerableNftContract.balanceOf(await signers[i].getAddress())).eq(MaxNumberOfNFT)).to.be.true;
+      }
       const remainingNFT = totalNFT.sub(MaxNumberOfNFT * 4);
       expect((await enumerableNftContract.balanceOf(await signers[9].getAddress())).eq(remainingNFT)).to.be.true;
 
@@ -300,24 +290,20 @@ describe("MysteryBoxSales", () => {
     for (let i = 0; i < 18; i++) {
       await enumerableNftContract.connect(user_1).mint(50);
     }
-    let id_list: number[] = [];
+    let id_list: BigNumber[] = [];
     let box_id;
     {
-      const parameter = JSON.parse(JSON.stringify(createBoxPara));
-      parameter.personal_limit = 255;
-      parameter.sell_all = false;
       const nftBalance = await enumerableNftContract.balanceOf(await user_1.getAddress());
       // all the NFT ids owned, total 1000 NFT(s)
       for (let i = 0; i < nftBalance.toNumber(); i++) {
         const nftId = await enumerableNftContract.tokenOfOwnerByIndex(await user_1.getAddress(), i);
-        id_list.push(nftId.toNumber());
+        id_list.push(nftId);
       }
-      parameter.nft_id_list = id_list;
+      const parameter = { ...createBoxPara, personal_limit: 255, sell_all: false, nft_id_list: id_list };
       await mbContract.connect(user_1).createBox.apply(null, Object.values(parameter));
 
-      const logs = await ethers.provider.getLogs(mbContract.filters.CreationSuccess());
-      const parsedLog = interfaceABI.parseLog(logs[0]);
-      const result = parsedLog.args;
+      const logs = await mbContract.queryFilter(mbContract.filters.CreationSuccess());
+      const result = last(logs)!.args;
       expect(result)
         .to.have.property("creator")
         .that.to.be.eq(await user_1.getAddress());
@@ -342,13 +328,13 @@ describe("MysteryBoxSales", () => {
     for (let i = 0; i < 20; i++) {
       await enumerableNftContract.connect(user_1).mint(50);
     }
-    let id_list_batch_2: number[] = [];
+    let id_list_batch_2: BigNumber[] = [];
     {
       const nftBalance = await enumerableNftContract.balanceOf(await user_1.getAddress());
       // all the NFT ids owned, total 1000 NFT(s)
       for (let i = id_list.length; i < nftBalance.toNumber(); i++) {
         const nftId = await enumerableNftContract.tokenOfOwnerByIndex(await user_1.getAddress(), i);
-        id_list_batch_2.push(nftId.toNumber());
+        id_list_batch_2.push(nftId);
       }
       await mbContract.connect(user_1).addNftIntoBox(box_id, id_list_batch_2);
       const boxStatus = await mbContract.getBoxStatus(box_id);
@@ -365,13 +351,13 @@ describe("MysteryBoxSales", () => {
     for (let i = 0; i < 20; i++) {
       await enumerableNftContract.connect(user_1).mint(50);
     }
-    let id_list_batch_3: number[] = [];
+    let id_list_batch_3: BigNumber[] = [];
     {
       const nftBalance = await enumerableNftContract.balanceOf(await user_1.getAddress());
       // all the NFT ids owned, total 1000 NFT(s)
       for (let i = nftBalance_before_batch_3; i < nftBalance; i = i.add(1)) {
         const nftId = await enumerableNftContract.tokenOfOwnerByIndex(await user_1.getAddress(), i);
-        id_list_batch_3.push(nftId.toNumber());
+        id_list_batch_3.push(nftId);
       }
       await mbContract.connect(user_1).addNftIntoBox(box_id, id_list_batch_3);
       const boxStatus = await mbContract.getBoxStatus(box_id);
@@ -387,9 +373,7 @@ describe("MysteryBoxSales", () => {
       const nftBalance_before = await enumerableNftContract.balanceOf(await user_1.getAddress());
       const buy_batch = 255;
       // buy 255 NFT(s)
-      const parameters = JSON.parse(JSON.stringify(openBoxParameters));
-      parameters.box_id = box_id;
-      parameters.amount = buy_batch;
+      const parameters = { ...openBoxParameters, box_id: box_id, amount: buy_batch };
       const tx_parameters = {
         value: txParameters.value.mul(parameters.amount),
       };
@@ -409,29 +393,23 @@ describe("MysteryBoxSales", () => {
     const boxStatus = await mbContract.getBoxStatus(not_sell_all_box_id);
     expect(boxStatus).to.have.property("remaining");
     const totalNFT = boxStatus.remaining;
-    {
-      await testTokenContract.transfer(await signers[5].getAddress(), transferAmount);
-      await testTokenContract.connect(signers[5]).approve(mbContract.address, transferAmount);
-      await testTokenContract.transfer(await signers[6].getAddress(), transferAmount);
-      await testTokenContract.connect(signers[6]).approve(mbContract.address, transferAmount);
-      await testTokenContract.transfer(await signers[7].getAddress(), transferAmount);
-      await testTokenContract.connect(signers[7]).approve(mbContract.address, transferAmount);
-      await testTokenContract.transfer(await signers[8].getAddress(), transferAmount);
-      await testTokenContract.connect(signers[8]).approve(mbContract.address, transferAmount);
+    for (let i = 5; i <= 8; ++i) {
+      await testTokenContract.transfer(await signers[i].getAddress(), transferAmount);
+      await testTokenContract.connect(signers[i]).approve(mbContract.address, transferAmount);
     }
     const contractTokenBalanceBefore = await testTokenContract.balanceOf(mbContract.address);
+    const parameters = {
+      ...openBoxParameters,
+      amount: MaxNumberOfNFT,
+      payment_token_index: 1,
+      box_id: not_sell_all_box_id,
+    };
+    for (let i = 5; i <= 7; ++i) {
+      expect((await enumerableNftContract.balanceOf(await signers[i].getAddress())).eq(0)).to.be.true;
+      await mbContract.connect(signers[i]).openBox.apply(null, Object.values(parameters));
+    }
     {
-      expect((await enumerableNftContract.balanceOf(await signers[5].getAddress())).eq(0)).to.be.true;
-      expect((await enumerableNftContract.balanceOf(await signers[6].getAddress())).eq(0)).to.be.true;
-      expect((await enumerableNftContract.balanceOf(await signers[7].getAddress())).eq(0)).to.be.true;
-      const parameters = JSON.parse(JSON.stringify(openBoxParameters));
-      parameters.amount = MaxNumberOfNFT;
-      parameters.payment_token_index = 1;
-      parameters.box_id = not_sell_all_box_id;
-      await mbContract.connect(signers[5]).openBox.apply(null, Object.values(parameters));
-      await mbContract.connect(signers[6]).openBox.apply(null, Object.values(parameters));
-      await mbContract.connect(signers[7]).openBox.apply(null, Object.values(parameters));
-      await expect(mbContract.connect(signers[8]).openBox.apply(null, Object.values(parameters))).to.be.rejectedWith(
+      await expect(mbContract.connect(signers[8]).openBox.apply(null, Object.values(parameters))).to.be.revertedWith(
         "no NFT left",
       );
       expect((await enumerableNftContract.balanceOf(await signers[5].getAddress())).eq(MaxNumberOfNFT)).to.be.true;
@@ -462,9 +440,6 @@ describe("MysteryBoxSales", () => {
     {
       await nonEnumerableNftContract.connect(user_1).mint(total);
       await nonEnumerableNftContract.connect(user_1).setApprovalForAll(mbContract.address, true);
-      const parameter = JSON.parse(JSON.stringify(createBoxPara));
-      parameter.nft_address = nonEnumerableNftContract.address;
-      parameter.sell_all = false;
       const nftBalance = await nonEnumerableNftContract.balanceOf(await user_1.getAddress());
       expect(total.toString()).to.be.eq(nftBalance.toString());
 
@@ -472,11 +447,15 @@ describe("MysteryBoxSales", () => {
       for (let i = 0; i < nftBalance.toNumber(); i++) {
         id_list.push(i);
       }
-      parameter.nft_id_list = id_list;
+      const parameter = {
+        ...createBoxPara,
+        nft_address: nonEnumerableNftContract.address,
+        sell_all: false,
+        nft_id_list: id_list,
+      };
       await mbContract.connect(user_1).createBox.apply(null, Object.values(parameter));
-      const logs = await ethers.provider.getLogs(mbContract.filters.CreationSuccess());
-      const parsedLog = interfaceABI.parseLog(logs[0]);
-      const result = parsedLog.args;
+      const logs = await mbContract.queryFilter(mbContract.filters.CreationSuccess());
+      const result = last(logs)!.args;
       expect(result)
         .to.have.property("creator")
         .that.to.be.eq(await user_1.getAddress());
@@ -493,29 +472,18 @@ describe("MysteryBoxSales", () => {
     expect(boxStatus).to.have.property("remaining");
     expect(total.toString()).to.be.eq(boxStatus.remaining.toString());
     const totalNFT = boxStatus.remaining;
-    {
-      await testTokenContract.transfer(await signers[5].getAddress(), transferAmount);
-      await testTokenContract.connect(signers[5]).approve(mbContract.address, transferAmount);
-      await testTokenContract.transfer(await signers[6].getAddress(), transferAmount);
-      await testTokenContract.connect(signers[6]).approve(mbContract.address, transferAmount);
-      await testTokenContract.transfer(await signers[7].getAddress(), transferAmount);
-      await testTokenContract.connect(signers[7]).approve(mbContract.address, transferAmount);
-      await testTokenContract.transfer(await signers[8].getAddress(), transferAmount);
-      await testTokenContract.connect(signers[8]).approve(mbContract.address, transferAmount);
+    for (let i = 5; i <= 8; ++i) {
+      await testTokenContract.transfer(await signers[i].getAddress(), transferAmount);
+      await testTokenContract.connect(signers[i]).approve(mbContract.address, transferAmount);
     }
     const contractTokenBalanceBefore = await testTokenContract.balanceOf(mbContract.address);
+    const parameters = { ...openBoxParameters, amount: MaxNumberOfNFT, payment_token_index: 1, box_id: box_id };
+    for (let i = 5; i <= 7; ++i) {
+      expect((await nonEnumerableNftContract.balanceOf(await signers[i].getAddress())).eq(0)).to.be.true;
+      await mbContract.connect(signers[i]).openBox.apply(null, Object.values(parameters));
+    }
     {
-      expect((await nonEnumerableNftContract.balanceOf(await signers[5].getAddress())).eq(0)).to.be.true;
-      expect((await nonEnumerableNftContract.balanceOf(await signers[6].getAddress())).eq(0)).to.be.true;
-      expect((await nonEnumerableNftContract.balanceOf(await signers[7].getAddress())).eq(0)).to.be.true;
-      const parameters = JSON.parse(JSON.stringify(openBoxParameters));
-      parameters.amount = MaxNumberOfNFT;
-      parameters.payment_token_index = 1;
-      parameters.box_id = box_id;
-      await mbContract.connect(signers[5]).openBox.apply(null, Object.values(parameters));
-      await mbContract.connect(signers[6]).openBox.apply(null, Object.values(parameters));
-      await mbContract.connect(signers[7]).openBox.apply(null, Object.values(parameters));
-      await expect(mbContract.connect(signers[8]).openBox.apply(null, Object.values(parameters))).to.be.rejectedWith(
+      await expect(mbContract.connect(signers[8]).openBox.apply(null, Object.values(parameters))).to.be.revertedWith(
         "no NFT left",
       );
       expect((await nonEnumerableNftContract.balanceOf(await signers[5].getAddress())).eq(MaxNumberOfNFT)).to.be.true;
@@ -557,24 +525,19 @@ describe("MysteryBoxSales", () => {
     const testAccount = signers[5];
     await testTokenContract.transfer(await testAccount.getAddress(), transferAmount);
     await testTokenContract.connect(testAccount).approve(mbContract.address, transferAmount);
-    const parameters = JSON.parse(JSON.stringify(openBoxParameters));
-    parameters.amount = max;
-    parameters.payment_token_index = 1;
-    parameters.box_id = not_sell_all_box_id;
+    const parameters = { ...openBoxParameters, amount: max, payment_token_index: 1, box_id: not_sell_all_box_id };
 
     while (true) {
       const boxStatus = await mbContract.getBoxStatus(not_sell_all_box_id);
-      if (boxStatus.remaining.eq(0) === true) {
+      if (boxStatus.remaining.eq(0)) {
         break;
       }
 
       await mbContract.connect(testAccount).openBox.apply(null, Object.values(parameters));
       {
-        const logs = await ethers.provider.getLogs(mbContract.filters.OpenSuccess());
-        const parsedLog = interfaceABI.parseLog(logs[0]);
-        const result = parsedLog.args;
+        const logs = await mbContract.queryFilter(mbContract.filters.OpenSuccess());
+        const result = last(logs)!.args;
         expect(result).to.have.property("amount");
-        // console.log("amount: " + result.amount.toString());
       }
     }
     expect((await enumerableNftContract.balanceOf(await testAccount.getAddress())).eq(remain)).to.be.true;
@@ -591,13 +554,10 @@ describe("MysteryBoxSales", () => {
     expect((await mask721ANFTContract.balanceOf(await signers[5].getAddress())).eq(0)).to.be.true;
     await mask721ANFTContract.connect(user_1).setApprovalForAll(mbContract.address, true);
     {
-      const parameter = JSON.parse(JSON.stringify(createBoxPara));
-      parameter.nft_address = mask721ANFTContract.address;
-      parameter.sell_all = true;
+      const parameter = { ...createBoxPara, nft_address: mask721ANFTContract.address, sell_all: true };
       await mbContract.connect(user_1).createBox.apply(null, Object.values(parameter));
-      const logs = await ethers.provider.getLogs(mbContract.filters.CreationSuccess());
-      const parsedLog = interfaceABI.parseLog(logs[0]);
-      const result = parsedLog.args;
+      const logs = await mbContract.queryFilter(mbContract.filters.CreationSuccess());
+      const result = last(logs)!.args;
       expect(result)
         .to.have.property("creator")
         .that.to.be.eq(await user_1.getAddress());
@@ -609,9 +569,7 @@ describe("MysteryBoxSales", () => {
       expect(result).to.have.property("box_id");
       box_id = result.box_id;
     }
-    const parameters = JSON.parse(JSON.stringify(openBoxParameters));
-    parameters.box_id = box_id;
-    parameters.amount = batch;
+    const parameters = { ...openBoxParameters, box_id: box_id, amount: batch };
     const tx_parameters = {
       value: txParameters.value.mul(parameters.amount),
     };
@@ -629,7 +587,7 @@ describe("MysteryBoxSales", () => {
     }
     await expect(
       mbContract.connect(user_2).openBox.apply(null, addTxParameters(parameters, tx_parameters)),
-    ).to.be.rejectedWith("no NFT left");
+    ).to.be.revertedWith("no NFT left");
     {
       const boxInfo = await mbContract.getBoxInfo(parameters.box_id);
       const boxStatus = await mbContract.getBoxStatus(parameters.box_id);
@@ -647,8 +605,8 @@ describe("MysteryBoxSales", () => {
   });
 
   it("Should claimPayment reject invalid parameters", async () => {
-    await expect(mbContract.connect(user_2).claimPayment([sell_all_box_id])).to.be.rejectedWith("not owner");
-    await expect(mbContract.connect(user_2).claimPayment([not_sell_all_box_id])).to.be.rejectedWith("not owner");
+    await expect(mbContract.connect(user_2).claimPayment([sell_all_box_id])).to.be.revertedWith("not owner");
+    await expect(mbContract.connect(user_2).claimPayment([not_sell_all_box_id])).to.be.revertedWith("not owner");
   });
 
   it("Should claimPayment work", async () => {
@@ -659,8 +617,7 @@ describe("MysteryBoxSales", () => {
     const tx_parameters = {
       value: txParameters.value,
     };
-    const open_parameters = JSON.parse(JSON.stringify(openBoxParameters));
-    open_parameters.box_id = not_sell_all_box_id;
+    const open_parameters = { ...openBoxParameters, box_id: not_sell_all_box_id };
     await mbContract.connect(user_2).openBox.apply(null, addTxParameters(open_parameters, tx_parameters));
     const paymentEthAmount = createBoxPara.payment[0][1];
     const paymentTokenAAmount = createBoxPara.payment[1][1];
@@ -681,8 +638,7 @@ describe("MysteryBoxSales", () => {
       ]);
     }
     {
-      const sell_all_open_parameters = JSON.parse(JSON.stringify(openBoxParameters));
-      sell_all_open_parameters.box_id = sell_all_box_id;
+      const sell_all_open_parameters = { ...openBoxParameters, box_id: sell_all_box_id };
       await mbContract.connect(user_2).openBox.apply(null, addTxParameters(sell_all_open_parameters, tx_parameters));
       {
         const boxStatus = await mbContract.getBoxStatus(not_sell_all_box_id);
@@ -705,10 +661,10 @@ describe("MysteryBoxSales", () => {
     // token A balance before
     const authorTokenABalanceBeforeClaim = await testTokenContract.balanceOf(await user_1.getAddress());
     const contractTokenABalanceBeforeClaim = await testTokenContract.balanceOf(mbContract.address);
-    await expect(mbContract.connect(user_1).claimPayment([not_sell_all_box_id])).to.be.rejectedWith(
+    await expect(mbContract.connect(user_1).claimPayment([not_sell_all_box_id])).to.be.revertedWith(
       "not expired/sold-out",
     );
-    await expect(mbContract.connect(user_2).claimPayment([not_sell_all_box_id])).to.be.rejectedWith("not owner");
+    await expect(mbContract.connect(user_2).claimPayment([not_sell_all_box_id])).to.be.revertedWith("not owner");
 
     await advanceTimeAndBlock(seconds_in_a_day * 90);
     await mbContract.connect(user_1).claimPayment([not_sell_all_box_id]);
@@ -758,21 +714,22 @@ describe("MysteryBoxSales", () => {
     expect((await testMaskTokenContract.balanceOf(await contractCreator.getAddress())).gt(0)).to.be.true;
     expect((await testMaskTokenContract.balanceOf(await user_1.getAddress())).eq(0)).to.be.true;
 
-    const open_parameters = JSON.parse(JSON.stringify(openBoxParameters));
+    const open_parameters = { ...openBoxParameters };
     {
-      const parameter = JSON.parse(JSON.stringify(createBoxPara));
-      parameter.holder_token_addr = testMaskTokenContract.address;
-      parameter.sell_all = true;
-      parameter.holder_min_token_amount = holderMinAmount;
+      const parameter = {
+        ...createBoxPara,
+        holder_token_addr: testMaskTokenContract.address,
+        sell_all: true,
+        holder_min_token_amount: holderMinAmount,
+      };
       await mbContract.connect(user_1).createBox.apply(null, Object.values(parameter));
-      const logs = await ethers.provider.getLogs(mbContract.filters.CreationSuccess());
-      const parsedLog = interfaceABI.parseLog(logs[0]);
-      const result = parsedLog.args;
+      const logs = await mbContract.queryFilter(mbContract.filters.CreationSuccess());
+      const result = last(logs)!.args;
       open_parameters.box_id = result.box_id;
     }
     await expect(
       mbContract.connect(user_1).openBox.apply(null, addTxParameters(open_parameters, txParameters)),
-    ).to.be.rejectedWith("not holding enough token");
+    ).to.be.revertedWith("not holding enough token");
 
     // transfer
     await testMaskTokenContract.transfer(await user_1.getAddress(), holderMinAmount);

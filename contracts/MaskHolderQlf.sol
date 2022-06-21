@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity >= 0.8.0;
+pragma solidity >=0.8.0;
 
 import "./interfaces/IQLF.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
@@ -13,11 +13,7 @@ contract MaskHolderQlf is OwnableUpgradeable {
     address public token_addr;
     uint256 public min_balance;
 
-    function initialize(
-        address addr,
-        uint256 balance
-    ) public initializer
-    {
+    function initialize(address addr, uint256 balance) public initializer {
         __Ownable_init();
         version = 1;
         token_addr = addr;
@@ -33,14 +29,10 @@ contract MaskHolderQlf is OwnableUpgradeable {
     }
 
     function is_qualified(address account, bytes memory)
-        virtual
         external
         view
-        returns
-        (
-            bool qualified,
-            string memory error_msg
-        )
+        virtual
+        returns (bool qualified, string memory error_msg)
     {
         uint256 balance = IERC20Upgradeable(token_addr).balanceOf(account);
         if (balance < min_balance) {

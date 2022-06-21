@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >= 0.8.0;
+pragma solidity >=0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
@@ -16,10 +16,7 @@ contract MaskEnumerableNFT is ERC721EnumerableUpgradeable, OwnableUpgradeable {
         string memory _name,
         string memory _symbol,
         string memory _baseURI_
-    )
-        public
-        initializer
-    {
+    ) public initializer {
         __ERC721_init(_name, _symbol);
         __ERC721Enumerable_init();
         __Ownable_init();
@@ -43,7 +40,13 @@ contract MaskEnumerableNFT is ERC721EnumerableUpgradeable, OwnableUpgradeable {
     /**
      * @dev See {IERC721Metadata-tokenURI}.
      */
-    function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
+    function tokenURI(uint256 tokenId)
+        public
+        view
+        virtual
+        override
+        returns (string memory)
+    {
         uint256 index = index_by_id[tokenId];
         string memory uri = resource_list[index];
         bytes memory uri_length = bytes(uri);
@@ -53,7 +56,10 @@ contract MaskEnumerableNFT is ERC721EnumerableUpgradeable, OwnableUpgradeable {
         return uri;
     }
 
-    function set_resource(uint256 index, string memory resource) external onlyOwner {
+    function set_resource(uint256 index, string memory resource)
+        external
+        onlyOwner
+    {
         resource_list[index] = resource;
     }
 }
