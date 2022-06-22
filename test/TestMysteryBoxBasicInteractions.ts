@@ -35,7 +35,7 @@ describe("MysteryBoxBasicInteractions", () => {
   let not_sell_all_nft_id_list: BigNumber[] = [];
 
   const txParameters: TxParameter = {
-    gasLimit: BigNumber.from(6000000),
+    gasLimit: BigNumber.from(6e6),
     value: createBoxPara.payment[0][1],
   };
 
@@ -56,8 +56,8 @@ describe("MysteryBoxBasicInteractions", () => {
   let nonEnumerableNftContract: MaskNonEnumerableNFT;
 
   // 1 billion tokens, typical decimal 18
-  const testTokenMintAmount = ethers.utils.parseUnits("1000000000", 18).toString();
-  const transferAmount = ethers.utils.parseUnits("100000000", 18).toString();
+  const testTokenMintAmount = ethers.utils.parseUnits("1", 27);
+  const transferAmount = ethers.utils.parseUnits("1", 26);
 
   before(async () => {
     signers = await ethers.getSigners();
@@ -166,7 +166,7 @@ describe("MysteryBoxBasicInteractions", () => {
       expect(boxStatus).to.have.property("canceled").that.to.be.eq(false);
 
       const nftList = await mbContract.getNftListForSale(not_sell_all_box_id, 0, parameter.nft_id_list.length);
-      expect(nftList.map((id) => id.toString())).to.eql(parameter.nft_id_list.map((id) => id.toString()));
+      expect(nftList).to.eql(parameter.nft_id_list);
     }
     for (let i = 0; i < 256; i++) {
       await advanceBlock();
@@ -227,7 +227,7 @@ describe("MysteryBoxBasicInteractions", () => {
     }
     {
       const nftList = await mbContract.getNftListForSale(box_id, 0, mintNftAmount);
-      expect(nftList.map((id) => id.toString())).to.eql(nft_id_list.map((id) => id.toString()));
+      expect(nftList).to.eql(nft_id_list);
 
       const boxStatus = await mbContract.getBoxStatus(box_id);
       expect(boxStatus).to.have.property("remaining");
@@ -264,7 +264,7 @@ describe("MysteryBoxBasicInteractions", () => {
     {
       const final_nft_id_list = nft_id_list.concat(append_nft_id_list);
       const nftList = await mbContract.getNftListForSale(box_id, 0, mintNftAmount);
-      expect(nftList.map((id) => id.toString())).to.eql(final_nft_id_list.map((id) => id.toString()));
+      expect(nftList).to.eql(final_nft_id_list);
       const boxStatus = await mbContract.getBoxStatus(box_id);
       expect(boxStatus).to.have.property("remaining");
       expect(boxStatus.remaining.eq(final_nft_id_list.length)).to.be.true;
@@ -351,13 +351,18 @@ describe("MysteryBoxBasicInteractions", () => {
         createBoxPara.payment[2][0],
         createBoxPara.payment[3][0],
       ]);
-      expect(boxStatus.payment.map((info) => info.price.toString())).to.eql([
-        createBoxPara.payment[0][1].toString(),
-        createBoxPara.payment[1][1].toString(),
-        createBoxPara.payment[2][1].toString(),
-        createBoxPara.payment[3][1].toString(),
+      expect(boxStatus.payment.map((info) => info.price)).to.eql([
+        createBoxPara.payment[0][1],
+        createBoxPara.payment[1][1],
+        createBoxPara.payment[2][1],
+        createBoxPara.payment[3][1],
       ]);
-      expect(boxStatus.payment.map((info) => info.receivable_amount.toString())).to.eql(["0", "0", "0", "0"]);
+      expect(boxStatus.payment.map((info) => info.receivable_amount)).to.eql([
+        BigNumber.from(0),
+        BigNumber.from(0),
+        BigNumber.from(0),
+        BigNumber.from(0),
+      ]);
       expect(boxStatus).to.have.property("started").that.to.be.eq(true);
       expect(boxStatus).to.have.property("expired").that.to.be.eq(false);
       expect(boxStatus).to.have.property("remaining");
@@ -414,17 +419,17 @@ describe("MysteryBoxBasicInteractions", () => {
         createBoxPara.payment[2][0],
         createBoxPara.payment[3][0],
       ]);
-      expect(boxStatus.payment.map((info) => info.price.toString())).to.eql([
-        createBoxPara.payment[0][1].toString(),
-        createBoxPara.payment[1][1].toString(),
-        createBoxPara.payment[2][1].toString(),
-        createBoxPara.payment[3][1].toString(),
+      expect(boxStatus.payment.map((info) => info.price)).to.eql([
+        createBoxPara.payment[0][1],
+        createBoxPara.payment[1][1],
+        createBoxPara.payment[2][1],
+        createBoxPara.payment[3][1],
       ]);
-      expect(boxStatus.payment.map((info) => info.receivable_amount.toString())).to.eql([
-        createBoxPara.payment[0][1].toString(),
-        "0",
-        "0",
-        "0",
+      expect(boxStatus.payment.map((info) => info.receivable_amount)).to.eql([
+        createBoxPara.payment[0][1],
+        BigNumber.from(0),
+        BigNumber.from(0),
+        BigNumber.from(0),
       ]);
       expect(boxStatus).to.have.property("started").that.to.be.eq(true);
       expect(boxStatus).to.have.property("expired").that.to.be.eq(false);

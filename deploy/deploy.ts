@@ -6,9 +6,9 @@ import path from "path";
 import { parse } from "csv-parse/sync";
 import { config as envConfig } from "dotenv";
 
-const { MaskNFTInitParameters, holderMinAmount } = require("../test/constants");
+import { MaskNFTInitParameters, holderMinAmount } from "../test/constants";
+import { getContractAddress } from "../SmartContractProjectConfig/config";
 
-const { ContractAddressConfig } = require("../SmartContractProjectConfig/config");
 const ADDRESS_TABLE_PATH = path.resolve(__dirname, "..", "contract-addresses.csv");
 envConfig({ path: path.resolve(__dirname, "./.env") });
 
@@ -44,78 +44,22 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const upgradeMysteryBox = false;
   const upgradeMaskEnumerableNFT = false;
   const upgradeWhitelistQlf = false;
+
   if (doDeployment) {
     if (deployMysteryBox) {
-      const impl = await ethers.getContractFactory("MysteryBox");
-      const proxy = await upgrades.deployProxy(impl, []);
-      await proxy.deployed();
-      console.log("MysteryBox proxy: " + proxy.address);
-
-      const admin = await upgrades.admin.getInstance();
-      const impl_addr = await admin.getProxyImplementation(proxy.address);
-      console.log("Implementation address: ", impl_addr);
-      if (doVerify)
-        await hre.run("verify:verify", {
-          address: impl_addr,
-          constructorArguments: [],
-        });
+      await deployContract("MysteryBox");
     }
     if (deployMaskEnumerableNFT) {
-      const impl = await ethers.getContractFactory("MaskEnumerableNFT");
-      const proxy = await upgrades.deployProxy(impl, [...Object.values(MaskNftParameter)]);
-      await proxy.deployed();
-      console.log("MaskEnumerableNFT proxy: " + proxy.address);
-
-      const admin = await upgrades.admin.getInstance();
-      const impl_addr = await admin.getProxyImplementation(proxy.address);
-      console.log("Implementation address: ", impl_addr);
-      if (doVerify)
-        await hre.run("verify:verify", {
-          address: impl_addr,
-          constructorArguments: [],
-        });
+      await deployContract("MaskEnumerableNFT", [...Object.values(MaskNftParameter)]);
     }
     if (deployWhitelistQlf) {
-      const impl = await ethers.getContractFactory("WhitelistQlf");
-      const proxy = await upgrades.deployProxy(impl, []);
-      await proxy.deployed();
-      console.log("WhitelistQlf proxy: " + proxy.address);
-      const admin = await upgrades.admin.getInstance();
-      const impl_addr = await admin.getProxyImplementation(proxy.address);
-      if (doVerify)
-        await hre.run("verify:verify", {
-          address: impl_addr,
-          constructorArguments: [],
-        });
+      await deployContract("WhitelistQlf");
     }
     if (deploySigVerifyQlf) {
-      const impl = await ethers.getContractFactory("SigVerifyQlf");
-      const proxy = await upgrades.deployProxy(impl, []);
-      await proxy.deployed();
-      console.log("SigVerifyQlf proxy: " + proxy.address);
-      const admin = await upgrades.admin.getInstance();
-      const impl_addr = await admin.getProxyImplementation(proxy.address);
-      if (doVerify)
-        await hre.run("verify:verify", {
-          address: impl_addr,
-          constructorArguments: [],
-        });
+      await deployContract("SigVerifyQlf");
     }
     if (deployMaskHolderQlf) {
-      const impl = await ethers.getContractFactory("MaskHolderQlf");
-      const proxy = await upgrades.deployProxy(impl, [
-        ContractAddressConfig[network].MaskTokenAddress,
-        holderMinAmount,
-      ]);
-      await proxy.deployed();
-      console.log("MaskHolderQlf proxy: " + proxy.address);
-      const admin = await upgrades.admin.getInstance();
-      const impl_addr = await admin.getProxyImplementation(proxy.address);
-      if (doVerify)
-        await hre.run("verify:verify", {
-          address: impl_addr,
-          constructorArguments: [],
-        });
+      await deployContract("MaskHolderQlf", [getContractAddress[network].MaskTokenAddress, holderMinAmount]);
     }
     if (deployMerkleProofQlf) {
       const tx = await deploy("MerkleProofQlf", {
@@ -127,48 +71,47 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     }
   } else {
     if (upgradeMysteryBox) {
-      // upgrade contract
-      if (deployedContractAddress[network].MysteryBox == "")
-        throw "MysteryBox hasn't been deployed on this chain before";
-      const implMysteryBox = await ethers.getContractFactory("MysteryBox");
-      const instance = await upgrades.upgradeProxy(deployedContractAddress[network].MysteryBox, implMysteryBox);
-      await instance.deployTransaction.wait();
-      const admin = await upgrades.admin.getInstance();
-      const impl = await admin.getProxyImplementation(deployedContractAddress[network].MysteryBox);
-      // example: `npx hardhat verify --network rinkeby 0x8974Ce3955eE1306bA89687C558B6fC1E5be777B`
-      await hre.run("verify:verify", {
-        address: impl,
-        constructorArguments: [],
-      });
+      await upgradeContract("MysteryBox");
     }
     if (upgradeMaskEnumerableNFT) {
-      // upgrade contract
-      if (deployedContractAddress[network].MaskEnumerableNFT == "")
-        throw "MaskEnumerableNFT hasn't been deployed on this chain before";
-      const implMysteryBox = await ethers.getContractFactory("MaskEnumerableNFT");
-      const instance = await upgrades.upgradeProxy(deployedContractAddress[network].MaskEnumerableNFT, implMysteryBox);
-      await instance.deployTransaction.wait();
-      const admin = await upgrades.admin.getInstance();
-      const impl = await admin.getProxyImplementation(deployedContractAddress[network].MaskEnumerableNFT);
-      await hre.run("verify:verify", {
-        address: impl,
-        constructorArguments: [],
-      });
+      await upgradeContract("MaskEnumerableNFT");
     }
     if (upgradeWhitelistQlf) {
-      // upgrade contract
-      if (deployedContractAddress[network].WhitelistQlf == "")
-        throw "WhitelistQlf hasn't been deployed on this chain before";
-      const implWhitelistQlf = await ethers.getContractFactory("WhitelistQlf");
-      const instance = await upgrades.upgradeProxy(deployedContractAddress[network].WhitelistQlf, implWhitelistQlf);
-      await instance.deployTransaction.wait();
-      const admin = await upgrades.admin.getInstance();
-      const impl = await admin.getProxyImplementation(deployedContractAddress[network].WhitelistQlf);
+      await upgradeContract("WhitelistQlf");
+    }
+  }
+
+  async function deployContract(contractName: string, parameters?: any[]) {
+    const impl = await ethers.getContractFactory(contractName);
+    const proxy = await upgrades.deployProxy(impl, parameters);
+    await proxy.deployed();
+    console.log(contractName + " proxy: " + proxy.address);
+
+    const admin = await upgrades.admin.getInstance();
+    const impl_addr = await admin.getProxyImplementation(proxy.address);
+    console.log("Implementation address: ", impl_addr);
+    if (doVerify)
+      await hre.run("verify:verify", {
+        address: impl_addr,
+        constructorArguments: [],
+      });
+  }
+
+  async function upgradeContract(contractName: string) {
+    if (deployedContractAddress[network][contractName] == "")
+      throw contractName + " hasn't been deployed on this chain before";
+    let impl = await ethers.getContractFactory(contractName);
+    const instance = await upgrades.upgradeProxy(deployedContractAddress[network][contractName], impl);
+    await instance.deployTransaction.wait();
+    const admin = await upgrades.admin.getInstance();
+    impl = await admin.getProxyImplementation(deployedContractAddress[network][contractName]);
+    console.log(impl);
+    // example: `npx hardhat verify --network rinkeby 0x8974Ce3955eE1306bA89687C558B6fC1E5be777B`
+    if (doVerify)
       await hre.run("verify:verify", {
         address: impl,
         constructorArguments: [],
       });
-    }
   }
 };
 

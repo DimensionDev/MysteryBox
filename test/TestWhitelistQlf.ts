@@ -6,6 +6,7 @@ import chaiAsPromised from "chai-as-promised";
 const { expect } = use(chaiAsPromised);
 import { takeSnapshot, revertToSnapShot } from "./helper";
 
+import { WhitelistQlf } from "../types";
 import jsonABI from "../artifacts/contracts/WhitelistQlf.sol/WhitelistQlf.json";
 
 describe("WhitelistQlf", () => {
@@ -16,7 +17,7 @@ describe("WhitelistQlf", () => {
   let user_1: Signer;
   let contractCreator: Signer;
 
-  let contract: Contract;
+  let contract: WhitelistQlf;
 
   before(async () => {
     signers = await ethers.getSigners();
@@ -26,7 +27,7 @@ describe("WhitelistQlf", () => {
 
     const factory = await ethers.getContractFactory("WhitelistQlf");
     const proxy = await upgrades.deployProxy(factory, []);
-    contract = new ethers.Contract(proxy.address, jsonABI.abi, contractCreator);
+    contract = new ethers.Contract(proxy.address, jsonABI.abi, contractCreator) as WhitelistQlf;
   });
 
   beforeEach(async () => {
@@ -42,16 +43,21 @@ describe("WhitelistQlf", () => {
 
   it("Should initialize work", async () => {
     // should not be able to call it again
-    await expect(contract.connect(contractCreator).initialize()).to.be.rejectedWith(Error);
-
-    await expect(contract.connect(user_0).initialize()).to.be.rejectedWith(Error);
-    await expect(contract.connect(user_1).initialize()).to.be.rejectedWith(Error);
+    await expect(contract.connect(contractCreator).initialize()).to.be.revertedWith(
+      "Initializable: contract is already initialized",
+    );
+    await expect(contract.connect(user_0).initialize()).to.be.revertedWith(
+      "Initializable: contract is already initialized",
+    );
+    await expect(contract.connect(user_1).initialize()).to.be.revertedWith(
+      "Initializable: contract is already initialized",
+    );
 
     const owner = await contract.owner();
     expect(owner).to.be.eq(await contractCreator.getAddress());
 
     const version = await contract.version();
-    expect(version.toString()).to.be.eq("1");
+    expect(version).to.be.eq(1);
   });
 
   it("Should whitelist work", async () => {
@@ -68,7 +74,7 @@ describe("WhitelistQlf", () => {
       expect(result.error_msg).to.be.eq("not whitelisted");
     }
     // add
-    await expect(contract.connect(user_0).addWhitelist([await user_0.getAddress()])).to.be.rejectedWith("not admin");
+    await expect(contract.connect(user_0).addWhitelist([await user_0.getAddress()])).to.be.revertedWith("not admin");
     await contract.connect(contractCreator).addWhitelist([await user_0.getAddress()]);
     expect(await contract.white_list(await user_0.getAddress())).to.be.eq(true);
     expect(await contract.white_list(await user_1.getAddress())).to.be.eq(false);
@@ -82,7 +88,7 @@ describe("WhitelistQlf", () => {
       expect(result.error_msg).to.be.eq("not whitelisted");
     }
     // remove
-    await expect(contract.connect(user_0).removeWhitelist([await user_0.getAddress()])).to.be.rejectedWith("not admin");
+    await expect(contract.connect(user_0).removeWhitelist([await user_0.getAddress()])).to.be.revertedWith("not admin");
     await contract.connect(contractCreator).removeWhitelist([await user_0.getAddress()]);
     expect(await contract.white_list(await user_0.getAddress())).to.be.eq(false);
     expect(await contract.white_list(await user_1.getAddress())).to.be.eq(false);
@@ -106,7 +112,7 @@ describe("WhitelistQlf", () => {
       const result = await contract.is_qualified(await user_test.getAddress(), []);
       expect(result.qualified).to.be.eq(false);
     }
-    await expect(contract.connect(user_1).addAdmin([await user_test.getAddress()])).to.be.rejectedWith(
+    await expect(contract.connect(user_1).addAdmin([await user_test.getAddress()])).to.be.revertedWith(
       "Ownable: caller is not the owner",
     );
     await contract.connect(contractCreator).addAdmin([await user_1.getAddress()]);
