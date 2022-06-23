@@ -5,7 +5,7 @@ coverage.json
 .coverage_artifacts
 .coverage_contracts
 .env
-project.secret.js
+project.secret*
 #Hardhat files
 cache
 artifacts

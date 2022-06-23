@@ -1,10 +1,10 @@
-import { providers, utils, Wallet, Contract } from "ethers";
+import { providers, utils, Wallet, Contract, BigNumber } from "ethers";
 import * as readline from "readline";
 import * as fs from "fs";
 import { getGasPrice } from "./utils";
-import { CreateBoxParameters, openBoxParameters, seconds_in_a_day } from "./test/constants";
+import { generateCreateBoxPara, openBoxParameters, seconds_in_a_day } from "./test/constants";
 
-const project_secret = require("./project.secret");
+import { project_secret } from "./project.secret";
 
 // TODO: organize these into a config file
 import MysteryBoxArtifact from "./abi/MysteryBox.json";
@@ -17,7 +17,7 @@ let NFTApp: Contract;
 
 // rinkeby
 const whitelistContractAddr = "0x50eCEebb7360Efb93094dDEA692e04274E548b1d";
-const whitelistArtifact = require("./abi/WhitelistQlf.json");
+import whitelistArtifact from "./abi/WhitelistQlf.json";
 
 let whitelistApp: Contract;
 let NetworkProvider: providers.Provider;
@@ -25,21 +25,20 @@ let adminWallet: Wallet;
 let testWallet_0: Wallet;
 let testWallet_1: Wallet;
 
-//----------------------------------------
-const transactionParameters = {
-  gasLimit: 10000000,
-  gasPrice: 0,
-};
-
-//------------------------------------------------------------------------------------------------
 // const network = 'rinkeby';
 let network = "matic_mainnet";
 
-const txParameters = {
-  gasLimit: 6000000,
-  value: 0,
+const transactionParameters = {
+  gasLimit: BigNumber.from(6000000),
+  gasPrice: utils.parseUnits("1", "gwei"),
 };
-const creatBoxParameter = CreateBoxParameters[network];
+
+const txParameters = {
+  gasLimit: BigNumber.from(6000000),
+  value: BigNumber.from(0),
+};
+
+const createBoxParameter = generateCreateBoxPara(network);
 
 async function isContractAddress(addr) {
   {
@@ -78,7 +77,7 @@ async function readFirstColumn(filePath, result) {
     // TODO: `console` option not found in `readline.createInterface`
     // console: false,
   });
-  let lines = [];
+  let lines: string[] = [];
   for await (const line of readInterface) {
     lines.push(line);
   }
@@ -120,7 +119,7 @@ async function main() {
     NetworkProvider = new providers.JsonRpcProvider("https://rinkeby.infura.io/v3/" + project_secret.infura_project_id);
   } else if (network === "matic_mainnet") {
     {
-      const deploymentInfo = require("./.openzeppelin/unknown-137.json");
+      const deploymentInfo = require("./.openzeppelin/unknown-31337.json");
       if (deploymentInfo.proxies.length < 1) {
         throw "project not deployed properly";
       }
@@ -140,7 +139,7 @@ async function main() {
   MysteryBoxApp = new Contract(MysteryBoxAddress, MysteryBoxArtifact, adminWallet);
 
   NFTApp = new Contract(NFTAddress, NFTArtifact, adminWallet);
-  whitelistApp = new Contract(whitelistContractAddr, whitelistArtifact.abi, adminWallet);
+  whitelistApp = new Contract(whitelistContractAddr, whitelistArtifact, adminWallet);
 
   console.log("MysteryBoxAddress: " + MysteryBoxAddress);
   console.log("network: " + network + " adminWallet address: " + adminWallet.address);
@@ -154,12 +153,12 @@ async function main() {
       const tx = await NFTApp.connect(testWallet_0).setApprovalForAll(MysteryBoxApp.address, true);
       await tx.wait();
     }
-    const tx = await MysteryBoxApp.connect(testWallet_0).createBox(...Object.values(creatBoxParameter));
+    const tx = await MysteryBoxApp.connect(testWallet_0).createBox(...Object.values(createBoxParameter));
     await tx.wait();
   } else if (action === "open") {
-    const box_id = parseInt(process.argv[3]);
+    const box_id = BigNumber.from(process.argv[3]);
     openBoxParameters.box_id = box_id;
-    txParameters.value = creatBoxParameter.payment[0][1];
+    txParameters.value = createBoxParameter.payment[0][1];
     const tx = await MysteryBoxApp.connect(testWallet_1).openBox(...Object.values(openBoxParameters), txParameters);
     await tx.wait();
   } else if (action === "test") {
@@ -189,21 +188,21 @@ async function main() {
   } else if (action === "create_invalid") {
     const now = Math.floor(new Date().getTime() / 1000);
     if (true) {
-      creatBoxParameter.start_time = now + 120 * seconds_in_a_day;
-      const tx = await MysteryBoxApp.connect(testWallet_0).createBox(...Object.values(creatBoxParameter));
+      createBoxParameter.start_time = now + 120 * seconds_in_a_day;
+      const tx = await MysteryBoxApp.connect(testWallet_0).createBox(...Object.values(createBoxParameter));
       const receipt = await tx.wait();
       console.log(receipt);
     }
     if (true) {
-      creatBoxParameter.start_time = 0;
-      creatBoxParameter.end_time = now + 60;
-      const tx = await MysteryBoxApp.connect(testWallet_0).createBox(...Object.values(creatBoxParameter));
+      createBoxParameter.start_time = 0;
+      createBoxParameter.end_time = now + 60;
+      const tx = await MysteryBoxApp.connect(testWallet_0).createBox(...Object.values(createBoxParameter));
       const receipt = await tx.wait();
       console.log(receipt);
     }
   } else if (action === "open_invalid") {
-    txParameters.value = creatBoxParameter.payment[0][1];
-    openBoxParameters.box_id = 3;
+    txParameters.value = createBoxParameter.payment[0][1];
+    openBoxParameters.box_id = BigNumber.from(3);
     const tx = await MysteryBoxApp.connect(testWallet_1).openBox(...Object.values(openBoxParameters), txParameters);
     await tx.wait();
   } else if (action === "set_resource") {
@@ -220,8 +219,8 @@ async function main() {
   } else if (action === "write_whitelist") {
     const batch_number = 450;
     const wallet_list = [];
-    const whiltelist_file = "./scripts/mask_holder.txt";
-    await readFirstColumn(whiltelist_file, wallet_list);
+    const whitelist_file = "./scripts/mask_holder.txt";
+    await readFirstColumn(whitelist_file, wallet_list);
     const blacklist = [];
     const blacklist_file = "./scripts/blacklist.txt";
     await readFirstColumn(blacklist_file, blacklist);
@@ -235,13 +234,11 @@ async function main() {
         console.log(addr + " in blacklist");
         continue;
       }
-      /*
-            const whitelisted = await whitelistApp.white_list(addr);
-            if (whitelisted) {
-                console.log(addr + ' whitelisted already');
-                continue;
-            }
-            */
+      // const whitelisted = await whitelistApp.white_list(addr);
+      // if (whitelisted) {
+      //   console.log(addr + " whitelisted already");
+      //   continue;
+      // }
       whitelist.push(addr);
       if (whitelist.length >= batch_number) {
         console.log("Writing: " + whitelist.length + " addresses");
@@ -256,8 +253,8 @@ async function main() {
     await tx.wait();
   } else if (action === "check_whitelist") {
     const wallet_list = [];
-    const whiltelist_file = "./scripts/mask_holder.txt";
-    await readFirstColumn(whiltelist_file, wallet_list);
+    const whitelist_file = "./scripts/mask_holder.txt";
+    await readFirstColumn(whitelist_file, wallet_list);
     const blacklist = [];
     const blacklist_file = "./scripts/blacklist.txt";
     await readFirstColumn(blacklist_file, blacklist);

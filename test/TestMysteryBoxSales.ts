@@ -182,6 +182,7 @@ describe("MysteryBoxSales", () => {
     {
       const mergedList = newNftList.concat(purchaseList);
       const difference = differenceWith(nftList, mergedList, (nftValue, mergedValue) => nftValue.eq(mergedValue));
+      expect(difference.length).to.be.eq(0);
     }
     {
       const emptyNftList = await mbContract.getNftListForSale(sell_all_box_id, nftBalance, nftBalance);
