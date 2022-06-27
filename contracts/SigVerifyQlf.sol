@@ -1,26 +1,21 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity >= 0.8.0;
+pragma solidity >=0.8.0;
 
 import "./interfaces/IQLF.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
-// whilte list qualification
+// whitelist qualification
 contract SigVerifyQlf {
-    uint32 constant public version = 4;
+    uint32 public constant version = 4;
 
-    constructor() {
-    }
+    constructor() {}
 
     function is_qualified(address account, bytes memory proof)
-        virtual
         external
         view
-        returns
-        (
-            bool qualified,
-            string memory error_msg
-        )
+        virtual
+        returns (bool qualified, string memory error_msg)
     {
         bytes32 verifier_bytes32;
         (proof, verifier_bytes32) = abi.decode(proof, (bytes, bytes32));

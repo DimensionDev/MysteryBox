@@ -1,0 +1,25 @@
+module.exports = {
+  "merkleRoot": "0x55e8063f883b9381398d8fef6fbae371817e8e4808a33a4145b8e3cdd65e3926",
+  "leavesWithProof": [
+    {
+      "address": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "proof": [
+        "0x00314e565e0574cb412563df634608d76f5c59d9f817e85966100ec1d48005c0",
+        "0x8a3552d60a98e0ade765adddad0a2e420ca9b1eef5f326ba7ab860bb4ea72c94"
+      ]
+    },
+    {
+      "address": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+      "proof": [
+        "0xe9707d0e6171f728f7473c24cc0432a9b07eaaf1efed6a137a4a8c12c79552d9",
+        "0x8a3552d60a98e0ade765adddad0a2e420ca9b1eef5f326ba7ab860bb4ea72c94"
+      ]
+    },
+    {
+      "address": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+      "proof": [
+        "0x070e8db97b197cc0e4a1790c5e6c3667bab32d733db7f815fbe84f5824c7168d"
+      ]
+    }
+  ]
+}

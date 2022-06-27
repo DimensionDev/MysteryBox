@@ -40,7 +40,7 @@ To deploy the smart contract on Ethereum `rinkeby` testnet:
 npm run deploy rinkeby
 ```
 
-Using the [`helper.js`](helper.js) script to set up the deployed smart contracts.
+Using the [`helper.ts`](helper.ts) script to set up the deployed smart contracts.
 
 ### Troubleshoot & Tips
 
@@ -56,29 +56,29 @@ Using the [`helper.js`](helper.js) script to set up the deployed smart contracts
 
 | Chain               | MysteryBox                             | MaskTestNFT                             |
 | ------------------- | -------------------------------------- | --------------------------------------- |
-| Mainnet             | [`0x294428f0`][mb-mainnet]             | [`0x56136E69`][nft-mainnet]             |
-| Ropsten             | [`0xc7387b6A`][mb-ropsten]             | [`0x4c73F4DC`][nft-ropsten]             |
-| Rinkeby             | [`0xF8ED169B`][mb-rinkeby]             | [`0x0c8FB5C9`][nft-rinkeby]             |
-| BSC                 |                                        | [`0xa8518287`][nft-bsc]                 |
-| Matic               | [`0x02F98667`][mb-matic]               | [`0x49C2a3D9`][nft-matic]               |
-| Goerli              | [`0xd4ABB07c`][mb-goerli]              | [`0xcdE281B3`][nft-goerli]              |
-| Fantom              | [`0x19f179D7`][mb-fantom]              | [`0x05ee315E`][nft-fantom]              |
-| Celo                | [`0x578a7Fee`][mb-celo]                | [`0x066804d9`][nft-celo]                |
-| Avalanche           | [`0x05ee315E`][mb-avalanche]           | [`0x81246335`][nft-avalanche]           |
-| Optimism_kovan      | [`0x3eadcFB5`][mb-optimism_kovan]      | [`0x7DBA5446`][nft-optimism_kovan]      |
-| Optimism            | [`0xF9F7C149`][mb-optimism]            | [`0x578a7Fee`][nft-optimism]            |
-| Aurora              | [`0x5B966f3a`][mb-aurora]              | [`0x54a0A221`][nft-aurora]              |
-| Fuse                | [`0x5B966f3a`][mb-fuse]                | [`0x54a0A221`][nft-fuse]                |
-| Boba                | [`0x5B966f3a`][mb-boba]                |                                         |
-| Moonriver           | [`0x6cc1b105`][mb-moonriver]           |                                         |
-| Conflux_espace_test | [`0x4c64b524`][mb-conflux_espace_test] | [`0xc29afd93`][nft-conflux_espace_test] |
-| Conflux_espace      | [`0x4c64b524`][mb-conflux_espace]      | [`0xc29afd93`][nft-conflux_espace]      |
-| Harmony_test        | [`0x4fda6d9b`][mb-harmony_test]        | [`0xd48bc506`][nft-harmony_test]        |
-| Harmony             | [`0xDc0905F2`][mb-harmony]             | [`0x677f7bba`][nft-harmony]             |
-| Metis_test          | [`0x5B966f3a`][mb-metis_test]          | [`0x981be454`][nft-metis_test]          |
-| Metis               | [`0x981be454`][mb-metis]               | [`0x96c7D011`][nft-metis]               |
-| Kardia              | [`0xbC7d9898`][mb-kardia]              | [`0x8D03d9b4`][nft-kardia]              |
-| Astar               | [`0x041Bdc5b`][mb-astar]               | [`0x7E0aa694`][nft-astar]               |
+| mainnet             | [`0x294428f0`][mb-mainnet]             | [`0x56136E69`][nft-mainnet]             |
+| ropsten             | [`0xc7387b6A`][mb-ropsten]             | [`0x4c73F4DC`][nft-ropsten]             |
+| rinkeby             | [`0xF8ED169B`][mb-rinkeby]             | [`0x0c8FB5C9`][nft-rinkeby]             |
+| bsc                 |                                        | [`0xa8518287`][nft-bsc]                 |
+| matic               | [`0x02F98667`][mb-matic]               | [`0x49C2a3D9`][nft-matic]               |
+| goerli              | [`0xd4ABB07c`][mb-goerli]              | [`0xcdE281B3`][nft-goerli]              |
+| fantom              | [`0x19f179D7`][mb-fantom]              | [`0x05ee315E`][nft-fantom]              |
+| celo                | [`0x578a7Fee`][mb-celo]                | [`0x066804d9`][nft-celo]                |
+| avalanche           | [`0x05ee315E`][mb-avalanche]           | [`0x81246335`][nft-avalanche]           |
+| optimism_kovan      | [`0x3eadcFB5`][mb-optimism_kovan]      | [`0x7DBA5446`][nft-optimism_kovan]      |
+| optimism            | [`0xF9F7C149`][mb-optimism]            | [`0x578a7Fee`][nft-optimism]            |
+| aurora              | [`0x5B966f3a`][mb-aurora]              | [`0x54a0A221`][nft-aurora]              |
+| fuse                | [`0x5B966f3a`][mb-fuse]                | [`0x54a0A221`][nft-fuse]                |
+| boba                | [`0x5B966f3a`][mb-boba]                |                                         |
+| moonriver           | [`0x6cc1b105`][mb-moonriver]           |                                         |
+| conflux_espace_test | [`0x4c64b524`][mb-conflux_espace_test] | [`0xc29afd93`][nft-conflux_espace_test] |
+| conflux_espace      | [`0x4c64b524`][mb-conflux_espace]      | [`0xc29afd93`][nft-conflux_espace]      |
+| harmony_test        | [`0x4fda6d9b`][mb-harmony_test]        | [`0xd48bc506`][nft-harmony_test]        |
+| harmony             | [`0xDc0905F2`][mb-harmony]             | [`0x677f7bba`][nft-harmony]             |
+| metis_test          | [`0x5B966f3a`][mb-metis_test]          | [`0x981be454`][nft-metis_test]          |
+| metis               | [`0x981be454`][mb-metis]               | [`0x96c7D011`][nft-metis]               |
+| kardia              | [`0xbC7d9898`][mb-kardia]              | [`0x8D03d9b4`][nft-kardia]              |
+| astar               | [`0x041Bdc5b`][mb-astar]               | [`0x7E0aa694`][nft-astar]               |
 
 [mb-mainnet]: https://etherscan.io/address/0x294428f04b0F9EbC49B7Ad61E2736ebD6808c145
 [mb-ropsten]: https://ropsten.etherscan.io/address/0xc7387b6Ac310ae15576451d2d37058711331105c
@@ -130,13 +130,13 @@ Using the [`helper.js`](helper.js) script to set up the deployed smart contracts
 
 <!-- begin Qualification -->
 
-| Chain               | WhitelistQlf               | SigVerifyQlf               | MaskHolderQlf              | MerkleProofQlf             |
-| ------------------- | -------------------------- | -------------------------- | -------------------------- | -------------------------- |
-| Ropsten             | [`0x3011dF5b`][wl-ropsten] |                            |                            |                            |
-| Rinkeby             | [`0x50eCEebb`][wl-rinkeby] | [`0x9a656528`][sv-rinkeby] | [`0x26c3DE14`][mh-rinkeby] | [`0x450A1185`][mp-rinkeby] |
-| Goerli              | [`0xfE14631D`][wl-goerli]  |                            |                            |                            |
-| Aurora              | [`0x83D6b366`][wl-aurora]  |                            |                            |                            |
-| Fuse                | [`0x83D6b366`][wl-fuse]    |                            |                            |                            |
+| Chain   | WhitelistQlf               | SigVerifyQlf               | MaskHolderQlf              | MerkleProofQlf             |
+| ------- | -------------------------- | -------------------------- | -------------------------- | -------------------------- |
+| ropsten | [`0x3011dF5b`][wl-ropsten] |                            |                            |                            |
+| rinkeby | [`0x50eCEebb`][wl-rinkeby] | [`0x9a656528`][sv-rinkeby] | [`0x26c3DE14`][mh-rinkeby] | [`0x450A1185`][mp-rinkeby] |
+| goerli  | [`0xfE14631D`][wl-goerli]  |                            |                            |                            |
+| aurora  | [`0x83D6b366`][wl-aurora]  |                            |                            |                            |
+| fuse    | [`0x83D6b366`][wl-fuse]    |                            |                            |                            |
 
 [wl-ropsten]: https://ropsten.etherscan.io/address/0x3011dF5b0Be18A56693cC062Cb61a160dca571C3
 [wl-rinkeby]: https://rinkeby.etherscan.io/address/0x50eCEebb7360Efb93094dDEA692e04274E548b1d

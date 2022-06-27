@@ -10,8 +10,8 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 contract Mask721A is Ownable, ERC721A {
     using Strings for uint256;
     string baseURI;
-    uint256 constant public BATCH_SIZE = 10;
-    uint256 constant public MAX_SUPPLY = 1000000;
+    uint256 public constant BATCH_SIZE = 10;
+    uint256 public constant MAX_SUPPLY = 1000000;
 
     constructor(
         string memory name,
@@ -29,9 +29,16 @@ contract Mask721A is Ownable, ERC721A {
         baseURI = _baseURI_;
     }
 
-    function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
+    function tokenURI(uint256 tokenId)
+        public
+        view
+        virtual
+        override
+        returns (string memory)
+    {
         if (_exists(tokenId)) {
-            return string(abi.encodePacked(baseURI, tokenId.toString(), ".json"));
+            return
+                string(abi.encodePacked(baseURI, tokenId.toString(), ".json"));
         }
 
         return "unknown.json";

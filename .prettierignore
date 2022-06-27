@@ -1,8 +1,27 @@
 .github/
 package.json
 package-lock.json
-truffle-config.js
-tsconfig.json
-README.md
-contracts/**
-migrations/**
+
+# VSCode personal settings
+.vscode/launch.json
+.vscode/tasks.json
+
+# Dependency directories
+node_modules/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# dotenv environment variables file
+.env
+.env.test
+
+# Generated files
+artifacts/
+cache/
+SmartContractProjectConfig/
+types/
+.openzeppelin
