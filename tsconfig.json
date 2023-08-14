@@ -12,7 +12,8 @@
     "./test",
     "./types",
     "./SmartContractProjectConfig",
-    "./deploy"
+    "./deploy",
+    "./generate-readme.ts"
   ],
   "files": [
     "./hardhat.config.ts"

@@ -26,7 +26,6 @@
   },
   "homepage": "https://github.com/DimensionDev/MysteryBox#readme",
   "dependencies": {
-    "@nomiclabs/hardhat-etherscan": "^3.1.0",
     "@openzeppelin/contracts": "^4.6.0",
     "@openzeppelin/contracts-upgradeable": "^4.6.0",
     "@openzeppelin/hardhat-upgrades": "^1.18.1",
@@ -34,6 +33,7 @@
   },
   "devDependencies": {
     "@dimensiondev/eslint-plugin": "^0.0.2-20220516081411-2649814",
+    "@nomicfoundation/hardhat-verify": "^1.1.1",
     "@nomiclabs/hardhat-ethers": "^2.0.6",
     "@nomiclabs/hardhat-solhint": "^2.0.1",
     "@nomiclabs/hardhat-waffle": "^2.0.3",

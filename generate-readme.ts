@@ -79,14 +79,14 @@ async function loadDeployedAddressRows(): Promise<DeployedAddressRow[]> {
 }
 
 function formElement(address: string, linkTag: string) {
-  if (address == "") {
+  if (address === "") {
     return "";
   }
   return `[\`${address.slice(0, 10)}\`][${linkTag}]`;
 }
 
 function formLink(address: string, chain: string, contract: string) {
-  if (address == "") {
+  if (address === "") {
     return null;
   }
   const browserPath = contractPath[chain] + address;

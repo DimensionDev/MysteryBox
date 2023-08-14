@@ -34,8 +34,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const doDeployment = true;
   const doVerify = false;
 
-  const deployMysteryBox = false;
-  const deployMaskEnumerableNFT = false;
+  const deployMysteryBox = true;
+  const deployMaskEnumerableNFT = true;
   const deployWhitelistQlf = false;
   const deploySigVerifyQlf = false;
   const deployMaskHolderQlf = false;

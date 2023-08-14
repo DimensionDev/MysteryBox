@@ -79,6 +79,8 @@ Using the [`helper.ts`](helper.ts) script to set up the deployed smart contracts
 | metis               | [`0x981be454`][mb-metis]               | [`0x96c7D011`][nft-metis]               |
 | kardia              | [`0xbC7d9898`][mb-kardia]              | [`0x8D03d9b4`][nft-kardia]              |
 | astar               | [`0x041Bdc5b`][mb-astar]               | [`0x7E0aa694`][nft-astar]               |
+| base                | [`0xc3e62b2C`][mb-base]                | [`0x081ea643`][nft-base]                |
+| base_goerli         | [`0x8D03d9b4`][mb-base_goerli]         | [`0x3387a7e7`][nft-base_goerli]         |
 
 [mb-mainnet]: https://etherscan.io/address/0x294428f04b0F9EbC49B7Ad61E2736ebD6808c145
 [mb-ropsten]: https://ropsten.etherscan.io/address/0xc7387b6Ac310ae15576451d2d37058711331105c
@@ -102,6 +104,8 @@ Using the [`helper.ts`](helper.ts) script to set up the deployed smart contracts
 [mb-metis]: https://andromeda-explorer.metis.io/address/0x981be454a930479d92C91a0092D204b64845A5D6
 [mb-kardia]: https://explorer.kardiachain.io/address/0xbC7d98985966f56A66B0cB5F23d865676dc2ac84
 [mb-astar]: https://blockscout.com/astar/address/0x041Bdc5b713aFc3AA06b9511E1e55552138b139A
+[mb-base]: https://basescan.org/address/0xc3e62b2CC70439C32a381Bfc056aCEd1d7162cef
+[mb-base_goerli]: https://goerli.basescan.org/address/0x8D03d9b43e98Cc2f790Be4E96503fD0CcFd04a2D
 [nft-mainnet]: https://etherscan.io/address/0x56136E69A5771436a9598804c5eA792230c21181
 [nft-ropsten]: https://ropsten.etherscan.io/address/0x4c73F4DC55Ef094259570892F52717cF19c62283
 [nft-rinkeby]: https://rinkeby.etherscan.io/address/0x0c8FB5C985E00fb1D002b6B9700084492Fb4B9A8
@@ -123,6 +127,8 @@ Using the [`helper.ts`](helper.ts) script to set up the deployed smart contracts
 [nft-metis]: https://andromeda-explorer.metis.io/address/0x96c7D011cdFD467f551605f0f5Fce279F86F4186
 [nft-kardia]: https://explorer.kardiachain.io/address/0x8D03d9b43e98Cc2f790Be4E96503fD0CcFd04a2D
 [nft-astar]: https://blockscout.com/astar/address/0x7E0aa694E51551Bcc0e669180123AAcB1debC5fd
+[nft-base]: https://basescan.org/address/0x081ea6437E73F3b4504b131443309404a9bC2054
+[nft-base_goerli]: https://goerli.basescan.org/address/0x3387a7e7B6A2ba6C2cE3482C14a5d6c6D1F03Ff5
 
 <!-- end main -->
 
@@ -130,13 +136,33 @@ Using the [`helper.ts`](helper.ts) script to set up the deployed smart contracts
 
 <!-- begin Qualification -->
 
-| Chain   | WhitelistQlf               | SigVerifyQlf               | MaskHolderQlf              | MerkleProofQlf             |
-| ------- | -------------------------- | -------------------------- | -------------------------- | -------------------------- |
-| ropsten | [`0x3011dF5b`][wl-ropsten] |                            |                            |                            |
-| rinkeby | [`0x50eCEebb`][wl-rinkeby] | [`0x9a656528`][sv-rinkeby] | [`0x26c3DE14`][mh-rinkeby] | [`0x450A1185`][mp-rinkeby] |
-| goerli  | [`0xfE14631D`][wl-goerli]  |                            |                            |                            |
-| aurora  | [`0x83D6b366`][wl-aurora]  |                            |                            |                            |
-| fuse    | [`0x83D6b366`][wl-fuse]    |                            |                            |                            |
+| Chain               | WhitelistQlf               | SigVerifyQlf               | MaskHolderQlf              | MerkleProofQlf             |
+| ------------------- | -------------------------- | -------------------------- | -------------------------- | -------------------------- |
+| mainnet             |                            |                            |                            |                            |
+| ropsten             | [`0x3011dF5b`][wl-ropsten] |                            |                            |                            |
+| rinkeby             | [`0x50eCEebb`][wl-rinkeby] | [`0x9a656528`][sv-rinkeby] | [`0x26c3DE14`][mh-rinkeby] | [`0x450A1185`][mp-rinkeby] |
+| bsc                 |                            |                            |                            |                            |
+| matic               |                            |                            |                            |                            |
+| goerli              | [`0xfE14631D`][wl-goerli]  |                            |                            |                            |
+| fantom              |                            |                            |                            |                            |
+| celo                |                            |                            |                            |                            |
+| avalanche           |                            |                            |                            |                            |
+| optimism_kovan      |                            |                            |                            |                            |
+| optimism            |                            |                            |                            |                            |
+| aurora              | [`0x83D6b366`][wl-aurora]  |                            |                            |                            |
+| fuse                | [`0x83D6b366`][wl-fuse]    |                            |                            |                            |
+| boba                |                            |                            |                            |                            |
+| moonriver           |                            |                            |                            |                            |
+| conflux_espace_test |                            |                            |                            |                            |
+| conflux_espace      |                            |                            |                            |                            |
+| harmony_test        |                            |                            |                            |                            |
+| harmony             |                            |                            |                            |                            |
+| metis_test          |                            |                            |                            |                            |
+| metis               |                            |                            |                            |                            |
+| kardia              |                            |                            |                            |                            |
+| astar               |                            |                            |                            |                            |
+| base                |                            |                            |                            |                            |
+| base_goerli         |                            |                            |                            |                            |
 
 [wl-ropsten]: https://ropsten.etherscan.io/address/0x3011dF5b0Be18A56693cC062Cb61a160dca571C3
 [wl-rinkeby]: https://rinkeby.etherscan.io/address/0x50eCEebb7360Efb93094dDEA692e04274E548b1d
