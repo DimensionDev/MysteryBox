@@ -138,31 +138,11 @@ Using the [`helper.ts`](helper.ts) script to set up the deployed smart contracts
 
 | Chain               | WhitelistQlf               | SigVerifyQlf               | MaskHolderQlf              | MerkleProofQlf             |
 | ------------------- | -------------------------- | -------------------------- | -------------------------- | -------------------------- |
-| mainnet             |                            |                            |                            |                            |
 | ropsten             | [`0x3011dF5b`][wl-ropsten] |                            |                            |                            |
 | rinkeby             | [`0x50eCEebb`][wl-rinkeby] | [`0x9a656528`][sv-rinkeby] | [`0x26c3DE14`][mh-rinkeby] | [`0x450A1185`][mp-rinkeby] |
-| bsc                 |                            |                            |                            |                            |
-| matic               |                            |                            |                            |                            |
 | goerli              | [`0xfE14631D`][wl-goerli]  |                            |                            |                            |
-| fantom              |                            |                            |                            |                            |
-| celo                |                            |                            |                            |                            |
-| avalanche           |                            |                            |                            |                            |
-| optimism_kovan      |                            |                            |                            |                            |
-| optimism            |                            |                            |                            |                            |
 | aurora              | [`0x83D6b366`][wl-aurora]  |                            |                            |                            |
 | fuse                | [`0x83D6b366`][wl-fuse]    |                            |                            |                            |
-| boba                |                            |                            |                            |                            |
-| moonriver           |                            |                            |                            |                            |
-| conflux_espace_test |                            |                            |                            |                            |
-| conflux_espace      |                            |                            |                            |                            |
-| harmony_test        |                            |                            |                            |                            |
-| harmony             |                            |                            |                            |                            |
-| metis_test          |                            |                            |                            |                            |
-| metis               |                            |                            |                            |                            |
-| kardia              |                            |                            |                            |                            |
-| astar               |                            |                            |                            |                            |
-| base                |                            |                            |                            |                            |
-| base_goerli         |                            |                            |                            |                            |
 
 [wl-ropsten]: https://ropsten.etherscan.io/address/0x3011dF5b0Be18A56693cC062Cb61a160dca571C3
 [wl-rinkeby]: https://rinkeby.etherscan.io/address/0x50eCEebb7360Efb93094dDEA692e04274E548b1d
